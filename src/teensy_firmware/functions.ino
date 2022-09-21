@@ -1,8 +1,8 @@
 void init() {
-  Serial.begin(11520);
+  Serial.begin(115200);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
-  //displayBatVoltage();
+  displayBatVoltage();
   debugln("Setup completed");
 }
 
@@ -24,15 +24,15 @@ void displayBatVoltage() {
   debugln("V");
 
   // TODO: change to proper voltages
-  if (batVoltage > 8.0) leds(255, 0);       // 100%
-  else if (batVoltage > 8.0) leds(230, 1);  // 88%
-  else if (batVoltage > 8.0) leds(200, 3);  // 75%
-  else if (batVoltage > 8.0) leds(150, 5);  // 63%
-  else if (batVoltage > 8.0) leds(123, 13); // 50%
-  else if (batVoltage > 8.0) leds(80, 25);  // 38%
-  else if (batVoltage > 8.0) leds(40, 80);  // 25%
-  else if (batVoltage > 8.0) leds(20, 130); // 13%
-  else if (batVoltage > 8.0) leds(0, 255);  // 0%
+  if (batVoltage > 8.05) leds(255, 0);       // > 80%
+  else if (batVoltage > 7.91) leds(230, 1);  // > 70%
+  else if (batVoltage > 7.75) leds(200, 3);  // > 60%
+  else if (batVoltage > 7.67) leds(150, 5);  // > 50%
+  else if (batVoltage > 7.59) leds(123, 13); // > 40%
+  else if (batVoltage > 7.53) leds(80, 25);  // > 30%
+  else if (batVoltage > 7.45) leds(40, 80);  // > 20%
+  else if (batVoltage > 7.37) leds(20, 130); // > 10%
+  else leds(0, 255);                         // 0%
 }
 
 void leds(byte b1, byte b2) {
