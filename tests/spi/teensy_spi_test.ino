@@ -1,5 +1,5 @@
 #include <SPI.h>
-
+//test
 // TEST PACKET
 // Pi:
 // 1, n, 0
@@ -21,7 +21,6 @@ int command = 0;
 int number = 0;
 
 ISR (SPI_STC_vect) {
-	byte b = SPDR;
 
 	switch(packet_pos) {
 	case 0:

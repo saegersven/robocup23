@@ -23,7 +23,6 @@ void displayBatVoltage() {
   debug(batVoltage);
   debugln("V");
 
-  // TODO: change to proper voltages
   if (batVoltage > 8.05) leds(255, 0);       // > 80%
   else if (batVoltage > 7.91) leds(230, 1);  // > 70%
   else if (batVoltage > 7.75) leds(200, 3);  // > 60%
