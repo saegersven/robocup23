@@ -10,9 +10,9 @@ ToDo
 
 The speed of the back wheels is given by:
 
-![equation](http://www.sciweavers.org/tex2img.php?eq=v_%7B3%2F4%7D%20%3D%20k%20%5Cfrac%7BD_f%7D%7BD_b%7D%20%5Cleft%5B%5Cfrac%7Bv_1%20%2B%20v_2%7D%7B2%7D%20%5Cpm%20%28v_2%20-%20v_1%29%5Cright%5D%2C&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=0)
+![equation](/docs/imgs/eq_rear_wheel_speeds.jpg)
 
-where v1 and v2 are the front right and left motor speeds, v3 and v4 are the back left and right motor speeds and Df and Db are the circumferences of the front and back wheels. Since the back wheels do not provide the main drive for the robot, the PWM-signal can be turned down by another factor k = 80%.
+where v1 and v2 are the front right and left motor speeds, v3 and v4 are the rear left and right motor speeds and Df and Dr are the circumferences of the front and rear wheels. Since the rear wheels do not provide the main drive for the robot, the PWM-signal can be turned down by a factor k = 80%.
 
 ### RasPi <-> Teensy protocol
 
