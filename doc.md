@@ -10,7 +10,7 @@ ToDo
 
 The speed of the back wheels is given by:
 
-![equation](/docs/imgs/eq_rear_wheel_speeds.jpg)
+![equation](/docs/eq_rear_wheel_speeds.jpg)
 
 where v1 and v2 are the front right and left motor speeds, v3 and v4 are the rear left and right motor speeds and Df and Dr are the circumferences of the front and rear wheels. Since the rear wheels do not provide the main drive for the robot, the PWM-signal can be turned down by a factor k = 80%.
 
