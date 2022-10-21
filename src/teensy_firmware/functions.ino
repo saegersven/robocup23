@@ -2,6 +2,19 @@ void init() {
   Serial.begin(115200);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
+  
+  pinMode(lf1, OUTPUT);
+  pinMode(lf2, OUTPUT);
+  pinMode(lf_pwm, OUTPUT);
+  pinMode(lb1, OUTPUT);
+  pinMode(lb2, OUTPUT);
+  pinMode(lb_pwm, OUTPUT);
+  pinMode(rf1, OUTPUT);
+  pinMode(rf2, OUTPUT);
+  pinMode(rf_pwm, OUTPUT);
+  pinMode(rb1, OUTPUT);
+  pinMode(rb2, OUTPUT);
+  pinMode(rb_pwm, OUTPUT);
   displayBatVoltage();
   debugln("Setup completed");
 }
@@ -37,4 +50,38 @@ void displayBatVoltage() {
 void leds(byte b1, byte b2) {
   analogWrite(LED1, b1);
   analogWrite(LED2, b2);
+}
+
+int clamp(int val, int min, int max) {
+  return val < min ? min : (val > max ? max : val);
+}
+
+// sets lf motor speed to lf
+void m_lf(int lf) {
+  // limit motor speed to [-255;255]
+  lf = clamp(lf, -255, 255);
+  Serial.println(lf);
+
+  // stop lf motor
+  if (lf == 0) {
+    Serial.println("1");
+    digitalWrite(lf1, LOW);
+    digitalWrite(lf2, LOW);
+  }
+  // turn lf motor forwards
+  else if (lf > 0) {
+    Serial.println("2");
+    digitalWrite(lf1, HIGH);
+    digitalWrite(lf2, LOW);
+  }
+  // turn lf motor backwards
+  else if (lf < 0) {
+    Serial.println("3");
+    digitalWrite(lf1, LOW);
+    digitalWrite(lf2, HIGH);
+  }
+  Serial.println("4");
+  Serial.println(abs(lf));
+  analogWrite(lf_pwm, 128);
+  Serial.println("5");
 }

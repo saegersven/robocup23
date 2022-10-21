@@ -10,7 +10,7 @@
 #define SPI_CLOCK_SPEED 1000000
 
 int main() {
-	int fd = wiringPiSPISetupMode(SPI_CHANNEL, SPI_CLOCK_SPEED, 0);
+	int fd = wiringPiSPISetup(SPI_CHANNEL, SPI_CLOCK_SPEED);
 	if(fd == -1) {
 		std::cout << "Failed to init SPI communication.\n";
 		return -1;
@@ -20,7 +20,11 @@ int main() {
 	unsigned char buf1[3] = { 1, 32, 0 };
 	unsigned char buf2[3] = { 2, 21, 0 };
 
-	wiringPiSPIDataRW(SPI_CHANNEL, buf1, 3);
+	unsigned char buf[1] = {1};
+	//while(true) {
+		wiringPiSPIDataRW(SPI_CHANNEL, buf, 1);
+	//}
+	return 0;
 
 	std::cout << "Data returned: " << std::to_string(buf1[2]) << "\n";
 

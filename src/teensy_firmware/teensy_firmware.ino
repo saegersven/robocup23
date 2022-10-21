@@ -11,8 +11,9 @@
 #endif
 
 void setup() {
-  init();
+  pinMode(6, OUTPUT);
 }
 
 void loop() {
+  analogWrite(6, 255);
 }
