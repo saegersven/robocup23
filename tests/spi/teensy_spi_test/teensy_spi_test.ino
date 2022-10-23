@@ -1,71 +1,39 @@
-#include "TSPISlave.h"
-//test
-// TEST PACKET
-// Pi:
-// 1, n, 0
-// 2, n, 0
-// Teensy:
-// -, -, n + 10
-// -, -, n * 2
-volatile uint8_t payload;
-uint8_t i = 0;
-
-TSPISlave mySPI = TSPISlave(SPI, 12, 11, 13, 10, 16);
+#include <Wire.h>
+ 
+// LED on pin 13
+const int ledPin = 13; 
+ 
 void setup() {
   Serial.begin(115200);
-  Serial.println("lol1");
-  mySPI.onReceive(myFunc);
+  // Join I2C bus as slave with address 8
+  Wire.begin(0x2a);
+
+  Wire.onReceive(onI2CReceive);
+  
+  // Setup pin 13 as output and turn LED off
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+}
+
+int counter = 0;
+long t = 0;
+
+void onI2CReceive(int n) {
+  while (Wire.available()) { // loop through all but the last
+    char c = Wire.read(); // receive byte as a character
+    //Serial.print(c);
+    counter++;
+
+    Serial.print(c);
+
+    if(c == 0x01) {
+      Wire.write(42);
+    }
+  }
 }
 
 void loop() {
-  delay(4000);
-  Serial.println(i);
-  cli();
-  payload=i;
-  sei();
-  i++;
-}
-
-int packet_pos = 0;
-int cmd = 0;
-int number = 0;
-
-void myFunc() {
-  Serial.println("START: ");
-  uint8_t i = 0;
-//  while ( mySPI.active() ) {
-    if (mySPI.available()) {
-      mySPI.pushr(payload);
-      Serial.print("VALUE: 0x");
-      Serial.println(mySPI.popr(), HEX);
-    }
-//  }
-  Serial.println("END");
-}
-
-void on_receive_SPI() {
-  if(mySPI.available()) {
-    byte b = mySPI.popr();
-    Serial.println("Lol");
-  }
-	/*switch(packet_pos) {
-	case 0:
-		cmd = b;
-		break;
-	case 1:
-		number = b;
-
-		if(cmd == 1) {
-			spi.pushr(number + 10);
-		} else {
-			spi.pushr(number * 2);
-		}
-		break;
-	case 2:
-		cmd = 0;
-		number = 0;
-		packet_pos = 0;
-		break;
-	}
-	++packet_pos;*/
+  delay(1000);
+  Serial.println();
+  Serial.println(counter);
 }
