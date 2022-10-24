@@ -51,37 +51,38 @@ void leds(byte b1, byte b2) {
   analogWrite(LED1, b1);
   analogWrite(LED2, b2);
 }
-
-int clamp(int val, int min, int max) {
-  return val < min ? min : (val > max ? max : val);
+// controls single motor
+void single_m(int inA_pin, int inB_pin, int pwm_pin, int pwm) {
+	if (pwm > 0) {
+		digitalWrite(inA_pin, HIGH);
+		digitalWrite(inB_pin, LOW);
+	} 
+	else if (pwm < 0) {
+		digitalWrite(inA_pin, LOW);
+		digitalWrite(inB_pin, HIGH);
+	}
+	else {
+		digitalWrite(inA_pin, LOW);
+		digitalWrite(inB_pin, LOW);
+	}
+	if (pwm < -255) pwm = 255;
+	if (pwm > 255) pwm = 255;
+	pwm = abs(pwm);
+	debugln(pwm); // TODO: Test
+	//analogWrite(pwm_pin, pwm)
 }
 
-// sets lf motor speed to lf
-void m_lf(int lf) {
-  // limit motor speed to [-255;255]
-  lf = clamp(lf, -255, 255);
-  Serial.println(lf);
+// controls all four motors
+void m(int left_speed, right_speed, int duration) {
+	single_m(lf1, lf2, lf_pwm, left_speed);
+	single_m(rf1, rf2, rf_pwm, right_speed);
 
-  // stop lf motor
-  if (lf == 0) {
-    Serial.println("1");
-    digitalWrite(lf1, LOW);
-    digitalWrite(lf2, LOW);
-  }
-  // turn lf motor forwards
-  else if (lf > 0) {
-    Serial.println("2");
-    digitalWrite(lf1, HIGH);
-    digitalWrite(lf2, LOW);
-  }
-  // turn lf motor backwards
-  else if (lf < 0) {
-    Serial.println("3");
-    digitalWrite(lf1, LOW);
-    digitalWrite(lf2, HIGH);
-  }
-  Serial.println("4");
-  Serial.println(abs(lf));
-  analogWrite(lf_pwm, 128);
-  Serial.println("5");
+	single_m(lb1, lb2, lb_pwm, left_speed*backwheel_factor);
+	single_m(rb1, rb2, rb_pwm, right_speed*backwheel_factor);
+
+	// stop all motors after movement
+	if (duration != 0) stop();
 }
+
+void stop() m(0, 0); // stops all four motors
+void m(int speed) m(speed, 0); // does not stop after motor movement
