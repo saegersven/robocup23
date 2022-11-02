@@ -2,7 +2,7 @@ void init() {
   Serial.begin(115200);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
-  
+
   pinMode(lf1, OUTPUT);
   pinMode(lf2, OUTPUT);
   pinMode(lf_pwm, OUTPUT);
@@ -15,7 +15,12 @@ void init() {
   pinMode(rb1, OUTPUT);
   pinMode(rb2, OUTPUT);
   pinMode(rb_pwm, OUTPUT);
+
+  servo_cam.attach(servo_cam_pin);
+  servo_arm.attach(servo_arm_pin);
+
   displayBatVoltage();
+
   debugln("Setup completed");
 }
 
@@ -53,36 +58,36 @@ void leds(byte b1, byte b2) {
 }
 // controls single motor
 void single_m(int inA_pin, int inB_pin, int pwm_pin, int pwm) {
-	if (pwm > 0) {
-		digitalWrite(inA_pin, HIGH);
-		digitalWrite(inB_pin, LOW);
-	} 
-	else if (pwm < 0) {
-		digitalWrite(inA_pin, LOW);
-		digitalWrite(inB_pin, HIGH);
-	}
-	else {
-		digitalWrite(inA_pin, LOW);
-		digitalWrite(inB_pin, LOW);
-	}
+  if (pwm > 0) {
+    digitalWrite(inA_pin, HIGH);
+    digitalWrite(inB_pin, LOW);
+  }
+  else if (pwm < 0) {
+    digitalWrite(inA_pin, LOW);
+    digitalWrite(inB_pin, HIGH);
+  }
+  else {
+    digitalWrite(inA_pin, LOW);
+    digitalWrite(inB_pin, LOW);
+  }
   pwm = abs(pwm);
-	if (pwm > 255) pwm = 255;
-	//debugln(pwm); // TODO: Test
-	analogWrite(pwm_pin, pwm);
+  if (pwm > 255) pwm = 255;
+  //debugln(pwm); // TODO: Test
+  analogWrite(pwm_pin, pwm);
 }
 
 // controls all four motors
 void m(int left_speed, int right_speed, int duration) {
-	single_m(lf1, lf2, lf_pwm, left_speed);
-	single_m(rf2, rf1, rf_pwm, right_speed);
+  single_m(lf1, lf2, lf_pwm, left_speed);
+  single_m(rf2, rf1, rf_pwm, right_speed);
 
-	single_m(lb1, lb2, lb_pwm, left_speed*backwheel_factor);
-	single_m(rb1, rb2, rb_pwm, right_speed*backwheel_factor);
- 
+  single_m(lb1, lb2, lb_pwm, left_speed * backwheel_factor);
+  single_m(rb1, rb2, rb_pwm, right_speed * backwheel_factor);
+
   delay(duration);
-  
-	// stop all motors after movement
-	if (duration != 0) stop();
+
+  // stop all motors after movement
+  if (duration != 0) stop();
 }
 
 void stop() {
@@ -90,12 +95,13 @@ void stop() {
   digitalWrite(lf2, LOW);
   digitalWrite(lb1, LOW);
   digitalWrite(lb2, LOW);
-  
+
   digitalWrite(rf1, LOW);
   digitalWrite(rf2, LOW);
   digitalWrite(rb1, LOW);
   digitalWrite(rb2, LOW);
 }
+
 void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }

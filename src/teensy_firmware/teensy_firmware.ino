@@ -1,6 +1,10 @@
 #include "defines.h"
-#define DEBUG 1
+#include <Servo.h>
+Servo servo_cam;
+Servo servo_arm;
 
+
+#define DEBUG 1
 // only print when in debug mode:
 #if DEBUG == 1
 #define debug(x) Serial.print(x)
@@ -15,12 +19,10 @@ void setup() {
 }
 
 void loop() {
-  m(255, 255, 2000);
-  m(-255, -255, 2000); 
-  m(255, -255, 2000);
-  m(-255, 255, 2000);
-  m(150, 150, 2000);
-  m(-150, -150, 2000);
-  m(150, -150, 2000);
-  m(-150, 150, 2000);
+  servo_cam.write(30);
+  servo_arm.write(180);
+  delay(2000);
+  servo_cam.write(90);
+  servo_arm.write(0);
+  delay(2000);
 }
