@@ -65,24 +65,37 @@ void single_m(int inA_pin, int inB_pin, int pwm_pin, int pwm) {
 		digitalWrite(inA_pin, LOW);
 		digitalWrite(inB_pin, LOW);
 	}
-	if (pwm < -255) pwm = 255;
+  pwm = abs(pwm);
 	if (pwm > 255) pwm = 255;
-	pwm = abs(pwm);
-	debugln(pwm); // TODO: Test
-	//analogWrite(pwm_pin, pwm)
+	//debugln(pwm); // TODO: Test
+	analogWrite(pwm_pin, pwm);
 }
 
 // controls all four motors
-void m(int left_speed, right_speed, int duration) {
+void m(int left_speed, int right_speed, int duration) {
 	single_m(lf1, lf2, lf_pwm, left_speed);
-	single_m(rf1, rf2, rf_pwm, right_speed);
+	single_m(rf2, rf1, rf_pwm, right_speed);
 
 	single_m(lb1, lb2, lb_pwm, left_speed*backwheel_factor);
 	single_m(rb1, rb2, rb_pwm, right_speed*backwheel_factor);
-
+ 
+  delay(duration);
+  
 	// stop all motors after movement
 	if (duration != 0) stop();
 }
 
-void stop() m(0, 0); // stops all four motors
-void m(int speed) m(speed, 0); // does not stop after motor movement
+void stop() {
+  digitalWrite(lf1, LOW);
+  digitalWrite(lf2, LOW);
+  digitalWrite(lb1, LOW);
+  digitalWrite(lb2, LOW);
+  
+  digitalWrite(rf1, LOW);
+  digitalWrite(rf2, LOW);
+  digitalWrite(rb1, LOW);
+  digitalWrite(rb2, LOW);
+}
+void m(int speed) {
+  m(speed, speed, 0); // does not stop after motor movement
+}
