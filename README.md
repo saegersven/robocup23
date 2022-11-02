@@ -1,4 +1,3 @@
-test
 # Robocup Junior Rescue Line 2023
 ### Team BitFlip
 
@@ -22,8 +21,8 @@ test
 - [ ] reprint camera holder
 - [ ] assemble all already printed parts
 - [ ] replace broken RasPi with new one
-- [ ] test other buck converters and replace the one currently used
-- [ ] properly assemble motor mounts
+- [x] test other buck converters and replace the one currently used
+- [x] properly assemble motor mounts
 
 #### CAD TODOs
 - [ ] design container for victims + rescue kit
