@@ -13,7 +13,7 @@
 - [ ] I2C connection between RasPi and Teensy (both Manger and Worker side)
 - [ ] multiplexing vl53l0x laser sensors and adding proper functions
 - [ ] BNO055 gyro sensor
-- [ ] function for servor motors
+- [x] function for servor motors
 - [x] function for controling motors
 
 #### Hardware TODOs
