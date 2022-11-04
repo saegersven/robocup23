@@ -1,6 +1,7 @@
 // general pins:
 #define LED1 37
 #define LED2 38
+#define LED3 32
 #define BAT_VOLTAGE A20
 
 // motors:
@@ -23,8 +24,10 @@
 #define backwheel_factor 1.1 // diameter of front wheels is roughtly 10% greater than diameter of back wheels
 
 // servos:
-#define servo_cam_pin 36
-#define servo_arm_pin 20
+#define servo_cam_pin 21
+#define servo_arm_pin 22
+#define cam_lower_pos 40
+#define cam_higher_pos 90
 
 // I2C commands
 #define CMD_MOTOR 0x01

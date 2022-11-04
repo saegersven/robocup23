@@ -40,12 +40,16 @@ void onI2CReceive(int n) {
         int left = (int)data[1];
         int right = (int)data[2];
 
+        debug(left);
+        debug(" ");
+        debugln(right);
         m(left, right, 0);
       }
       break;
     case CMD_STOP:
       // Stop
-      if(counter == 1) {
+      if(counter == 0) {
+        debugln("Stop");
         stop();
       }
       break;

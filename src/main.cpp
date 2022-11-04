@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <thread>
 
 #include "line.h"
 #include "robot.h"
@@ -15,14 +16,14 @@ int main() {
 	line.start();
 
 	while(!robot->button(BTN_RESTART));
-	while(robot->button(BTN_RESTART));
-	delay(100);
+	delay(200);
 
 	// MAIN LOOP
 	while(1) {
 		if(robot->button(BTN_RESTART)) {
 			while(robot->button(BTN_RESTART));
 			line.stop();
+			robot->stop();
 			std::cout << "Stop." << std::endl;
 			delay(50);
 

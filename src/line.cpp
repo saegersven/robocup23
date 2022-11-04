@@ -1,5 +1,9 @@
 #include "line.h"
 
+#include <opencv2/opencv.hpp>
+#include <functional>
+
+#include "utils.h"
 #include "defines.h"
 
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
@@ -9,15 +13,16 @@ bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 Line::Line(std::shared_ptr<Robot> robot) {
 	this->robot = robot;
 	last_line_angle = 0.0f;
+	create_maps();
 }
 
-Line::start() {
+void Line::start() {
 	last_line_angle = 0.0f;
 
 	// Init camera
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, LINE_FRAME_WIDTH);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, LINE_FRAME_HEIGHT);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, LINE_FRAME_WIDTH * 4);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, LINE_FRAME_HEIGHT * 4);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 
 	if(!cap.isOpened()) {
@@ -26,9 +31,18 @@ Line::start() {
 	}
 }
 
-Line::stop() {
+void Line::stop() {
 	robot->stop();
 	cap.release();
+}
+
+void Line::grab_frame() {
+	cap.grab();
+	cap.retrieve(frame);
+	cv::resize(frame, frame, cv::Size(LINE_FRAME_WIDTH, LINE_FRAME_HEIGHT));
+	debug_frame = frame.clone();
+	cv::flip(debug_frame, frame, 0);
+	debug_frame = frame.clone();
 }
 
 float Line::difference_weight(float x) {
@@ -36,15 +50,17 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	return std::min(0.0f, std::pow(2, -std::pow(3.5f * x - 2.6, 2)) - 0.1f);
+	float f = std::pow(2, -std::pow(3.5f * x - 2.6, 2)) - 0.1f;
+	if(f < 0.0f) f = 0.0f;
+	return f;
 }
 
-Line::create_maps() {
+void Line::create_maps() {
 	float center_x = LINE_FRAME_WIDTH / 2;
 	float center_y = LINE_FRAME_HEIGHT;
 
-	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, cv::CV_8UC1);
-	this->pixel_angles_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, cv::CV_8SC1);
+	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_8UC1);
+	this->pixel_angles_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_8SC1);
 
 	for(int y = 0; y < LINE_FRAME_HEIGHT; ++y) {
 		uint8_t* p_dwm = this->distance_weight_map.ptr<uint8_t>(y);
@@ -53,7 +69,7 @@ Line::create_maps() {
 			float xdif = x - center_x;
 			float ydif = y - center_y;
 			float dist = std::sqrt(xdif*xdif + ydif*ydif);
-			p_dwm[x] = std::clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f) * 255.0f;
+			p_dwm[x] = clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f) * 255.0f;
 			p_pam[x] = std::round((std::atan2(ydif, xdif) + PI05) / PI * 255.0f);
 		}
 	}
@@ -119,13 +135,14 @@ void Line::follow() {
 }
 
 void Line::line() {
-	cap.grab();
-	cap.retreive(frame);
+	grab_frame();
 
 	debug_frame = frame.clone();
 
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
+
+	cv::imshow("Black", black);
 
 	follow();
 
@@ -135,7 +152,7 @@ void Line::line() {
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
 	int fps = std::round(1.0f / ((float)us / 1'000'000));
 	cv::putText(debug_frame, std::to_string(fps),
-		cv::Point(2, 8), cv::CV_FONT_HERSHEY_DUPLEX,
+		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.2, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 #endif

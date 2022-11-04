@@ -2,6 +2,7 @@ void init() {
   Serial.begin(115200);
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
 
   pinMode(lf1, OUTPUT);
   pinMode(lf2, OUTPUT);
@@ -19,6 +20,7 @@ void init() {
   servo_cam.attach(servo_cam_pin);
   servo_arm.attach(servo_arm_pin);
 
+  servo_cam.write(cam_lower_pos);
   displayBatVoltage();
 
   debugln("Setup completed");

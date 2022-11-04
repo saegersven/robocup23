@@ -36,6 +36,8 @@ private:
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 
+	void grab_frame();
+
 	/**
 	 * Function for determining difference weights.
 	 * Input range -0.5 to 0.5

@@ -1,11 +1,14 @@
 #pragma once
 
+#include <cstdlib>
+#include <cstdint>
+
 #define TEENSY_I2C_ADDR 0x2a
 
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
 
-#define BTN_RESTART 19 // TODO
+#define BTN_RESTART 4
 
 class Robot {
 private:

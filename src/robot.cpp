@@ -8,10 +8,15 @@ extern "C" {
 #include <sys/ioctl.h>
 }
 
+#include <wiringPi.h>
+
+#include <cstdlib>
+#include <iostream>
 #include <chrono>
 #include <thread>
 
-#include <wiringPi.h>
+#include "defines.h"
+#include "utils.h"
 
 Robot::Robot() {
 	wiringPiSetupGpio();
@@ -34,14 +39,14 @@ bool Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }
 
-Robot::i2c_write(char* data, int len) {
+void Robot::i2c_write(char* data, int len) {
 	if(write(teensy_fd, data, len) != len) {
 		std::cerr << "I2C transaction failed" << std::endl;
 	}
 }
 
-Robot::m(int8_t left, int8_t right, uint16_t duration) {
-	char msg[3] = {CMD_MOTOR, left, right};
+void Robot::m(int8_t left, int8_t right, uint16_t duration) {
+	char msg[3] = {CMD_MOTOR, (char)left, (char)right};
 	i2c_write(msg, 3);
 
 	if(duration > 0) {
@@ -50,7 +55,7 @@ Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	}
 }
 
-Robot::stop() {
+void Robot::stop() {
 	char msg[1] = {CMD_STOP};
 	i2c_write(msg, 1);
 }
