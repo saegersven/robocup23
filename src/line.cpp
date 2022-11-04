@@ -27,6 +27,7 @@ Line::start() {
 }
 
 Line::stop() {
+	robot->stop();
 	cap.release();
 }
 
@@ -35,7 +36,7 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	return std::min(0.0f, std::pow(2, -std::pow(4.0f * x - 2.6, 2)) - 0.1f);
+	return std::min(0.0f, std::pow(2, -std::pow(3.5f * x - 2.6, 2)) - 0.1f);
 }
 
 Line::create_maps() {

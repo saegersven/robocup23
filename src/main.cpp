@@ -26,15 +26,11 @@ int main() {
 			std::cout << "Stop." << std::endl;
 			delay(50);
 
-			while(!robot->button(BTN_RESTART)) {
-				robot->stop();
-			}
-			delay(50);
-
+			while(!robot->button(BTN_RESTART));
 			while(robot->button(BTN_RESTART));
 			delay(100);
 			std::cout << "Start." << std::endl;
-
+			
 			line.start();
 		}
 

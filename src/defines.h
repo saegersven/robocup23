@@ -19,3 +19,4 @@
 
 // Error codes
 #define ERRCODE_CAM_SETUP 1
+#define ERRCODE_I2C 2
