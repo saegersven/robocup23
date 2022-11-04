@@ -18,5 +18,5 @@ public:
 	void i2c_write(char* data, int len);
 
 	void m(int8_t left, int8_t right, uint16_t duration = 0);
-	void stop(uint8_t brake = 0xFF);
+	void stop();
 };

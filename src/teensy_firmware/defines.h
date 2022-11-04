@@ -25,3 +25,7 @@
 // servos:
 #define servo_cam_pin 36
 #define servo_arm_pin 20
+
+// I2C commands
+#define CMD_MOTOR 0x01
+#define CMD_STOP 0x02

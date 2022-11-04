@@ -50,7 +50,7 @@ Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	}
 }
 
-Robot::stop(uint8_t brake) {
-	char msg[2] = {CMD_STOP, brake};
-	i2c_write(msg, 2);
+Robot::stop() {
+	char msg[1] = {CMD_STOP};
+	i2c_write(msg, 1);
 }
