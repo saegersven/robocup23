@@ -7,6 +7,7 @@
 
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
+#define CMD_TURN 0x03
 
 #define BTN_RESTART 4
 
@@ -22,4 +23,6 @@ public:
 
 	void m(int8_t left, int8_t right, uint16_t duration = 0);
 	void stop();
+
+	void turn(float angle);
 };

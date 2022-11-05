@@ -10,6 +10,10 @@ bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
 }
 
+bool is_green(uint8_t b, uint8_t g, uint8_t r) {
+	return 1.0f / GREEN_RATIO_THRESHOLD * g > b + r && g > GREEN_MIN_VALUE;
+}
+
 Line::Line(std::shared_ptr<Robot> robot) {
 	this->robot = robot;
 	last_line_angle = 0.0f;
@@ -18,8 +22,18 @@ Line::Line(std::shared_ptr<Robot> robot) {
 
 void Line::start() {
 	last_line_angle = 0.0f;
+	camera_opened = false;
+	open_camera();
+}
 
-	// Init camera
+void Line::stop() {
+	robot->stop();
+	close_camera();
+}
+
+void Line::open_camera() {
+	if(camera_opened) return;
+
 	cap.open(0, cv::CAP_V4L2);
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, LINE_FRAME_WIDTH * 4);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, LINE_FRAME_HEIGHT * 4);
@@ -29,11 +43,14 @@ void Line::start() {
 		std::cerr << "Could not open camera" << std::endl;
 		exit(ERRCODE_CAM_SETUP);
 	}
+	camera_opened = true;
 }
 
-void Line::stop() {
-	robot->stop();
+void Line::close_camera() {
+	if(!camera_opened) return;
+
 	cap.release();
+	camera_opened = false;
 }
 
 void Line::grab_frame() {
@@ -111,6 +128,9 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
+	uint32_t num_black_pixels = 0;
+	black = in_range(frame, &is_black, &num_black_pixels);
+
 	float line_angle = get_line_angle(black);
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
@@ -134,17 +154,191 @@ void Line::follow() {
 		);
 }
 
+void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
+	const int col_limit = ir.cols - 1;
+	const int row_limit = ir.rows - 1;
+
+	for(int y = -1; y <= 1; ++y) {
+		int y_index = y_pos + y;
+
+		uint8_t* p = ir.ptr<uint8_t>(y_index);
+
+		for(int x = -1; x <= 1; ++x) {
+			if(y == 0 && x == 0) continue;
+
+			int x_index = x_pos + x;
+
+			if(p[x_index] == 0xFF) {
+				p[x_index] = 0x7F; // Something non-zero different from 0xFF, marking this pixel as found
+				center_x += (float)x_index;
+				center_y += (float)y_index;
+				++num_pixels;
+
+				if(x_index > 0 && x_index < col_limit
+					&& y_index > 0 && y_index < row_limit) {
+					add_to_group_center(x_index, y_index, ir, num_pixels, center_x, center_y);
+				}
+			}
+		}
+	}
+}
+
+std::vector<Group> find_groups(cv::Mat frame, cv::Mat ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+	std::vector<Group> groups;
+
+	uint32_t num_pixels = 0;
+	ir = in_range(frame, f, &num_pixels);
+
+	if(num_pixels < 50) return groups;
+
+	for(int y = 0; y < ir.rows; ++y) {
+		uint8_t* p = ir.ptr<uint8_t>(y);
+		for(int x = 0; x < ir.cols; ++x) {
+			if(p[x] == 0xFF) {
+				uint32_t num_group_pixels = 0;
+				float group_center_x = 0.0f;
+				float group_center_y = 0.0f;
+				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
+
+				if(num_group_pixels > 130) {
+					group_center_x /= num_group_pixels;
+					group_center_y /= num_group_pixels;
+					groups.push_back({group_center_x, group_center_y, num_group_pixels});
+				}
+			}
+		}
+	}
+
+	return groups;
+}
+
+uint8_t Line::green_direction(float& global_average_x, float& global_average_y) {
+	uint8_t result = 0;
+
+	cv::Mat green;
+	std::vector<Group> groups = find_groups(frame, green, &is_green);
+
+	const int cut_width = 30;
+	const int cut_height = 30;
+
+	// Check if all of the groups are between certain y values to prevent premature evaluation
+	// of a dead-end or late evaluation of green points behind a line, when the lower line is
+	// already out of the frame
+	for(int i = 0; i < groups.size(); ++i) {
+		if(groups[i].y < 10) return 0;
+		if(groups[i].y > 35) return 0;
+		//if(groups[i].x < 8) return 0;
+		//if(groups[i].x > frame.cols - 8) return 0;
+	}
+
+	// Global average is the average of all green dots for optimal approach.
+	global_average_x = 0.0f;
+	global_average_y = 0.0f;
+	uint8_t num_green_points = 0;
+
+	// Cut out part of the black matrix around group centers
+	for(int i = 0; i < groups.size(); ++i) {
+		int x_start = groups[i].x - cut_width / 2;
+		int x_end = groups[i].x + cut_width / 2;
+		if(x_start < 0) x_start = 0;
+		if(x_end > black.cols) x_end = black.cols;
+
+		int y_start = groups[i].y - cut_height / 2;
+		int y_end = groups[i].y + cut_height / 2;
+		if(y_start < 0) y_start = 0;
+		if(y_end > black.rows) y_end = black.rows;
+
+		float average_x = 0.0f;
+		float average_y = 0.0f;
+
+		uint32_t num_pixels = 0;
+
+		// Calculate the "average black pixels" around the green dot
+		for(int y = y_start; y < y_end; ++y) {
+			uint8_t* p = black.ptr<uint8_t>(y);
+			uint8_t* p_grn = green.ptr<uint8_t>(y);
+
+			for(int x = x_start; x < x_end; ++x) {
+				if(p[x] && !p_grn[x]) {
+					average_x += (float)x;
+					average_y += (float)y;
+					++num_pixels;
+				}
+			}
+		}
+		average_x /= num_pixels;
+		average_y /= num_pixels;
+
+		// Determine the quadrant of the average pixel
+		if(average_y < groups[i].y) {
+			// Only consider dot below the line (average is above green dot)
+			global_average_x += average_x;
+			global_average_y += average_y;
+			++num_green_points;
+
+			result |= average_x < groups[i].x ? 0x02 : 0x01;
+		}
+	}
+
+	global_average_x /= num_green_points;
+	global_average_y /= num_green_points;
+
+	return result;
+}
+
+void Line::green() {
+	float global_average_x, global_average_y;
+	uint8_t green_result = green_direction(global_average_x, global_average_y);
+
+	if(green_result != 0) {
+		// Approach
+		float dif_x = global_average_x - frame.cols / 2.0f;
+		float dif_y = global_average_y - (frame.rows + 20.0f);
+		float angle = std::atan2(dif_y, dif_x) + PI05;
+		float distance = std::sqrt(dif_x*dif_x + dif_y*dif_y);
+
+		close_camera();
+
+		robot->stop();
+		robot->turn(angle);
+		delay(50);
+		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
+
+		// Take another frame and reevaluate
+		open_camera();
+		grab_frame();
+		close_camera();
+
+		black = in_range(frame, &is_black);
+
+		uint8_t new_green_result = green_direction(frame, black, global_average_x, global_average_y);
+
+		robot->m(60, 60, 250);
+
+		// TODO: See if checking the previous result is actually necessary
+		if(new_green_result == GREEN_RESULT_DEAD_END || green_result == GREEN_RESULT_DEAD_END) {
+			robot->turn(R180);
+			delay(70);
+			robot->m(60, 60, 150);
+		} else if(green_result == GREEN_RESULT_LEFT) {
+			robot->turn(DTOR(-70.0f));
+			delay(70);
+		} else if(green_result == GREEN_RESULT_RIGHT) {
+			robot->turn(DTOR(70.0f));
+			delay(70);
+		}
+		robot->m(60, 60, 130);
+		open_camera();
+	}
+}
+
 void Line::line() {
 	grab_frame();
 
 	debug_frame = frame.clone();
 
-	uint32_t num_black_pixels = 0;
-	black = in_range(frame, &is_black, &num_black_pixels);
-
-	cv::imshow("Black", black);
-
 	follow();
+	green();
 
 #ifdef DEBUG
 #ifdef DRAW_FPS

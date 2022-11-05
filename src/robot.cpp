@@ -59,3 +59,9 @@ void Robot::stop() {
 	char msg[1] = {CMD_STOP};
 	i2c_write(msg, 1);
 }
+
+void Robot::turn(float angle) {
+	char* angle_bytes = (char*)&angle;
+	char msg[5] = {CMD_TURN, angle_bytes[0], angle_bytes[1], angle_bytes[2], angle_bytes[3]};
+	i2c_write(msg, 5);
+}

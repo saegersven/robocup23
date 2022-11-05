@@ -11,10 +11,33 @@
 #include "robot.h"
 #include "utils.h"
 
+#define BLACK_MAX_SUM 200
+
+#define GREEN_RATIO_THRESHOLD 0.75f
+#define GREEN_MIN_VALUE 25
+
+#define GREEN_RESULT_LEFT 1
+#define GREEN_RESULT_RIGHT 2
+#define GREEN_RESULT_DEAD_END 3
+
 /**
- * Single-pixel thresholding operation
+ * Single-pixel thresholding operation for line.
  */
 bool is_black(uint8_t b, uint8_t g, uint8_t r);
+
+/**
+ * Thresholding operation for green dots.
+ */
+bool is_green(uint8_t b, uint8_t g, uint8_t r);
+
+/**
+ * A group of pixels with a center and the number of pixels (size).
+ * Used to describe green dots.
+ */
+struct Group {
+	float x, y;
+	uint32_t num_pixels;
+}
 
 class Line {
 private:
@@ -36,7 +59,15 @@ private:
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 
+	// Camera control
+	bool camera_opened;
+	void open_camera();
+	void close_camera();
 	void grab_frame();
+
+	/*########################
+	METHODS FOR LINE-FOLLOWING
+	########################*/
 
 	/**
 	 * Function for determining difference weights.
@@ -72,6 +103,33 @@ private:
 	 */
 	void follow();
 
+	/*#######################
+	METHODS FOR INTERSECTIONS
+	#######################*/
+
+	/**
+	 * Methods to find groups/contours of a single color recursively.
+	 * Used to find green dots.
+	 */
+	void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y);
+	std::vector<Group> find_groups(cv::Mat frame, cv::Mat ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
+
+	/**
+	 * Determine direction of intersection.
+	 * Return values:
+	 * 0 -> No intersection
+	 * 1 -> Go left
+	 * 2 -> Go right
+	 * 3 -> Turn around (both left and right)
+	 */
+	uint8_t green_direction(float& global_average_x, float& global_average_y);
+
+	/**
+	 * Main green method. Calls green_direction, approaches intersection,
+	 * calls green_direction again, then makes final decision and turns.
+	 */
+	void green();
+
 public:
 	Line(std::shared_ptr<Robot> robot);
 
@@ -79,7 +137,7 @@ public:
 	void stop();
 
 	/**
-	 * Main line method. Handles cameras and calls subroutines.
+	 * Main line method. Handles cameras and calls methods.
 	 */
 	void line();
 };
