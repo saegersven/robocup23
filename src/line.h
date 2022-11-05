@@ -10,6 +10,7 @@
 
 #include "robot.h"
 #include "utils.h"
+#include "defines.h"
 
 #define BLACK_MAX_SUM 200
 
@@ -19,6 +20,13 @@
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
 #define GREEN_RESULT_DEAD_END 3
+
+// LINE PARAMETERS
+#define LINE_FRAME_WIDTH 80
+#define LINE_FRAME_HEIGHT 48
+
+#define LINE_FOLLOW_BASE_SPEED 55
+#define LINE_FOLLOW_SENSITIVITY 70.0f
 
 /**
  * Single-pixel thresholding operation for line.
@@ -96,7 +104,6 @@ private:
 	 * to the last line angle and the distance from the bottom center.
 	 */
 	float get_line_angle(cv::Mat in);
-	float circular_line(cv::Mat& in);
 
 	/**
 	 * Calls get_line_angle and draws result to debug frame.

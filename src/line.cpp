@@ -54,6 +54,11 @@ void Line::close_camera() {
 }
 
 void Line::grab_frame() {
+	if(!camera_opened) {
+		std::cerr << "Tried to grab frame with closed camera" << std::endl;
+		exit(ERRCODE_CAM_CLOSED);
+	}
+
 	cap.grab();
 	cap.retrieve(frame);
 	cv::resize(frame, frame, cv::Size(LINE_FRAME_WIDTH, LINE_FRAME_HEIGHT));
@@ -77,8 +82,8 @@ void Line::create_maps() {
 	float center_x = LINE_FRAME_WIDTH / 2;
 	float center_y = LINE_FRAME_HEIGHT;
 
-	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_8UC1);
-	this->pixel_angles_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_8SC1);
+	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32UC1);
+	this->pixel_angles_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32FC1);
 
 	for(int y = 0; y < LINE_FRAME_HEIGHT; ++y) {
 		uint8_t* p_dwm = this->distance_weight_map.ptr<uint8_t>(y);
@@ -87,53 +92,10 @@ void Line::create_maps() {
 			float xdif = x - center_x;
 			float ydif = y - center_y;
 			float dist = std::sqrt(xdif*xdif + ydif*ydif);
-			p_dwm[x] = clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f) * 255.0f;
-			p_pam[x] = std::round((std::atan2(ydif, xdif) + PI05) / PI * 255.0f);
+			p_dwm[x] = clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f);
+			p_pam[x] = std::atan2(y - center_y, x - center_x) + PI05;
 		}
 	}
-}
-
-float Line::circular_line(cv::Mat& in) {
-	float weighted_line_angle = 0.0f;
-	float total_weight = 0.0f;
-
-	uint32_t num_angles = 0;
-
-	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
-	float center_x = in.cols / 2.0f;
-	float center_y = in.rows;
-
-	int i, j;
-	for(i = 0; i < in.rows; ++i) {
-		uint8_t* p = in.ptr<uint8_t>(i);
-		uint8_t* p_dw = distance_weight_map.ptr<uint8_t>(i);
-		for(j = 0; j < in.cols; ++j) {
-			if(p[j]) {
-				float x = (float)j;
-				float y = (float)i;
-
-				uint8_t dw = p_dw[j];
-				if(dw) {
-					++num_angles;
-
-					float pixel_distance_weight = dw / 255.0f;
-					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
-					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
-					
-					weighted_line_angle += angle_difference_weight * pixel_distance_weight * angle;
-					total_weight += angle_difference_weight * pixel_distance_weight;
-				}
-			}
-		}
-	}
-
-	if(num_angles < 40) return 0.0f;
-
-	weighted_line_angle /= total_weight;
-	//average_difference_weight /= num_angles;
-	//average_line_angle /= average_difference_weight;
-
-	return weighted_line_angle;
 }
 
 float Line::get_line_angle(cv::Mat in) {
@@ -144,23 +106,20 @@ float Line::get_line_angle(cv::Mat in) {
 	float center_x = in.cols / 2.0f;
 	float center_y = in.rows;
 
-	for(int i = 0; i < in.rows; ++i) {
-		uint8_t* p = in.ptr<uint8_t>(i);
-		uint8_t* p_dwm = this->distance_weight_map.ptr<uint8_t>(i);
-		uint8_t* p_pam = this->pixel_angles_map.ptr<uint8_t>(i);
+	for(int y = 0; y < in.rows; ++y) {
+		uint8_t* p = in.ptr<uint8_t>(y);
+		float* p_dwm = this->distance_weight_map.ptr<float>(y);
+		float* p_pam = this->pixel_angles_map.ptr<float>(y);
 
-		for(int j = 0; j < in.cols; ++j) {
-			if(p[j]) {
-				float x = (float)j;
-				float y = (float)i;
-
-				uint8_t distance_weight = p_dwm[j];
+		for(int x = 0; x < in.cols; ++x) {
+			if(p[x]) {
+				uint8_t distance_weight = p_dwm[x];
 				if(distance_weight) {
 					++num_angles;
 
 					float pixel_distance_weight = distance_weight / 255.0f;
-					//float angle = -((float)p_pam[j]) / 255.0f * PI + PI05;
-					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
+					//float angle = -((float)p_pam[x]) / 255.0f * PI + PI05;
+					float angle = p_pam[x];
 					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
 
 					float weight = angle_difference_weight * pixel_distance_weight;
@@ -170,8 +129,6 @@ float Line::get_line_angle(cv::Mat in) {
 			}
 		}
 	}
-
-	std::cout << num_angles << std::endl;
 
 	if(num_angles < 40) return 0.0f;
 	weighted_line_angle /= total_weight;
