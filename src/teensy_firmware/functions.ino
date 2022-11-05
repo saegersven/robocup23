@@ -72,7 +72,7 @@ void single_m(int inA_pin, int inB_pin, int pwm_pin, int pwm) {
     digitalWrite(inA_pin, LOW);
     digitalWrite(inB_pin, LOW);
   }
-  pwm = abs(pwm);
+  pwm = abs(pwm) * 2;
   if (pwm > 255) pwm = 255;
   //debugln(pwm); // TODO: Test
   analogWrite(pwm_pin, pwm);
@@ -83,8 +83,10 @@ void m(int left_speed, int right_speed, int duration) {
   single_m(lf1, lf2, lf_pwm, left_speed);
   single_m(rf2, rf1, rf_pwm, right_speed);
 
-  single_m(lb1, lb2, lb_pwm, left_speed * backwheel_factor);
-  single_m(rb1, rb2, rb_pwm, right_speed * backwheel_factor);
+  int s = (left_speed + right_speed) / 2;
+  int d = right_speed - left_speed;
+  single_m(lb1, lb2, lb_pwm, (s - d) * backwheel_factor);
+  single_m(rb1, rb2, rb_pwm, (s + d) * backwheel_factor);
 
   delay(duration);
 
