@@ -282,8 +282,9 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 		average_x /= num_pixels;
 		average_y /= num_pixels;
 
+		bool is_considered = average_y < groups[i].y;
 		// Determine the quadrant of the average pixel
-		if(average_y < groups[i].y) {
+		if(is_considered) {
 			// Only consider dot below the line (average is above green dot)
 			global_average_x += average_x;
 			global_average_y += average_y;
@@ -291,6 +292,11 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 			result |= average_x < groups[i].x ? 0x02 : 0x01;
 		}
+
+#ifdef DEBUG
+		cv::circle(debug_frame, cv::Point((int)groups[i].x, (int)groups[i].y),
+			2, cv::Scalar(0, 0, is_considered ? 255 : 100), 2);
+#endif
 	}
 
 	global_average_x /= num_green_points;
@@ -304,7 +310,9 @@ void Line::green() {
 	uint8_t green_result = green_direction(global_average_x, global_average_y);
 
 	if(green_result != 0) {
-		// Approach
+		std::cout << "Approaching intersection (" << std::to_string(green_result) << ")\n";
+
+		// Approach	
 		float dif_x = global_average_x - frame.cols / 2.0f;
 		float dif_y = global_average_y - (frame.rows + 20.0f);
 		float angle = std::atan2(dif_y, dif_x) + PI05;
@@ -330,13 +338,16 @@ void Line::green() {
 
 		// TODO: See if checking the previous result is actually necessary
 		if(new_green_result == GREEN_RESULT_DEAD_END || green_result == GREEN_RESULT_DEAD_END) {
+			std::cout << "Result: DEAD END" << std::endl;
 			robot->turn(R180);
 			delay(70);
 			robot->m(60, 60, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
+			std::cout << "Result: LEFT" << std::endl;
 			robot->turn(DTOR(-70.0f));
 			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
+			std::cout << "Result: RIGHT" << std::endl;
 			robot->turn(DTOR(70.0f));
 			delay(70);
 		}
@@ -347,8 +358,6 @@ void Line::green() {
 
 void Line::line() {
 	grab_frame();
-
-	//debug_frame = frame.clone();
 
 	follow();
 	green();
