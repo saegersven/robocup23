@@ -65,6 +65,7 @@ private:
 	 * to the last line angle and the distance from the bottom center.
 	 */
 	float get_line_angle(cv::Mat in);
+	float circular_line(cv::Mat& in);
 
 	/**
 	 * Calls get_line_angle and draws result to debug frame.

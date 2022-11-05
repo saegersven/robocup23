@@ -26,7 +26,7 @@
 // servos:
 #define servo_cam_pin 21
 #define servo_arm_pin 22
-#define cam_lower_pos 40
+#define cam_lower_pos 50
 #define cam_higher_pos 90
 
 // I2C commands

@@ -42,7 +42,8 @@ void Line::grab_frame() {
 	cv::resize(frame, frame, cv::Size(LINE_FRAME_WIDTH, LINE_FRAME_HEIGHT));
 	debug_frame = frame.clone();
 	cv::flip(debug_frame, frame, 0);
-	debug_frame = frame.clone();
+	cv::flip(frame, debug_frame, 1);
+	frame = debug_frame.clone();
 }
 
 float Line::difference_weight(float x) {
@@ -50,7 +51,7 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	float f = std::pow(2, -std::pow(3.5f * x - 2.6, 2)) - 0.1f;
+	float f = std::pow(2, -std::pow(4.0f * x - 2.6, 2)) - 0.1f;
 	if(f < 0.0f) f = 0.0f;
 	return f;
 }
@@ -75,11 +76,56 @@ void Line::create_maps() {
 	}
 }
 
+float Line::circular_line(cv::Mat& in) {
+	float weighted_line_angle = 0.0f;
+	float total_weight = 0.0f;
+
+	uint32_t num_angles = 0;
+
+	//cv::Point2f center(in.cols / 2, in.rows); // Bottom center
+	float center_x = in.cols / 2.0f;
+	float center_y = in.rows;
+
+	int i, j;
+	for(i = 0; i < in.rows; ++i) {
+		uint8_t* p = in.ptr<uint8_t>(i);
+		uint8_t* p_dw = distance_weight_map.ptr<uint8_t>(i);
+		for(j = 0; j < in.cols; ++j) {
+			if(p[j]) {
+				float x = (float)j;
+				float y = (float)i;
+
+				uint8_t dw = p_dw[j];
+				if(dw) {
+					++num_angles;
+
+					float pixel_distance_weight = dw / 255.0f;
+					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
+					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
+					
+					weighted_line_angle += angle_difference_weight * pixel_distance_weight * angle;
+					total_weight += angle_difference_weight * pixel_distance_weight;
+				}
+			}
+		}
+	}
+
+	if(num_angles < 40) return 0.0f;
+
+	weighted_line_angle /= total_weight;
+	//average_difference_weight /= num_angles;
+	//average_line_angle /= average_difference_weight;
+
+	return weighted_line_angle;
+}
+
 float Line::get_line_angle(cv::Mat in) {
 	float weighted_line_angle = 0.0f;
 	float total_weight = 0.0f;
 
 	uint32_t num_angles = 0;
+	float center_x = in.cols / 2.0f;
+	float center_y = in.rows;
 
 	for(int i = 0; i < in.rows; ++i) {
 		uint8_t* p = in.ptr<uint8_t>(i);
@@ -88,21 +134,27 @@ float Line::get_line_angle(cv::Mat in) {
 
 		for(int j = 0; j < in.cols; ++j) {
 			if(p[j]) {
+				float x = (float)j;
+				float y = (float)i;
+
 				uint8_t distance_weight = p_dwm[j];
 				if(distance_weight) {
+					++num_angles;
+
 					float pixel_distance_weight = distance_weight / 255.0f;
-					float angle = p_pam[j] / 255.0f * PI;
+					//float angle = -((float)p_pam[j]) / 255.0f * PI + PI05;
+					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
 					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
 
 					float weight = angle_difference_weight * pixel_distance_weight;
 					weighted_line_angle += weight * angle;
 					total_weight += weight;
-
-					++num_angles;
 				}
 			}
 		}
 	}
+
+	std::cout << num_angles << std::endl;
 
 	if(num_angles < 40) return 0.0f;
 	weighted_line_angle /= total_weight;
@@ -126,18 +178,22 @@ void Line::follow() {
 		cv::Point(std::sin(line_angle) * LINE_LENGTH, -std::cos(line_angle) * LINE_LENGTH) + center,
 		cv::Scalar(0, 255, 0), 2
 		);
+	
+	cv::putText(debug_frame, std::to_string(line_angle * 180 / PI),
+		cv::Point(20, 8), cv::FONT_HERSHEY_DUPLEX,
+		0.4, cv::Scalar(0, 100, 100));
 #endif
 
 	robot->m(
-		LINE_FOLLOW_BASE_SPEED - line_angle * LINE_FOLLOW_SENSITIVITY,
-		LINE_FOLLOW_BASE_SPEED + line_angle * LINE_FOLLOW_SENSITIVITY
+		clamp(LINE_FOLLOW_BASE_SPEED + line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127),
+		clamp(LINE_FOLLOW_BASE_SPEED - line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127)
 		);
 }
 
 void Line::line() {
 	grab_frame();
 
-	debug_frame = frame.clone();
+	//debug_frame = frame.clone();
 
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
