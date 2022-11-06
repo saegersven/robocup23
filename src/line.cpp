@@ -82,23 +82,26 @@ void Line::create_maps() {
 	float center_x = LINE_FRAME_WIDTH / 2;
 	float center_y = LINE_FRAME_HEIGHT;
 
-	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32UC1);
+	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32FC1);
 	this->pixel_angles_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32FC1);
 
 	for(int y = 0; y < LINE_FRAME_HEIGHT; ++y) {
-		uint8_t* p_dwm = this->distance_weight_map.ptr<uint8_t>(y);
-		int8_t* p_pam = this->pixel_angles_map.ptr<int8_t>(y);
+		float* p_dwm = this->distance_weight_map.ptr<float>(y);
+		float* p_pam = this->pixel_angles_map.ptr<float>(y);
 		for(int x = 0; x < LINE_FRAME_WIDTH; ++x) {
 			float xdif = x - center_x;
 			float ydif = y - center_y;
 			float dist = std::sqrt(xdif*xdif + ydif*ydif);
 			p_dwm[x] = clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f);
-			p_pam[x] = std::atan2(y - center_y, x - center_x) + PI05;
+			p_pam[x] = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
 		}
 	}
 }
 
 float Line::get_line_angle(cv::Mat in) {
+	cv::imshow("Black", black);
+	cv::waitKey(1);
+
 	float weighted_line_angle = 0.0f;
 	float total_weight = 0.0f;
 
@@ -113,16 +116,15 @@ float Line::get_line_angle(cv::Mat in) {
 
 		for(int x = 0; x < in.cols; ++x) {
 			if(p[x]) {
-				uint8_t distance_weight = p_dwm[x];
-				if(distance_weight) {
+				float distance_weight = p_dwm[x];
+				if(distance_weight > 0.0f) {
 					++num_angles;
 
-					float pixel_distance_weight = distance_weight / 255.0f;
-					//float angle = -((float)p_pam[x]) / 255.0f * PI + PI05;
-					float angle = p_pam[x];
+					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
+					//float angle = p_pam[x];
 					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
 
-					float weight = angle_difference_weight * pixel_distance_weight;
+					float weight = angle_difference_weight * distance_weight;
 					weighted_line_angle += weight * angle;
 					total_weight += weight;
 				}
@@ -167,9 +169,9 @@ void Line::follow() {
 		);
 }
 
-void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
-	const int col_limit = ir.cols - 1;
-	const int row_limit = ir.rows - 1;
+void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
+	int col_limit = ir.cols - 1;
+	int row_limit = ir.rows - 1;
 
 	for(int y = -1; y <= 1; ++y) {
 		int y_index = y_pos + y;
@@ -182,21 +184,19 @@ void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels,
 			int x_index = x_pos + x;
 
 			if(p[x_index] == 0xFF) {
-				p[x_index] = 0x7F; // Something non-zero different from 0xFF, marking this pixel as found
+				p[x_index] = 0x7F;
 				center_x += (float)x_index;
 				center_y += (float)y_index;
 				++num_pixels;
 
-				if(x_index > 0 && x_index < col_limit
-					&& y_index > 0 && y_index < row_limit) {
+				if(x_index > 0 && x_index < col_limit && y_index > 0 && y_index < row_limit)
 					add_to_group_center(x_index, y_index, ir, num_pixels, center_x, center_y);
-				}
 			}
 		}
 	}
 }
 
-std::vector<Group> find_groups(cv::Mat frame, cv::Mat ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
 	std::vector<Group> groups;
 
 	uint32_t num_pixels = 0;
@@ -207,7 +207,11 @@ std::vector<Group> find_groups(cv::Mat frame, cv::Mat ir, std::function<bool (ui
 	for(int y = 0; y < ir.rows; ++y) {
 		uint8_t* p = ir.ptr<uint8_t>(y);
 		for(int x = 0; x < ir.cols; ++x) {
+			// Don't check for non-zero, as found pixels are set to 0x7F
+			// This way, information does not get lost
+			// check for non-zero pixels
 			if(p[x] == 0xFF) {
+				//std::cout << "Creating group at " << x << ", " << y << std::endl;
 				uint32_t num_group_pixels = 0;
 				float group_center_x = 0.0f;
 				float group_center_y = 0.0f;
@@ -231,6 +235,9 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 	cv::Mat green;
 	std::vector<Group> groups = find_groups(frame, green, &is_green);
 
+	if(groups.size() == 0) return 0;
+	std::cout << groups.size() << std::endl;
+
 	const int cut_width = 30;
 	const int cut_height = 30;
 
@@ -242,6 +249,9 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 		if(groups[i].y > 35) return 0;
 		//if(groups[i].x < 8) return 0;
 		//if(groups[i].x > frame.cols - 8) return 0;
+
+		cv::circle(debug_frame, cv::Point((int)groups[i].x, (int)groups[i].y),
+			2, cv::Scalar(0, 0, 255), 2);
 	}
 
 	// Global average is the average of all green dots for optimal approach.
@@ -251,11 +261,13 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 	// Cut out part of the black matrix around group centers
 	for(int i = 0; i < groups.size(); ++i) {
+		// Horizontal range
 		int x_start = groups[i].x - cut_width / 2;
 		int x_end = groups[i].x + cut_width / 2;
 		if(x_start < 0) x_start = 0;
 		if(x_end > black.cols) x_end = black.cols;
 
+		// Vertical range
 		int y_start = groups[i].y - cut_height / 2;
 		int y_end = groups[i].y + cut_height / 2;
 		if(y_start < 0) y_start = 0;
@@ -266,13 +278,23 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 		uint32_t num_pixels = 0;
 
-		// Calculate the "average black pixels" around the green dot
-		for(int y = y_start; y < y_end; ++y) {
+		std::cout << "Green size: " << green.rows << " x " << green.cols << std::endl;
+		std::cout << "Black size: " << black.rows << " x " << black.cols << std::endl;
+
+		// Calculate the "average black pixel" around the green dot
+		int y, x;
+		for(y = y_start; y < y_end; ++y) {
+			std::cout << "A" << std::endl;
 			uint8_t* p = black.ptr<uint8_t>(y);
 			uint8_t* p_grn = green.ptr<uint8_t>(y);
-
-			for(int x = x_start; x < x_end; ++x) {
-				if(p[x] && !p_grn[x]) {
+			std::cout << "B" << std::endl;
+			for(x = x_start; x < x_end; ++x) {
+				std::cout << "C" << std::endl;
+				uint8_t p_val = p[x];
+				std::cout << "D" << std::endl;
+				uint8_t p_grn_val = p_grn[x];
+				std::cout << "E" << std::endl;
+				if(p_val && !p_grn_val) {
 					average_x += (float)x;
 					average_y += (float)y;
 					++num_pixels;
@@ -321,7 +343,7 @@ void Line::green() {
 		close_camera();
 
 		robot->stop();
-		robot->turn(angle);
+		//robot->turn(angle);
 		delay(50);
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
 
@@ -332,7 +354,7 @@ void Line::green() {
 
 		black = in_range(frame, &is_black);
 
-		uint8_t new_green_result = green_direction(frame, black, global_average_x, global_average_y);
+		uint8_t new_green_result = green_direction(global_average_x, global_average_y);
 
 		robot->m(60, 60, 250);
 

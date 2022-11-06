@@ -61,7 +61,18 @@ void Robot::stop() {
 }
 
 void Robot::turn(float angle) {
-	char* angle_bytes = (char*)&angle;
+	/*char* angle_bytes = (char*)&angle;
 	char msg[5] = {CMD_TURN, angle_bytes[0], angle_bytes[1], angle_bytes[2], angle_bytes[3]};
-	i2c_write(msg, 5);
+	i2c_write(msg, 5);*/
+	uint16_t duration = (uint16_t)std::abs(angle) * 200.0f;
+	if(angle > 0) {
+		m(80, -80, duration);
+	} else {
+		m(-80, 80, duration);
+	}
+}
+
+void Robot::send_byte(char b) {
+	char msg[1] = {b};
+	i2c_write(msg, 1);
 }

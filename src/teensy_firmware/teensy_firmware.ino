@@ -60,5 +60,8 @@ void onI2CReceive(int n) {
 }
 
 void loop() {
-  
+  while (1) {
+    m(-128, 128, 200);
+    m(128, -128, 200);
+  }
 }

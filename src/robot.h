@@ -11,6 +11,8 @@
 
 #define BTN_RESTART 4
 
+#define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
+
 class Robot {
 private:
 	int teensy_fd;
@@ -25,4 +27,6 @@ public:
 	void stop();
 
 	void turn(float angle);
+
+	void send_byte(char b);
 };

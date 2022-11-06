@@ -11,11 +11,15 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	robot->stop();
+	robot->send_byte(0x08);
 
 	Line line(robot);
 	line.start();
 
 	while(!robot->button(BTN_RESTART));
+	while(robot->button(BTN_RESTART));
+	
+	robot->send_byte(0x09);
 	delay(200);
 
 	// MAIN LOOP

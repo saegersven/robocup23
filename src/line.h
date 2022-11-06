@@ -5,6 +5,7 @@
 #include <cmath>
 #include <algorithm>
 #include <chrono>
+#include <functional>
 
 #include <opencv2/opencv.hpp>
 
@@ -45,7 +46,7 @@ bool is_green(uint8_t b, uint8_t g, uint8_t r);
 struct Group {
 	float x, y;
 	uint32_t num_pixels;
-}
+};
 
 class Line {
 private:
@@ -120,7 +121,7 @@ private:
 	 * Used to find green dots.
 	 */
 	void add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y);
-	std::vector<Group> find_groups(cv::Mat frame, cv::Mat ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
+	std::vector<Group> find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f);
 
 	/**
 	 * Determine direction of intersection.
