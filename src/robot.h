@@ -8,6 +8,7 @@
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
 #define CMD_TURN 0x03
+#define CMD_START 0x04
 
 #define BTN_RESTART 4
 
