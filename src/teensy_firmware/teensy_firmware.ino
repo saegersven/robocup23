@@ -21,7 +21,6 @@ void setup() {
   init();
 
   Wire.begin(0x2a);
-
   Wire.onReceive(onI2CReceive);
 }
 
@@ -47,21 +46,20 @@ void onI2CReceive(int n) {
       }
       break;
     case CMD_STOP:
-      // Stop
+      // RasPi program has been stopped
       if(counter == 0) {
         debugln("Stop");
         stop();
+        digitalWrite(LED3, HIGH);
+        //TODO: update battery voltage
       }
       break;
+    case CMD_START:
+       digitalWrite(LED3, LOW);
     }
-
     ++counter;
   }
 }
 
 void loop() {
-  while (1) {
-    m(-128, 128, 200);
-    m(128, -128, 200);
-  }
 }
