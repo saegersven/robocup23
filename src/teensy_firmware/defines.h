@@ -1,7 +1,7 @@
 // general pins:
-#define LED1 37
-#define LED2 38
-#define LED3 32
+#define LED1 37 // green LED on PCB
+#define LED2 38 // red LED on PCB
+#define LED3 32 // LED ring from restart btn
 #define BAT_VOLTAGE A20
 
 // motors:
