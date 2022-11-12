@@ -5,7 +5,9 @@
 
 Servo servo_cam;
 Servo servo_arm;
-
+Servo servo_gripper1;
+Servo servo_gripper2;
+Servo servo_gate;
 
 #define DEBUG 1
 // only print when in debug mode:
@@ -51,7 +53,7 @@ void onI2CReceive(int n) {
         debugln("Stop");
         stop();
         digitalWrite(LED3, HIGH);
-        //TODO: update battery voltage
+        displayBatVoltage();
       }
       break;
     case CMD_START:
@@ -62,4 +64,5 @@ void onI2CReceive(int n) {
 }
 
 void loop() {
+  
 }

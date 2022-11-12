@@ -19,10 +19,17 @@ void init() {
 
   servo_cam.attach(servo_cam_pin);
   servo_arm.attach(servo_arm_pin);
-
+  servo_gripper1.attach(servo_gripper1_pin);
+  servo_gripper2.attach(servo_gripper2_pin);
+  servo_gate.attach(servo_gate_pin);
+  
   servo_cam.write(cam_lower_pos);
+  servo_gripper1.write(gripper1_closed);
+  servo_gripper2.write(gripper2_closed);
+  servo_arm.write(arm_higher_pos);
+  delay(2000);
   displayBatVoltage();
-
+  pick_up_victim();
   debugln("Setup completed");
 }
 
@@ -108,4 +115,24 @@ void stop() {
 
 void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
+}
+
+void pick_up_victim() {
+  servo_arm.write((int) arm_higher_pos / 3);
+  delay(450);
+  servo_gripper1.write(gripper1_open);
+  servo_gripper2.write(gripper2_open);
+  servo_arm.write(arm_lower_pos);
+  delay(300);
+  m(70, 70, 300);
+  servo_gripper1.write(gripper1_closed);
+  servo_gripper2.write(gripper2_closed);
+  delay(1000);
+  servo_arm.write(arm_higher_pos);
+  delay(800);
+  servo_gripper1.write(gripper1_open);
+  servo_gripper2.write(gripper2_open);
+  delay(150);
+  servo_gripper1.write(gripper1_closed);
+  servo_gripper2.write(gripper2_closed);
 }
