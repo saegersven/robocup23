@@ -17,6 +17,7 @@ bool is_green(uint8_t b, uint8_t g, uint8_t r) {
 Line::Line(std::shared_ptr<Robot> robot) {
 	this->robot = robot;
 	last_line_angle = 0.0f;
+	camera_opened = false;
 	create_maps();
 }
 
