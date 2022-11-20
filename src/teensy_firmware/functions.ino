@@ -27,9 +27,15 @@ void init() {
   servo_gripper1.write(gripper1_closed);
   servo_gripper2.write(gripper2_closed);
   servo_arm.write(arm_higher_pos);
-  delay(2000);
+  servo_gate.write(gate_closed);
   displayBatVoltage();
-  pick_up_victim();
+  // wait for servos to finish turning
+  for (int i = 0; i < 3; ++i) {
+    digitalWrite(LED3, HIGH);
+    delay(200);
+    digitalWrite(LED3, LOW);
+    delay(200);
+  }
   debugln("Setup completed");
 }
 
@@ -124,7 +130,7 @@ void pick_up_victim() {
   servo_gripper2.write(gripper2_open);
   servo_arm.write(arm_lower_pos);
   delay(300);
-  m(70, 70, 300);
+  m(100, 100, 300);
   servo_gripper1.write(gripper1_closed);
   servo_gripper2.write(gripper2_closed);
   delay(1000);
@@ -132,7 +138,7 @@ void pick_up_victim() {
   delay(800);
   servo_gripper1.write(gripper1_open);
   servo_gripper2.write(gripper2_open);
-  delay(150);
+  m(-100, -100, 300);
   servo_gripper1.write(gripper1_closed);
   servo_gripper2.write(gripper2_closed);
 }

@@ -26,12 +26,12 @@
 // servo pins
 #define servo_cam_pin 21 // servo to change cam position
 #define servo_arm_pin 22 // servo to lift up gripper
-#define servo_gate_pin 23 // servo to empty victim container
 #define servo_gripper1_pin 20 // servo to grab victims
 #define servo_gripper2_pin 36 // 2th servo to grab victims
+#define servo_gate_pin 23 // servo to empty victim container
 
 // servo position
-#define cam_lower_pos 50
+#define cam_lower_pos 65
 #define cam_higher_pos 90
 #define arm_lower_pos 20
 #define arm_higher_pos 180
@@ -39,6 +39,8 @@
 #define gripper1_closed 125
 #define gripper2_open 95
 #define gripper2_closed 15
+#define gate_open 100
+#define gate_closed 12
 
 // I2C commands
 #define CMD_MOTOR 0x01

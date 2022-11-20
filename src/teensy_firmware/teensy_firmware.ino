@@ -64,5 +64,28 @@ void onI2CReceive(int n) {
 }
 
 void loop() {
+  /*
+  pick_up_victim();
+  delay(1000);
+  pick_up_victim();
+  delay(1000);
+  pick_up_victim();
+  servo_gate.write(gate_open);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  m(100, 100, 50);
+  m(-100, -100, 50);
+  delay(1000);
+  servo_gate.write(gate_closed);
   
+  delay(1000000);
+  */
 }
