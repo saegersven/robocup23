@@ -4,7 +4,7 @@
 #include <cstdint>
 
 extern "C" {
-#include "libs/BNO055_driver/bno055.h"
+#include "BNO055_driver/bno055.h"
 }
 
 #define TEENSY_I2C_ADDR 0x2a

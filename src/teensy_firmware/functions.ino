@@ -36,6 +36,7 @@ void init() {
     digitalWrite(LED3, LOW);
     delay(200);
   }
+  digitalWrite(LED3, HIGH);
   debugln("Setup completed");
 }
 

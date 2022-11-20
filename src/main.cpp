@@ -12,11 +12,17 @@ int main() {
 
 	robot->stop();
 
+	/*while(1) {
+		std::cout << robot->read_heading() << std::endl;
+	}
+	exit(0);*/
+
 	Line line(robot);
 	line.start();
 
 	while(!robot->button(BTN_RESTART));
 	while(robot->button(BTN_RESTART));
+
 	robot->send_byte(CMD_START);
 	delay(200);
 

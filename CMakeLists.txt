@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 project(robocup VERSION 23)
 
+include_directories("libs")
+
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
@@ -19,7 +21,7 @@ find_package(Threads REQUIRED)
 
 #include_directories("${EIGEN3_INCLUDE_DIR}")
 
-add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp src/line.cpp)
+add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp src/line.cpp libs/BNO055_driver/bno055.c)
 
 target_link_libraries(robocup atomic)
 target_link_libraries(robocup ${OpenCV_LIBS})

@@ -14,6 +14,7 @@ extern "C" {
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <unistd.h>
 
 #include "defines.h"
 #include "utils.h"
@@ -24,6 +25,7 @@ int8_t i2c_write_byte(uint8_t dev_addr, uint8_t byte) {
 		return 1;
 	}
 	return 0;
+	//i2c_write(dev_addr, byte, nullptr, 0);
 }
 
 int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
@@ -32,10 +34,17 @@ int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t 
 		return 1;
 	}
 	return 0;
+	/*char msg[cnt + 1] = {reg_addr};
+	for(int i = 0; i < cnt; i++) {
+		msg[i + 1] = reg_data[i];
+	}
+	if(write(dev_addr, msg, cnt + 1) != cnt + 1) {
+		std::cerr << "I2C transaction failed" << std::endl;
+	}*/
 }
 
 int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
-	if(i2c_smbus_read_block_data(dev_addr, reg_addr, cnt, reg_data)) {
+	if(i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data) < 0) {
 		std::cerr << "I2C read failed" << std::endl;
 		return 1;
 	}
@@ -43,7 +52,7 @@ int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t c
 }
 
 void i2c_delay_msec(uint32_t ms) {
-	delay(ms);
+	usleep(ms * 1000);
 }
 
 Robot::Robot() {
@@ -62,7 +71,7 @@ Robot::Robot() {
 	select_device(DEV_TEENSY);
 
 	// Init BNO055
-	select_device(DEV_BNO055);
+	/*select_device(DEV_BNO055);
 
 	bno055.bus_write = i2c_write;
 	bno055.bus_read = i2c_read;
@@ -77,7 +86,7 @@ Robot::Robot() {
 	if(comres > 0) {
 		std::cerr << "BNO055 init failed" << std::endl;
 		exit(ERRCODE_BNO055);
-	}
+	}*/
 }
 
 void Robot::select_device(uint8_t device_id) {
@@ -102,7 +111,7 @@ bool Robot::button(uint8_t pin) {
 
 void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	select_device(DEV_TEENSY);
-	char msg[3] = {(char)left, (char)right};
+	uint8_t msg[2] = {*(uint8_t*)(&left), *(uint8_t*)(&right)};
 	i2c_write(i2c_fd, CMD_MOTOR, msg, 2);
 
 	if(duration > 0) {
@@ -136,9 +145,9 @@ void Robot::send_byte(char b) {
 
 float Robot::read_heading() {
 	select_device(DEV_BNO055);
-	double data = 0.0;
+	int16_t data = 0.0;
 
-	if(bno055_read_euler_data_h(&data) != 0) {
+	if(bno055_read_euler_h(&data) != 0) {
 		std::cerr << "Error reading euler data" << std::endl;
 		exit(ERRCODE_BNO055);
 	}
@@ -147,9 +156,9 @@ float Robot::read_heading() {
 
 float Robot::read_pitch() {
 	select_device(DEV_BNO055);
-	double data = 0.0;
+	int16_t data = 0.0;
 
-	if(bno055_read_euler_data_r(&data) != 0) {
+	if(bno055_read_euler_r(&data) != 0) {
 		std::cerr << "Error reading euler data" << std::endl;
 		exit(ERRCODE_BNO055);
 	}

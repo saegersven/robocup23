@@ -31,7 +31,7 @@
 #define servo_gate_pin 23 // servo to empty victim container
 
 // servo position
-#define cam_lower_pos 65
+#define cam_lower_pos 75
 #define cam_higher_pos 90
 #define arm_lower_pos 20
 #define arm_higher_pos 180

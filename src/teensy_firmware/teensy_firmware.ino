@@ -37,9 +37,9 @@ void onI2CReceive(int n) {
     switch(data[0]) {
     case CMD_MOTOR:
       // Set motor speeds [left, right]
-      if(counter == 2) {
-        int8_t left = (int8_t)data[1];
-        int8_t right = (int8_t)data[2];
+      if(counter == 3) {
+        int8_t left = (int8_t)data[2];
+        int8_t right = (int8_t)data[3];
 
         debug(left);
         debug(" ");
