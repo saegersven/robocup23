@@ -13,12 +13,9 @@ extern "C" {
 #define BNO055_I2C_ADDR 0x28
 
 #define VL53L0X_FORWARD_XSHUT 0
-#define VL53L0X_FORWARD_ADDR 0x31
-#define VL53L0X_SIDE_XSHUT 0
-#define VL53L0X_SIDE_ADDR 0x33
+#define VL53L0X_FORWARD_ADDR 0x29
 
 #define DIST_FORWARD 0
-#define DIST_SIDE 1
 
 #define DEV_TEENSY 0
 #define DEV_BNO055 1
@@ -26,8 +23,15 @@ extern "C" {
 
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
-#define CMD_TURN 0x03
-#define CMD_START 0x04
+#define CMD_SERVO 0x03
+#define CMD_BEGIN 0x05
+#define CMD_END 0x06
+
+#define SERVO_CAM 0
+#define SERVO_ARM 1
+#define SERVO_GRIPPER1 2
+#define SERVO_GRIPPER2 3
+#define SERVO_GATE 4
 
 #define BTN_RESTART 4
 
@@ -52,8 +56,8 @@ private:
 	// Orientation sensor
 	bno055_t bno055;
 
-	// Distance sensors
-	std::vector<std::unique_ptr<VL53L0X>> vl53l0x_vec;
+	// Distance sensor
+	VL53L0X vl53l0x;
 public:
 	Robot();
 
@@ -90,9 +94,19 @@ public:
 	void send_byte(char b);
 
 	/**
+	 * Send Servo command with servo id and angle.
+	 */
+	void servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms = 650);
+
+	/**
 	 * Read orientation values (euler angles) from BNO055.
 	 * Returns angle in radians.
 	 */
 	float read_heading();
 	float read_pitch();
+
+	/**
+	 * Read distance from forward VL53L0X in millimeters
+	 */
+	uint16_t read_distance();
 };

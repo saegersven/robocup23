@@ -45,4 +45,6 @@
 // I2C commands
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
-#define CMD_START 0x04
+#define CMD_SERVO 0x03
+#define CMD_BEGIN 0x05
+#define CMD_END 0x06

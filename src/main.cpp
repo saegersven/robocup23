@@ -23,7 +23,7 @@ int main() {
 	while(!robot->button(BTN_RESTART));
 	while(robot->button(BTN_RESTART));
 
-	robot->send_byte(CMD_START);
+	robot->send_byte(CMD_BEGIN);
 	delay(200);
 
 	// MAIN LOOP
@@ -37,7 +37,7 @@ int main() {
 
 			while(!robot->button(BTN_RESTART));
 			while(robot->button(BTN_RESTART));
-			robot->send_byte(CMD_START);
+			robot->send_byte(CMD_BEGIN);
 			delay(200);
 			std::cout << "Start." << std::endl;
 			

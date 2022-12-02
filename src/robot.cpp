@@ -98,12 +98,12 @@ int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) 
 	return 0;
 }
 
-// bno055 needs this
+// bno055 needs millisecond delay function
 void i2c_delay_msec(uint32_t ms) {
 	usleep(ms * 1000);
 }
 
-Robot::Robot() {
+Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	wiringPiSetupGpio();
 
 	pinMode(BTN_RESTART, INPUT);
@@ -118,7 +118,7 @@ Robot::Robot() {
 	device_addresses.push_back(TEENSY_I2C_ADDR);
 	device_addresses.push_back(BNO055_I2C_ADDR);
 	device_addresses.push_back(VL53L0X_FORWARD_ADDR);
-	device_addresses.push_back(VL53L0X_SIDE_ADDR);
+
 	// Init Teensy (Just select to see if it works)
 	select_device(DEV_TEENSY);
 
@@ -138,45 +138,25 @@ Robot::Robot() {
 	if(comres > 0) {
 		std::cerr << "BNO055 init failed" << std::endl;
 		exit(ERRCODE_BNO055);
-	}*/
-
-	const uint8_t vl53l0x_xshuts[2] = {
-		VL53L0X_FORWARD_XSHUT,
-		VL53L0X_SIDE_XSHUT
-	};
-
-	const uint8_t vl53l0x_addresses[2] = {
-		VL53L0X_FORWARD_ADDR,
-		VL53L0X_SIDE_ADDR
-	};
-
-	// Init VL53L0Xs
-	for(int i = 0; i < 2; ++i) {
-		vl53l0x_vec.push_back(std::make_unique<VL53L0X>(vl53l0x_xshuts[i]));
-		// Set I2C interface functions
-		vl53l0x_vec[i]->i2c_readByte = &i2c_read_byte;
-		vl53l0x_vec[i]->i2c_readBytes = &i2c_read;
-		vl53l0x_vec[i]->i2c_writeByte = &i2c_write_byte;
-		vl53l0x_vec[i]->i2c_writeBytes = &i2c_write;
-		vl53l0x_vec[i]->i2c_writeWord = &i2c_write_word;
-
-		select_device(DEV_VL53L0X + i);
-
-		// Power each sensor off to configure and be able to set unique addresses
-		vl53l0x_vec[i]->powerOff();
 	}
 
-	for(int i = 0; i < 2; ++i) {
-		delay(20);
-		select_device(DEV_VL53L0X + i);
-		delay(20);
-		vl53l0x_vec[i]->initialize();
-		vl53l0x_vec[i]->setTimeout(200);
-		vl53l0x_vec[i]->setMeasurementTimingBudget(40000);
-		vl53l0x_vec[i]->setAddress(vl53l0x_addresses[i]);
-	}
+	std::cout << "BNO055 initialized" << std::endl;*/
 
-	std::cout << "VL53L0Xs initialized" << std::endl;
+	// Init VL53L0X
+	// Set I2C interface functions
+	vl53l0x.i2c_readByte = &i2c_read_byte;
+	vl53l0x.i2c_readBytes = &i2c_read;
+	vl53l0x.i2c_writeByte = &i2c_write_byte;
+	vl53l0x.i2c_writeBytes = &i2c_write;
+	vl53l0x.i2c_writeWord = &i2c_write_word;
+
+	select_device(DEV_VL53L0X);
+
+	vl53l0x.initialize();
+	vl53l0x.setTimeout(200);
+	vl53l0x.setMeasurementTimingBudget(40000);
+
+	std::cout << "VL53L0X initialized" << std::endl;
 }
 
 void Robot::select_device(uint8_t device_id) {
@@ -227,6 +207,13 @@ void Robot::send_byte(char b) {
 	i2c_write_byte(i2c_fd, b);
 }
 
+float Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
+	select_device(DEV_TEENSY);
+	uint8_t msg[2] = {servo_id, angle};
+	i2c_write(i2c_fd, CMD_SERVO, msg, 2);
+	delay(delay);
+}
+
 float Robot::read_heading() {
 	select_device(DEV_BNO055);
 	int16_t data = 0.0;
@@ -247,4 +234,16 @@ float Robot::read_pitch() {
 		exit(ERRCODE_BNO055);
 	}
 	return DTOR((float)data / 16.0f);
+}
+
+uint16_t Robot::read_distance() {
+	select_device(DEV_VL53L0X);
+
+	uint16_t dist = vl53l0x.readRangeSingleMillimeters();
+
+	if(vl53l0x.timeoutOccurred()) {
+		std::cerr << "VL53L0X timout" << std::endl;
+		return 4000;
+	}
+	return dist;
 }
