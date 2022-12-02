@@ -18,6 +18,13 @@
 
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
+/**
+ * Performs a binary operation on an image. Applies the specified function on every pixel
+ * and colors pixels white (0xFF) or black (0x00) depending on function return value.
+ */
 cv::Mat in_range(cv::Mat in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels = nullptr);
 
+/**
+ * Force a number into the specified range.
+ */
 float clamp(float n, float min, float max);
