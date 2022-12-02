@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstdint>
 
+#include "vl53l0x-linux/VL53L0X.hpp"
+
 extern "C" {
 #include "BNO055_driver/bno055.h"
 }
@@ -10,8 +12,17 @@ extern "C" {
 #define TEENSY_I2C_ADDR 0x2a
 #define BNO055_I2C_ADDR 0x28
 
-#define DEV_TEENSY 1
-#define DEV_BNO055 2
+#define VL53L0X_FORWARD_XSHUT 0
+#define VL53L0X_FORWARD_ADDR 0x31
+#define VL53L0X_SIDE_XSHUT 0
+#define VL53L0X_SIDE_ADDR 0x33
+
+#define DIST_FORWARD 0
+#define DIST_SIDE 1
+
+#define DEV_TEENSY 0
+#define DEV_BNO055 1
+#define DEV_VL53L0X 2
 
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
@@ -35,10 +46,14 @@ class Robot {
 private:
 	// Linux I2C file handle
 	int i2c_fd;
+	std::vector<uint8_t> device_addresses;
 	int selected_device;
 
 	// Orientation sensor
 	bno055_t bno055;
+
+	// Distance sensors
+	std::vector<std::unique_ptr<VL53L0X>> vl53l0x_vec;
 public:
 	Robot();
 

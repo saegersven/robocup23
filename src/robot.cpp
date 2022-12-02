@@ -19,21 +19,34 @@ extern "C" {
 #include "defines.h"
 #include "utils.h"
 
-int8_t i2c_write_byte(uint8_t dev_addr, uint8_t byte) {
-	if(i2c_smbus_write_byte(dev_addr, byte) < 0) {
+int8_t i2c_write_byte_single(uint8_t dev_addr, uint8_t byte) {
+	return i2c_write(dev_addr, byte, nullptr, 0);
+}
+
+int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte) {
+	/*if(i2c_smbus_write_byte(dev_addr, byte) < 0) {
 		std::cerr << "I2C write byte failed" << std::endl;
 		return 1;
 	}
-	return 0;
-	//i2c_write(dev_addr, byte, nullptr, 0);
+	return 0;*/
+	return i2c_write(dev_addr, reg_addr, &byte, 1);
+}
+
+// VL53L0X needs this for some reason
+int8_t i2c_write_word(uint8_t dev_addr, uint8_t reg_addr, uint16_t word) {
+	uint8_t buf[2];
+	buf[0] = word >> 8;
+	buf[1] = word;
+
+	return i2c_write(dev_addr, reg_addr, buf, 2);
 }
 
 int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
-	if(i2c_smbus_write_block_data(dev_addr, reg_addr, cnt, reg_data) < 0) {
+	/*if(i2c_smbus_write_block_data(dev_addr, reg_addr, cnt, reg_data) < 0) {
 		std::cerr << "I2C write failed" << std::endl;
 		return 1;
 	}
-	return 0;
+	return 0;*/
 	/*char msg[cnt + 1] = {reg_addr};
 	for(int i = 0; i < cnt; i++) {
 		msg[i + 1] = reg_data[i];
@@ -41,16 +54,51 @@ int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t 
 	if(write(dev_addr, msg, cnt + 1) != cnt + 1) {
 		std::cerr << "I2C transaction failed" << std::endl;
 	}*/
-}
-
-int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
-	if(i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data) < 0) {
-		std::cerr << "I2C read failed" << std::endl;
-		return 1;
+	uint8_t buf[128];
+	buf[0] = reg_addr;
+	if(reg_data != nullptr) memcpy(buf + 1, reg_data, cnt);
+	int8_t count = write(dev_addr, buf, cnt + 1);
+	if(count < 0) {
+		std::cerr << "I2C write failed" << std::endl;
+		close(dev_addr);
+		exit(ERRCODE_I2C);
+	} else if(count != cnt + 1) {
+		std::cerr << "Short write to device" << std::endl;
+		close(dev_addr);
+		exit(ERRCODE_I2C);
 	}
 	return 0;
 }
 
+int8_t i2c_read_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data) {
+	return i2c_read(dev_addr, reg_addr, data, 1);
+}
+
+int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) {
+	/*if(i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data) < 0) {
+		std::cerr << "I2C read failed" << std::endl;
+		return 1;
+	}*/
+	if(write(dev_addr, &reg_addr, 1) != 1) {
+		std::cerr << "I2C read failed (reg addr write)" << std::endl;
+		close(dev_addr);
+		exit(ERRCODE_I2C);
+	}
+	int8_t count = read(dev_addr, data, cnt);
+	if(count < 0) {
+		std::cerr << "I2C read failed" << std::endl;
+		close(dev_addr);
+		exit(ERRCODE_I2C);
+	} else if(count != cnt + 1) {
+		std::cerr << "Short read from device" << std::endl;
+		close(dev_addr);
+		exit(ERRCODE_I2C);
+	}
+
+	return 0;
+}
+
+// bno055 needs this
 void i2c_delay_msec(uint32_t ms) {
 	usleep(ms * 1000);
 }
@@ -67,6 +115,10 @@ Robot::Robot() {
 		exit(ERRCODE_I2C);
 	}
 
+	device_addresses.push_back(TEENSY_I2C_ADDR);
+	device_addresses.push_back(BNO055_I2C_ADDR);
+	device_addresses.push_back(VL53L0X_FORWARD_ADDR);
+	device_addresses.push_back(VL53L0X_SIDE_ADDR);
 	// Init Teensy (Just select to see if it works)
 	select_device(DEV_TEENSY);
 
@@ -87,18 +139,50 @@ Robot::Robot() {
 		std::cerr << "BNO055 init failed" << std::endl;
 		exit(ERRCODE_BNO055);
 	}*/
+
+	const uint8_t vl53l0x_xshuts[2] = {
+		VL53L0X_FORWARD_XSHUT,
+		VL53L0X_SIDE_XSHUT
+	};
+
+	const uint8_t vl53l0x_addresses[2] = {
+		VL53L0X_FORWARD_ADDR,
+		VL53L0X_SIDE_ADDR
+	};
+
+	// Init VL53L0Xs
+	for(int i = 0; i < 2; ++i) {
+		vl53l0x_vec.push_back(std::make_unique<VL53L0X>(vl53l0x_xshuts[i]));
+		// Set I2C interface functions
+		vl53l0x_vec[i]->i2c_readByte = &i2c_read_byte;
+		vl53l0x_vec[i]->i2c_readBytes = &i2c_read;
+		vl53l0x_vec[i]->i2c_writeByte = &i2c_write_byte;
+		vl53l0x_vec[i]->i2c_writeBytes = &i2c_write;
+		vl53l0x_vec[i]->i2c_writeWord = &i2c_write_word;
+
+		select_device(DEV_VL53L0X + i);
+
+		// Power each sensor off to configure and be able to set unique addresses
+		vl53l0x_vec[i]->powerOff();
+	}
+
+	for(int i = 0; i < 2; ++i) {
+		delay(20);
+		select_device(DEV_VL53L0X + i);
+		delay(20);
+		vl53l0x_vec[i]->initialize();
+		vl53l0x_vec[i]->setTimeout(200);
+		vl53l0x_vec[i]->setMeasurementTimingBudget(40000);
+		vl53l0x_vec[i]->setAddress(vl53l0x_addresses[i]);
+	}
+
+	std::cout << "VL53L0Xs initialized" << std::endl;
 }
 
 void Robot::select_device(uint8_t device_id) {
 	if(selected_device == device_id) return;
 
-	uint8_t addr = 0;
-	switch(device_id) {
-	case DEV_TEENSY: addr = TEENSY_I2C_ADDR; break;
-	case DEV_BNO055: addr = BNO055_I2C_ADDR; break;
-	}
-
-	if(ioctl(i2c_fd, I2C_SLAVE, addr) < 0) {
+	if(ioctl(i2c_fd, I2C_SLAVE, device_addresses[device_id]) < 0) {
 		std::cerr << "I2C device init failed (" << std::to_string(device_id) + ")" << std::endl;
 		exit(ERRCODE_I2C);
 	}

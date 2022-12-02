@@ -3,4 +3,4 @@
 	url = https://github.com/BoschSensortec/BNO055_driver
 [submodule "libs/vl53l0x-linux"]
 	path = libs/vl53l0x-linux
-	url = https://github.com/mjbogusz/vl53l0x-linux
+	url = https://github.com/saegersven/vl53l0x-linux
