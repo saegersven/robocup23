@@ -6,6 +6,7 @@
 #include <thread>
 
 // CONSTANTS
+// TODO: Too inaccurate
 #define PI (3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679)
 #define PI05 (PI / 2.0f)
 #define PI2 (PI * 2.0f)
@@ -13,9 +14,16 @@
 #define R180 PI
 #define R90 PI05
 
+/**
+ * Degrees to Radians and
+ * Radians to Degrees macros
+ */
 #define DTOR(x) (x / 180.0f * PI)
 #define RTOR(x) (x * 180.0f / PI)
 
+/**
+ * Millisecond delay
+ */
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 
 /**
