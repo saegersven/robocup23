@@ -19,12 +19,11 @@ find_package(Threads REQUIRED)
 
 #include_directories("${EIGEN3_INCLUDE_DIR}")
 
-include_directories("libs/BNO055_driver")
+include_directories("libs")
+
 add_library(bno055-driver STATIC libs/BNO055_driver/bno055.c libs/BNO055_driver/bno055.h)
 
-include_directories("libs/vl53l0x-linux")
-add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/VL53L0X.hpp 
-	libs/vl53l0x-linux/VL53L0X_defines.hpp)
+add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/VL53L0X.hpp libs/vl53l0x-linux/VL53L0X_defines.hpp)
 
 add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp src/line.cpp libs/BNO055_driver/bno055.c)
 

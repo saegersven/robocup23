@@ -74,7 +74,7 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	float f = std::pow(2, -std::pow(4.0f * x - 2.6, 2)) - 0.1f;
+	float f = std::pow(2, -std::pow(4.2f * x - 2.6, 2)) - 0.1f;
 	if(f < 0.0f) f = 0.0f;
 	return f;
 }
@@ -346,8 +346,7 @@ void Line::green() {
 		robot->stop();
 		//robot->turn(angle);
 		delay(50);
-		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
-
+		//robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
 		// Take another frame and reevaluate
 		open_camera();
 		grab_frame();

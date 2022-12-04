@@ -28,6 +28,13 @@ void init() {
   servo_gripper2.write(gripper2_closed);
   servo_arm.write(arm_higher_pos);
   servo_gate.write(gate_closed);
+
+  delay(2000);
+  servo_cam.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
+  servo_arm.detach();
+  servo_gate.detach();
   displayBatVoltage();
   // wait for servos to finish turning
   for (int i = 0; i < 3; ++i) {

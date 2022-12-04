@@ -54,19 +54,32 @@ int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t 
 	if(write(dev_addr, msg, cnt + 1) != cnt + 1) {
 		std::cerr << "I2C transaction failed" << std::endl;
 	}*/
+	int i2c_fd = open("/dev/i2c-1", O_RDWR);
+	if(i2c_fd < 0) {
+		std::cerr << "I2C init failed" << std::endl;
+		exit(ERRCODE_I2C);
+	}
+	if(ioctl(i2c_fd, I2C_SLAVE, dev_addr) < 0) {
+		std::cerr << "I2C device init failed (" << std::to_string(dev_addr) + ")" << std::endl;
+		close(i2c_fd);
+		exit(ERRCODE_I2C);
+	}
+
 	uint8_t buf[128];
 	buf[0] = reg_addr;
 	if(reg_data != nullptr) memcpy(buf + 1, reg_data, cnt);
-	int8_t count = write(dev_addr, buf, cnt + 1);
+	int8_t count = write(i2c_fd, buf, cnt + 1);
 	if(count < 0) {
 		std::cerr << "I2C write failed" << std::endl;
-		close(dev_addr);
+		close(i2c_fd);
 		exit(ERRCODE_I2C);
 	} else if(count != cnt + 1) {
 		std::cerr << "Short write to device" << std::endl;
-		close(dev_addr);
+		close(i2c_fd);
 		exit(ERRCODE_I2C);
 	}
+	close(i2c_fd);
+
 	return 0;
 }
 
@@ -75,25 +88,34 @@ int8_t i2c_read_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data) {
 }
 
 int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) {
-	/*if(i2c_smbus_read_block_data(dev_addr, reg_addr, reg_data) < 0) {
-		std::cerr << "I2C read failed" << std::endl;
-		return 1;
-	}*/
-	if(write(dev_addr, &reg_addr, 1) != 1) {
-		std::cerr << "I2C read failed (reg addr write)" << std::endl;
-		close(dev_addr);
+	// Init I2C
+	int i2c_fd = open("/dev/i2c-1", O_RDWR);
+	if(i2c_fd < 0) {
+		std::cerr << "I2C init failed" << std::endl;
 		exit(ERRCODE_I2C);
 	}
-	int8_t count = read(dev_addr, data, cnt);
+	if(ioctl(i2c_fd, I2C_SLAVE, dev_addr) < 0) {
+		std::cerr << "I2C device init failed (" << std::to_string(dev_addr) + ")" << std::endl;
+		close(i2c_fd);
+		exit(ERRCODE_I2C);
+	}
+	if(write(i2c_fd, &reg_addr, 1) != 1) {
+		std::cerr << "I2C read failed (reg addr write)" << std::endl;
+		std::cerr << std::to_string(reg_addr) << std::endl;
+		close(i2c_fd);
+		exit(ERRCODE_I2C);
+	}
+	int8_t count = read(i2c_fd, data, cnt);
 	if(count < 0) {
 		std::cerr << "I2C read failed" << std::endl;
-		close(dev_addr);
+		close(i2c_fd);
 		exit(ERRCODE_I2C);
-	} else if(count != cnt + 1) {
+	} else if(count != cnt) {
 		std::cerr << "Short read from device" << std::endl;
-		close(dev_addr);
+		close(i2c_fd);
 		exit(ERRCODE_I2C);
 	}
+	close(i2c_fd);
 
 	return 0;
 }
@@ -107,20 +129,6 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	wiringPiSetupGpio();
 
 	pinMode(BTN_RESTART, INPUT);
-
-	// Init I2C
-	i2c_fd = open("/dev/i2c-1", O_RDWR);
-	if(i2c_fd < 0) {
-		std::cerr << "I2C init failed" << std::endl;
-		exit(ERRCODE_I2C);
-	}
-
-	device_addresses.push_back(TEENSY_I2C_ADDR);
-	device_addresses.push_back(BNO055_I2C_ADDR);
-	device_addresses.push_back(VL53L0X_FORWARD_ADDR);
-
-	// Init Teensy (Just select to see if it works)
-	select_device(DEV_TEENSY);
 
 	// Init BNO055
 	/*select_device(DEV_BNO055);
@@ -150,8 +158,6 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	vl53l0x.i2c_writeBytes = &i2c_write;
 	vl53l0x.i2c_writeWord = &i2c_write_word;
 
-	select_device(DEV_VL53L0X);
-
 	vl53l0x.initialize();
 	vl53l0x.setTimeout(200);
 	vl53l0x.setMeasurementTimingBudget(40000);
@@ -174,9 +180,8 @@ bool Robot::button(uint8_t pin) {
 }
 
 void Robot::m(int8_t left, int8_t right, uint16_t duration) {
-	select_device(DEV_TEENSY);
 	uint8_t msg[2] = {*(uint8_t*)(&left), *(uint8_t*)(&right)};
-	i2c_write(i2c_fd, CMD_MOTOR, msg, 2);
+	i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
 
 	if(duration > 0) {
 		delay(duration);
@@ -185,12 +190,10 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 }
 
 void Robot::stop() {
-	select_device(DEV_TEENSY);
 	send_byte(CMD_STOP);
 }
 
 void Robot::turn(float angle) {
-	select_device(DEV_TEENSY);
 	/*char* angle_bytes = (char*)&angle;
 	char msg[5] = {CMD_TURN, angle_bytes[0], angle_bytes[1], angle_bytes[2], angle_bytes[3]};
 	i2c_write(msg, 5);*/
@@ -203,19 +206,16 @@ void Robot::turn(float angle) {
 }
 
 void Robot::send_byte(char b) {
-	select_device(DEV_TEENSY);
-	i2c_write_byte(i2c_fd, b);
+	i2c_write_byte_single(TEENSY_I2C_ADDR, b);
 }
 
-float Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
-	select_device(DEV_TEENSY);
+void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	uint8_t msg[2] = {servo_id, angle};
-	i2c_write(i2c_fd, CMD_SERVO, msg, 2);
-	delay(delay);
+	i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
+	delay(delay_ms);
 }
 
 float Robot::read_heading() {
-	select_device(DEV_BNO055);
 	int16_t data = 0.0;
 
 	if(bno055_read_euler_h(&data) != 0) {
@@ -226,7 +226,6 @@ float Robot::read_heading() {
 }
 
 float Robot::read_pitch() {
-	select_device(DEV_BNO055);
 	int16_t data = 0.0;
 
 	if(bno055_read_euler_r(&data) != 0) {
@@ -237,8 +236,6 @@ float Robot::read_pitch() {
 }
 
 uint16_t Robot::read_distance() {
-	select_device(DEV_VL53L0X);
-
 	uint16_t dist = vl53l0x.readRangeSingleMillimeters();
 
 	if(vl53l0x.timeoutOccurred()) {

@@ -13,7 +13,7 @@ int main() {
 	robot->stop();
 
 	/*while(1) {
-		std::cout << robot->read_heading() << std::endl;
+		std::cout << robot->read_distance() << std::endl;
 	}
 	exit(0);*/
 
@@ -44,6 +44,7 @@ int main() {
 			line.start();
 		}
 
+		std::cout << robot->read_distance() << std::endl;
 		line.line();
 	}
 

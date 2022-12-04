@@ -9,13 +9,21 @@ Servo servo_gripper1;
 Servo servo_gripper2;
 Servo servo_gate;
 
-const Servo[5] servos = {
+const Servo servos[5] = {
   servo_cam,
   servo_arm,
   servo_gripper1,
   servo_gripper2,
   servo_gate
-}
+};
+
+const int servo_pins[5] = {
+  servo_cam_pin,
+  servo_arm_pin,
+  servo_gripper1_pin,
+  servo_gripper2_pin,
+  servo_gate_pin
+};
 
 #define DEBUG 1
 // only print when in debug mode:
@@ -32,7 +40,6 @@ void setup() {
 
   Wire.begin(0x2a);
   Wire.onReceive(onI2CReceive);
-  delay(5000);
 }
 
 void onI2CReceive(int n) {
@@ -67,12 +74,14 @@ void onI2CReceive(int n) {
         uint8_t servo_id = data[1];
         uint8_t angle = data[2];
 
+        if(!servos[servo_id].attached()) servos[servo_id].attach(servo_pins[servo_id]);
         servos[servo_id].write(angle);
+        //servos[servo_id].detach();
 
         debug("S: ");
-        debug(data[1]);
+        debug((int)data[1]);
         debug(" to ");
-        debugln(data[2]);
+        debugln((int)data[2]);
       }
       break;
     case CMD_BEGIN:
@@ -82,14 +91,18 @@ void onI2CReceive(int n) {
       debugln("Stop");
       stop();
       digitalWrite(LED3, HIGH);
-      displayBatVoltage();
       break;
     }
     ++counter;
   }
 }
 
+int time_since_last_bat_update = 0;
 void loop() {
+  if(millis() - time_since_last_bat_update >= 3000) {
+    time_since_last_bat_update = millis();
+    displayBatVoltage();
+  }
   /*
   pick_up_victim();
   delay(1000);
