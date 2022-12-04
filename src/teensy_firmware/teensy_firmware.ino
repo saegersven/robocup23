@@ -24,6 +24,7 @@ void setup() {
 
   Wire.begin(0x2a);
   Wire.onReceive(onI2CReceive);
+  delay(5000);
 }
 
 void onI2CReceive(int n) {
