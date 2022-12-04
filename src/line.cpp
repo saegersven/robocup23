@@ -351,9 +351,8 @@ void Line::green() {
 		open_camera();
 		grab_frame();
 		close_camera();
-
 		black = in_range(frame, &is_black);
-
+		delay(1000);
 		uint8_t new_green_result = green_direction(global_average_x, global_average_y);
 
 		robot->m(60, 60, 250);
@@ -366,14 +365,14 @@ void Line::green() {
 			robot->m(60, 60, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "Result: LEFT" << std::endl;
-			robot->turn(DTOR(-70.0f));
+			robot->turn(DTOR(-85.0f));
 			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
 			std::cout << "Result: RIGHT" << std::endl;
-			robot->turn(DTOR(70.0f));
+			robot->turn(DTOR(85.0f));
 			delay(70);
 		}
-		robot->m(60, 60, 130);
+		robot->m(127, 127, 50);
 		open_camera();
 	}
 }
@@ -395,6 +394,8 @@ void Line::line() {
 	last_frame_t = now_t;
 #endif
 
+	auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	cv::imwrite("/home/pi/Desktop/imgs/" + std::to_string(millisecondsUTC) + ".png", frame);
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif

@@ -30,6 +30,9 @@ int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte) {
 	}
 	return 0;*/
 	return i2c_write(dev_addr, reg_addr, &byte, 1);
+	//<Robot> robot = std::make_shared<Robot>();
+
+	//robot->stop();
 }
 
 // VL53L0X needs this for some reason
@@ -131,8 +134,8 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	pinMode(BTN_RESTART, INPUT);
 
 	// Init BNO055
-	/*select_device(DEV_BNO055);
-
+	//select_device(DEV_BNO055);
+/*
 	bno055.bus_write = i2c_write;
 	bno055.bus_read = i2c_read;
 	bno055.delay_msec = i2c_delay_msec;
@@ -148,10 +151,11 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 		exit(ERRCODE_BNO055);
 	}
 
-	std::cout << "BNO055 initialized" << std::endl;*/
-
+	std::cout << "BNO055 initialized" << std::endl;
+*/
 	// Init VL53L0X
 	// Set I2C interface functions
+	/*
 	vl53l0x.i2c_readByte = &i2c_read_byte;
 	vl53l0x.i2c_readBytes = &i2c_read;
 	vl53l0x.i2c_writeByte = &i2c_write_byte;
@@ -163,6 +167,7 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	vl53l0x.setMeasurementTimingBudget(40000);
 
 	std::cout << "VL53L0X initialized" << std::endl;
+	*/
 }
 
 void Robot::select_device(uint8_t device_id) {

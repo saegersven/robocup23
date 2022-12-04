@@ -44,7 +44,7 @@ int main() {
 			line.start();
 		}
 
-		std::cout << robot->read_distance() << std::endl;
+		//std::cout << robot->read_distance() << std::endl;
 		line.line();
 	}
 
