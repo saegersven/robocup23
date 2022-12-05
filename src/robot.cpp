@@ -24,15 +24,7 @@ int8_t i2c_write_byte_single(uint8_t dev_addr, uint8_t byte) {
 }
 
 int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte) {
-	/*if(i2c_smbus_write_byte(dev_addr, byte) < 0) {
-		std::cerr << "I2C write byte failed" << std::endl;
-		return 1;
-	}
-	return 0;*/
 	return i2c_write(dev_addr, reg_addr, &byte, 1);
-	//<Robot> robot = std::make_shared<Robot>();
-
-	//robot->stop();
 }
 
 // VL53L0X needs this for some reason
@@ -45,18 +37,6 @@ int8_t i2c_write_word(uint8_t dev_addr, uint8_t reg_addr, uint16_t word) {
 }
 
 int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
-	/*if(i2c_smbus_write_block_data(dev_addr, reg_addr, cnt, reg_data) < 0) {
-		std::cerr << "I2C write failed" << std::endl;
-		return 1;
-	}
-	return 0;*/
-	/*char msg[cnt + 1] = {reg_addr};
-	for(int i = 0; i < cnt; i++) {
-		msg[i + 1] = reg_data[i];
-	}
-	if(write(dev_addr, msg, cnt + 1) != cnt + 1) {
-		std::cerr << "I2C transaction failed" << std::endl;
-	}*/
 	int i2c_fd = open("/dev/i2c-1", O_RDWR);
 	if(i2c_fd < 0) {
 		std::cerr << "I2C init failed" << std::endl;
@@ -97,17 +77,23 @@ int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) 
 		std::cerr << "I2C init failed" << std::endl;
 		exit(ERRCODE_I2C);
 	}
+
+	// Select device
 	if(ioctl(i2c_fd, I2C_SLAVE, dev_addr) < 0) {
 		std::cerr << "I2C device init failed (" << std::to_string(dev_addr) + ")" << std::endl;
 		close(i2c_fd);
 		exit(ERRCODE_I2C);
 	}
+
+	// Write register address/command
 	if(write(i2c_fd, &reg_addr, 1) != 1) {
 		std::cerr << "I2C read failed (reg addr write)" << std::endl;
 		std::cerr << std::to_string(reg_addr) << std::endl;
 		close(i2c_fd);
 		exit(ERRCODE_I2C);
 	}
+
+	// Read response
 	int8_t count = read(i2c_fd, data, cnt);
 	if(count < 0) {
 		std::cerr << "I2C read failed" << std::endl;
@@ -123,7 +109,7 @@ int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) 
 	return 0;
 }
 
-// bno055 needs millisecond delay function
+// bno055 needs this
 void i2c_delay_msec(uint32_t ms) {
 	usleep(ms * 1000);
 }
@@ -133,9 +119,7 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 
 	pinMode(BTN_RESTART, INPUT);
 
-	// Init BNO055
-	//select_device(DEV_BNO055);
-/*
+#ifdef ENABLE_BNO055
 	bno055.bus_write = i2c_write;
 	bno055.bus_read = i2c_read;
 	bno055.delay_msec = i2c_delay_msec;
@@ -152,10 +136,9 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	}
 
 	std::cout << "BNO055 initialized" << std::endl;
-*/
-	// Init VL53L0X
-	// Set I2C interface functions
-	/*
+#endif // ENABLE_BNO055
+
+#ifdef ENABLE_VL53L0X
 	vl53l0x.i2c_readByte = &i2c_read_byte;
 	vl53l0x.i2c_readBytes = &i2c_read;
 	vl53l0x.i2c_writeByte = &i2c_write_byte;
@@ -167,17 +150,7 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	vl53l0x.setMeasurementTimingBudget(40000);
 
 	std::cout << "VL53L0X initialized" << std::endl;
-	*/
-}
-
-void Robot::select_device(uint8_t device_id) {
-	if(selected_device == device_id) return;
-
-	if(ioctl(i2c_fd, I2C_SLAVE, device_addresses[device_id]) < 0) {
-		std::cerr << "I2C device init failed (" << std::to_string(device_id) + ")" << std::endl;
-		exit(ERRCODE_I2C);
-	}
-	selected_device = device_id;
+#endif // ENABLE_VL53L0X
 }
 
 bool Robot::button(uint8_t pin) {
@@ -199,9 +172,6 @@ void Robot::stop() {
 }
 
 void Robot::turn(float angle) {
-	/*char* angle_bytes = (char*)&angle;
-	char msg[5] = {CMD_TURN, angle_bytes[0], angle_bytes[1], angle_bytes[2], angle_bytes[3]};
-	i2c_write(msg, 5);*/
 	uint16_t duration = (uint16_t)std::abs(angle) * 200.0f;
 	if(angle > 0) {
 		m(80, -80, duration);

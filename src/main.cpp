@@ -30,8 +30,10 @@ int main() {
 	while(1) {
 		if(robot->button(BTN_RESTART)) {
 			while(robot->button(BTN_RESTART));
+			
 			line.stop();
 			robot->stop();
+
 			std::cout << "Stop." << std::endl;
 			delay(200);
 
@@ -44,7 +46,6 @@ int main() {
 			line.start();
 		}
 
-		//std::cout << robot->read_distance() << std::endl;
 		line.line();
 	}
 

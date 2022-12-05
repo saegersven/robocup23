@@ -50,9 +50,12 @@ extern "C" {
 
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 
+//#define ENABLE_VL53L0X
+//#define ENABLE_BNO055
+
 /*
- * I2C interface functions. These are passed to the bno055 driver and used for communication
- * with the Teensy.
+ * I2C interface functions. These are passed to the bno055 and vl53l0x drivers
+ * and used for communication with the Teensy.
  */
 int8_t i2c_write_byte_single(uint8_t dev_addr, uint8_t byte);
 int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte);
@@ -64,8 +67,6 @@ class Robot {
 private:
 	// Linux I2C file handle
 	int i2c_fd;
-	std::vector<uint8_t> device_addresses;
-	int selected_device;
 
 	// Orientation sensor
 	bno055_t bno055;
@@ -79,11 +80,6 @@ public:
 	 * Simple digital read
 	 */
 	bool button(uint8_t pin);
-
-	/**
-	 * Select an I2C device
-	 */
-	void select_device(uint8_t device_id);
 
 	/**
 	 * Sends left and right motor speeds to the motor controller.
@@ -115,6 +111,8 @@ public:
 	/**
 	 * Read orientation values (euler angles) from BNO055.
 	 * Returns angle in radians.
+	 * read_heading() acts like a compass.
+	 * read_pitch() is used for detecting ramps.
 	 */
 	float read_heading();
 	float read_pitch();

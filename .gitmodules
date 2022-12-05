@@ -4,3 +4,6 @@
 [submodule "libs/vl53l0x-linux"]
 	path = libs/vl53l0x-linux
 	url = https://github.com/saegersven/vl53l0x-linux
+[submodule "libs/tensorflow"]
+	path = libs/tensorflow
+	url = https://github.com/tensorflow/tensorflow.git
