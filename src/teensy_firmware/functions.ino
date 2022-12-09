@@ -39,11 +39,10 @@ void init() {
   // wait for servos to finish turning
   for (int i = 0; i < 3; ++i) {
     digitalWrite(LED3, HIGH);
-    delay(200);
+    delay(100);
     digitalWrite(LED3, LOW);
-    delay(200);
+    delay(100);
   }
-  digitalWrite(LED3, HIGH);
   debugln("Setup completed");
 }
 
@@ -59,10 +58,10 @@ float batteryVoltage(int iterations) {
 // displays battery voltage through two LEDs
 void displayBatVoltage() {
   float batVoltage = batteryVoltage(1);
-  debugln();
-  debug("Battery voltage: ");
-  debug(batVoltage);
-  debugln("V");
+  //debugln();
+  //debug("Battery voltage: ");
+  debugln(batVoltage);
+  //debugln("V");
 
   if (batVoltage > 8.05) leds(255, 0);       // > 80%
   else if (batVoltage > 7.91) leds(230, 1);  // > 70%

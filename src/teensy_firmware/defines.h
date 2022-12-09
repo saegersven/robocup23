@@ -46,5 +46,4 @@
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
 #define CMD_SERVO 0x03
-#define CMD_BEGIN 0x05
-#define CMD_END 0x06
+#define CMD_READY 0x05

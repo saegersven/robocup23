@@ -1,5 +1,7 @@
 #include "silver_ml.h"
 
+SilverML::SilverML() {}
+
 void SilverML::start() {
 	running = true;
 	has_new_frame = false;
@@ -28,19 +30,20 @@ void SilverML::internal_loop() {
 		if(!has_new_frame) continue;
 
 		frame_lock.lock();
+		uint8_t channels = current_frame.channels();
 		// Image is three bytes (BGR), need to convert to one float (grayscale)
 		uint8_t* p;
-		for(int i = 0; i < image.rows; ++i) {
-			p = image.ptr<uint8_t>(i);
-			for(int j = 0; j < image.cols; ++j) {
+		for(int i = 0; i < current_frame.rows; ++i) {
+			p = current_frame.ptr<uint8_t>(i);
+			for(int j = 0; j < current_frame.cols; ++j) {
 				// Compute average of all three channels
 				float f = 0.0f;
-				for(int k = 0; k < image.channels; ++k) {
-					f += (float)p[j][k] / 255.0f;
+				for(int k = 0; k < channels; ++k) {
+					f += (float)p[j + k] / 255.0f;
 				}
-				f /= image.channels;
+				f /= channels;
 				// Put into input layer of NN
-				input_layer[i * image.cols + j * image.channels + k] = f;
+				input_layer[i * current_frame.cols + j * channels] = f;
 			}
 		}
 		frame_lock.unlock();

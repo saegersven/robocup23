@@ -56,4 +56,4 @@ public:
 	 * Performs copying operations and invokes the neural network.
 	 */
 	void internal_loop();
-}
+};

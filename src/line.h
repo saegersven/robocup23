@@ -12,6 +12,7 @@
 #include "robot.h"
 #include "utils.h"
 #include "defines.h"
+#include "silver_ml.h"
 
 #define BLACK_MAX_SUM 200
 
@@ -26,8 +27,8 @@
 #define LINE_FRAME_WIDTH 80
 #define LINE_FRAME_HEIGHT 48
 
-#define LINE_FOLLOW_BASE_SPEED 80 //50
-#define LINE_FOLLOW_SENSITIVITY 130.0f //80.0f
+#define LINE_FOLLOW_BASE_SPEED 50 //50
+#define LINE_FOLLOW_SENSITIVITY 80.0f //80.0f
 
 /**
  * Single-pixel thresholding operation for line.
@@ -67,6 +68,8 @@ private:
 	float last_line_angle;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
+
+	SilverML silver_ml;
 
 	// Camera control
 	bool camera_opened;

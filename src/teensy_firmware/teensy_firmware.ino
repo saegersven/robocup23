@@ -58,11 +58,12 @@ void onI2CReceive(int n) {
         int8_t right = (int8_t)data[2];
         
         m(left, right, 0);
-
+        /*
         debug("M: ");
         debug(left);
         debug(" ");
         debugln(right);
+        */
       }
       break;
     case CMD_STOP: // Motor stop command
@@ -78,28 +79,28 @@ void onI2CReceive(int n) {
         servos[servo_id].write(angle);
         //servos[servo_id].detach();
 
+        /*
         debug("S: ");
         debug((int)data[1]);
         debug(" to ");
         debugln((int)data[2]);
+        */
       }
       break;
-    case CMD_BEGIN:
+    case CMD_READY:
+       digitalWrite(LED3, HIGH);
+       delay(50);
        digitalWrite(LED3, LOW);
        break;
-    case CMD_END: // Program stop command
-      debugln("Stop");
-      stop();
-      digitalWrite(LED3, HIGH);
-      break;
     }
     ++counter;
   }
 }
 
 int time_since_last_bat_update = 0;
+float minvol = 10.0;
 void loop() {
-  if(millis() - time_since_last_bat_update >= 3000) {
+  if(millis() - time_since_last_bat_update >= 0) {
     time_since_last_bat_update = millis();
     displayBatVoltage();
   }

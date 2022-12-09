@@ -25,11 +25,13 @@ void Line::start() {
 	last_line_angle = 0.0f;
 	camera_opened = false;
 	open_camera();
+	silver_ml.start();
 }
 
 void Line::stop() {
 	robot->stop();
 	close_camera();
+	silver_ml.stop();
 }
 
 void Line::open_camera() {
@@ -382,21 +384,19 @@ void Line::line() {
 
 	follow();
 	green();
+	silver_ml.set_frame(frame);
+	std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
 #ifdef DEBUG
 #ifdef DRAW_FPS
 	auto now_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
-	int fps = std::round(1.0f / ((float)us / 1'000'000));
+	int fps = std::round(1.0f / ((float)us / 1000000));
 	cv::putText(debug_frame, std::to_string(fps),
 		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.2, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 #endif
-
-	auto millisecondsUTC = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-	cv::imwrite("/home/pi/Desktop/imgs/" + std::to_string(millisecondsUTC) + ".png", frame);
-	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
 }
