@@ -39,7 +39,7 @@ void SilverML::internal_loop() {
 				// Compute average of all three channels
 				float f = 0.0f;
 				for(int k = 0; k < channels; ++k) {
-					f += (float)p[j + k] / 255.0f;
+					f += (float)p[j * channels + k] / 255.0f;
 				}
 				f /= channels;
 				// Put into input layer of NN

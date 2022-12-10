@@ -380,10 +380,19 @@ void Line::green() {
 }
 
 void Line::line() {
-	grab_frame();
+	//grab_frame();
 
-	follow();
-	green();
+	//follow();
+	//green();
+
+	if(test) {
+		frame = cv::imread("/home/pi/robocup23/runtime_data/silver_no_silver_test.png", cv::IMREAD_COLOR);
+		test = false;
+	} else {
+		frame = cv::imread("/home/pi/robocup23/runtime_data/silver_silver_test.png", cv::IMREAD_COLOR);
+		test = true;
+	}
+
 	silver_ml.set_frame(frame);
 	std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 

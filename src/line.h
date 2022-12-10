@@ -65,6 +65,9 @@ private:
 	// Thresholded frame
 	cv::Mat black;
 
+	// used for silver testing
+	bool test = false;
+
 	float last_line_angle;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
