@@ -11,8 +11,13 @@ void SilverML::start() {
 	model = tflite::FlatBufferModel::BuildFromFile(SILVER_MODEL_PATH);
 	tflite::ops::builtin::BuiltinOpResolver resolver;
 	tflite::InterpreterBuilder builder(*model, resolver);
-	builder(&interpreter);
-	interpreter->AllocateTensors();
+	if(builder(&interpreter) != kTfLiteOk) {
+		std::cerr << "Failed building interpreter (Silver)" << std::endl;
+	}
+	
+	if(interpreter->AllocateTensors() != kTfLiteOk) {
+		std::cerr << "Failed allocating tensors (Silver)" << std::endl;
+	}
 
 	input_layer = interpreter->typed_input_tensor<float>(0);
 	output_layer = interpreter->typed_output_tensor<float>(0);
