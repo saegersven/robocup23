@@ -37,5 +37,5 @@ float clamp(float n, float min, float max) {
  * Saves .png image to subfolder in /home/pi/Desktop/images
  */
 void save_img(cv::Mat img, const std::string& subfolder) {
-	cv::imwrite("/home/pi/Desktop/images/" + subfolder + std::to_string(millis()) + ".png", img);
+	cv::imwrite("/home/pi/Desktop/images/" + subfolder + "/" + std::to_string(millis()) + ".png", img);
 }

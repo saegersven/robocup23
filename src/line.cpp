@@ -380,21 +380,20 @@ void Line::green() {
 }
 
 void Line::line() {
-	//grab_frame();
+	grab_frame();
 
-	//follow();
+	follow();
 	//green();
 
-	if(test) {
-		frame = cv::imread("/home/pi/robocup23/runtime_data/silver_no_silver_test.png", cv::IMREAD_COLOR);
-		test = false;
-	} else {
-		frame = cv::imread("/home/pi/robocup23/runtime_data/silver_silver_test.png", cv::IMREAD_COLOR);
-		test = true;
-	}
-
 	silver_ml.set_frame(frame);
-	std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
+	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
+
+	if(silver_ml.get_current_prediction()) {
+		close_camera();
+		robot->stop();
+		delay(5000);
+		open_camera();
+	}
 
 #ifdef DEBUG
 #ifdef DRAW_FPS
