@@ -43,7 +43,7 @@ void SilverML::internal_loop() {
 				}
 				f /= channels;
 				// Put into input layer of NN
-				input_layer[i * current_frame.cols + j * channels] = f;
+				input_layer[i * current_frame.cols + j] = f;
 			}
 		}
 		frame_lock.unlock();
