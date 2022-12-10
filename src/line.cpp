@@ -383,17 +383,17 @@ void Line::line() {
 	grab_frame();
 
 	follow();
-	//green();
+	green();
 
 	silver_ml.set_frame(frame);
 	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
-	if(silver_ml.get_current_prediction()) {
+	/*if(silver_ml.get_current_prediction()) {
 		close_camera();
 		robot->stop();
 		delay(5000);
 		open_camera();
-	}
+	}*/
 
 #ifdef DEBUG
 #ifdef DRAW_FPS

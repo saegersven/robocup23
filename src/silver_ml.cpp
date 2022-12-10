@@ -30,8 +30,6 @@ void SilverML::internal_loop() {
 		if(!has_new_frame) continue;
 
 		frame_lock.lock();
-		std::cout << "NEW FRAME!" << std::endl;
-		cv::imshow("ML frame", current_frame);
 
 		uint8_t channels = current_frame.channels();
 		// Image is three bytes (BGR), need to convert to one float (grayscale)
@@ -53,7 +51,7 @@ void SilverML::internal_loop() {
 
 		interpreter->Invoke();
 
-		std::cout << "[" << output_layer[0] << "\t" << output_layer[1] << "]" << std::endl;
+		//std::cout << "[" << output_layer[0] << "\t" << output_layer[1] << "]" << std::endl;
 
 		current_prediction = output_layer[0] > output_layer[1];
 		if(current_prediction) {

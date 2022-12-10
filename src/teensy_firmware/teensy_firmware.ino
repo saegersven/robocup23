@@ -38,6 +38,7 @@ const int servo_pins[5] = {
 void setup() {
   init();
 
+  Wire.setClock(50000);
   Wire.begin(0x2a);
   Wire.onReceive(onI2CReceive);
 }
@@ -88,9 +89,9 @@ void onI2CReceive(int n) {
       }
       break;
     case CMD_READY:
-       digitalWrite(LED3, HIGH);
-       delay(50);
-       digitalWrite(LED3, LOW);
+       //digitalWrite(LED3, HIGH);
+       //delay(50);
+       //digitalWrite(LED3, LOW);
        break;
     }
     ++counter;

@@ -29,13 +29,6 @@ void init() {
   servo_arm.write(arm_higher_pos);
   servo_gate.write(gate_closed);
 
-  delay(2000);
-  servo_cam.detach();
-  servo_gripper1.detach();
-  servo_gripper2.detach();
-  servo_arm.detach();
-  servo_gate.detach();
-  displayBatVoltage();
   // wait for servos to finish turning
   for (int i = 0; i < 3; ++i) {
     digitalWrite(LED3, HIGH);
@@ -43,6 +36,13 @@ void init() {
     digitalWrite(LED3, LOW);
     delay(100);
   }
+  
+  servo_cam.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
+  servo_arm.detach();
+  servo_gate.detach();
+  displayBatVoltage();
   debugln("Setup completed");
 }
 
@@ -108,10 +108,10 @@ void m(int left_speed, int right_speed, int duration) {
   single_m(lb1, lb2, lb_pwm, (s - d) * backwheel_factor);
   single_m(rb1, rb2, rb_pwm, (s + d) * backwheel_factor);
 
-  delay(duration);
+  //delay(duration);
 
   // stop all motors after movement
-  if (duration != 0) stop();
+  //if (duration != 0) stop();
 }
 
 void stop() {

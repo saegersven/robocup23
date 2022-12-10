@@ -123,17 +123,21 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	bno055.bus_write = i2c_write;
 	bno055.bus_read = i2c_read;
 	bno055.delay_msec = i2c_delay_msec;
-	bno055.dev_addr = i2c_fd;
+	bno055.dev_addr = BNO055_I2C_ADDR;
 
 	uint32_t comres = 0;
 	comres += bno055_init(&bno055);
 	comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
 	comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
-	
+
 	if(comres > 0) {
 		std::cerr << "BNO055 init failed" << std::endl;
 		exit(ERRCODE_BNO055);
 	}
+
+	uint8_t c_id = 0;
+	if(bno055_read_chip_id(&c_id) != 0) std::cout << "OH OH" << std::endl;
+	std::cout << std::to_string(c_id) << std::endl;
 
 	std::cout << "BNO055 initialized" << std::endl;
 #endif // ENABLE_BNO055
@@ -174,9 +178,9 @@ void Robot::stop() {
 void Robot::turn(float angle) {
 	uint16_t duration = (uint16_t)std::abs(angle) * 200.0f;
 	if(angle > 0) {
-		m(80, -80, duration);
+		m(40, -40, duration);
 	} else {
-		m(-80, 80, duration);
+		m(-40, 40, duration);
 	}
 }
 

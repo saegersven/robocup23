@@ -12,11 +12,6 @@ int main() {
 
 	robot->stop();
 
-	/*while(1) {
-		std::cout << robot->read_distance() << std::endl;
-	}
-	exit(0);*/
-
 	// max power usage test
 	/*
 	robot->servo(0, 120, 0);
