@@ -49,7 +49,7 @@ extern "C" {
 
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 
-//#define ENABLE_VL53L0X
+#define ENABLE_VL53L0X
 //#define ENABLE_BNO055
 
 /*

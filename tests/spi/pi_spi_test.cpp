@@ -1,15 +1,7 @@
 #include <iostream>
-
-#include <linux/i2c-dev.h>
-#include <i2c/smbus.h>
-#include <fcntl.h>
+#include <wiringPiSPI.h>
+#include <wiringPi.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
-
-#include <chrono>
-#include <thread>
-
-#define delay(x) std::this_thread::sleep_for(std::chrono::milliseconds(x))
 
 // Compile with
 // g++ -o pi_spi_test pi_spi_test.cpp -lwiringPi
@@ -17,50 +9,37 @@
 // ./pi_spi_test
 
 #define SPI_CHANNEL 0
-#define SPI_CLOCK_SPEED 1000000
+#define SPI_CLOCK_SPEED 50000
 
 int main() {
-	int fd;
-	int adapter_nr = 1;
-	char filename[20];
+	wiringPiSetupGpio();
+	pinMode(8, OUTPUT);
+	digitalWrite(8, HIGH);
 
-	snprintf(filename, 19, "/dev/i2c-%d", adapter_nr);
-	fd = open(filename, O_RDWR);
-	if(fd < 0) {
-		std::cout << "i2c init failed" << std::endl;
-		exit(1);
+	int fd = wiringPiSPISetup(SPI_CHANNEL, SPI_CLOCK_SPEED);
+	if(fd == -1) {
+		std::cout << "Failed to init SPI communication.\n";
+		return -1;
 	}
+	std::cout << "SPI init successful.\n";
 
-	int addr = 0x2a;
+	unsigned char buf1[3] = { 1, 32, 0 };
+	unsigned char buf2[3] = { 2, 21, 0 };
 
-	if(ioctl(fd, I2C_SLAVE, addr) < 0) {
-		std::cout << "device init failed" << std::endl;
-		exit(1);
+	for(int i = 0; i < 10; ++i) {
+
+		digitalWrite(8, LOW);	
+		wiringPiSPIDataRW(SPI_CHANNEL, buf1, 3);
+		digitalWrite(8, HIGH);	
+		usleep(100000);
 	}
+	return 0;
 
-	char buf[1] = {0x01};
-	if(write(fd, buf, 1) != 1) {
-		std::cout << "i2c transaction failed" << std::endl;
-	}
+	std::cout << "Data returned: " << std::to_string(buf1[2]) << "\n";
 
-	char res[1];
-	while(read(fd, res, 1) != 1) {
-		std::cout << ".";
-	}
-	std::cout << " Read " << std::to_string(res[0]) << std::endl;
+	wiringPiSPIDataRW(SPI_CHANNEL, buf2, 3);
 
-	/*auto start = std::chrono::high_resolution_clock::now();
-
-	for(int i = 0; i < 1000; i++) {
-		if(write(fd, buf, NUM) != NUM) {
-			std::cout << "i2c transaction failed" << std::endl;
-		}
-	}
-	auto end = std::chrono::high_resolution_clock::now();
-
-	std::cout << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() / 8000 << std::endl;*/
-
-
+	std::cout << "Data returned: " << std::to_string(buf2[2]) << "\n";
 
 	return 0;
 }

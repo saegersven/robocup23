@@ -1,5 +1,6 @@
 #include <Servo.h>
 #include <Wire.h>
+#include <SPI.h>
 
 #include "defines.h"
 
@@ -38,7 +39,6 @@ const int servo_pins[5] = {
 void setup() {
   init();
 
-  Wire.setClock(50000);
   Wire.begin(0x2a);
   Wire.onReceive(onI2CReceive);
 }
@@ -59,12 +59,12 @@ void onI2CReceive(int n) {
         int8_t right = (int8_t)data[2];
         
         m(left, right, 0);
-        /*
+        
         debug("M: ");
         debug(left);
         debug(" ");
         debugln(right);
-        */
+        
       }
       break;
     case CMD_STOP: // Motor stop command
@@ -101,9 +101,9 @@ void onI2CReceive(int n) {
 int time_since_last_bat_update = 0;
 float minvol = 10.0;
 void loop() {
-  if(millis() - time_since_last_bat_update >= 0) {
+  if(millis() - time_since_last_bat_update >= 500) {
     time_since_last_bat_update = millis();
-    displayBatVoltage();
+    //displayBatVoltage();
   }
   /*
   pick_up_victim();

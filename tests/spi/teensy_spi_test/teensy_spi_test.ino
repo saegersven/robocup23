@@ -1,39 +1,52 @@
-#include <Wire.h>
- 
-// LED on pin 13
-const int ledPin = 13; 
- 
+#include <TSPISlave.h>
+
+uint8_t miso = 12;
+uint8_t mosi = 11;
+uint8_t sck = 13;
+uint8_t cs = 15;
+uint8_t spimode = 8;
+
+TSPISlave spi = TSPISlave(SPI, miso, mosi, sck, cs, spimode);
+
 void setup() {
   Serial.begin(115200);
-  // Join I2C bus as slave with address 8
-  Wire.begin(0x2a);
 
-  Wire.onReceive(onI2CReceive);
-  
-  // Setup pin 13 as output and turn LED off
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
+  pinMode(cs, INPUT);
+  pinMode(miso, INPUT);
+  pinMode(sck, INPUT);
+  //spi.onReceive(spi_receive);
+
+  Serial.println("START!");
 }
 
-int counter = 0;
-long t = 0;
-
-void onI2CReceive(int n) {
-  while (Wire.available()) { // loop through all but the last
-    char c = Wire.read(); // receive byte as a character
-    //Serial.print(c);
-    counter++;
-
-    Serial.print(c);
-
-    if(c == 0x01) {
-      Wire.write(42);
+void read_spi(byte* data, int* len) {
+    uint8_t counter = 0;
+    while (digitalRead(sck) == LOW) {
+      if(digitalRead(cs) == HIGH) return;
     }
-  }
+    data[*len] |= digitalRead(miso) << counter;
+    ++counter;
+    if (counter == 8) {
+      ++len;
+      counter = 0;
+    }
+    while (sck == HIGH) {
+      if(digitalRead(sck) == HIGH) return;
+    }
 }
 
 void loop() {
-  delay(1000);
-  Serial.println();
-  Serial.println(counter);
+  if (digitalRead(cs) == LOW) {
+    byte data[128];
+    int len = 0;
+    Serial.println("DATA OGHHHHJ");
+    read_spi(data, &len);
+    Serial.print(len);
+    Serial.println("WORKED VERY GOODLY YES YES YES!!11!");
+    for(int i = 0; i < len; ++i) {
+      Serial.print((int)data[i]);
+      if(i != len - 1) Serial.print("\t");
+    }
+    Serial.println();
+  }
 }

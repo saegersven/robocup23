@@ -9,22 +9,15 @@ int main() {
 	std::cout << "Init" << std::endl;
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
+	
+	while(true) {
+		//robot->m(50, 50, 500);
+		//robot->m(-50, -50, 500);
+		std::cout << robot->read_distance() << std::endl;
+	}
 
 	robot->stop();
 
-	// max power usage test
-	/*
-	robot->servo(0, 120, 0);
-	robot->servo(1, 170, 0);
-	robot->servo(2, 85, 0);
-	robot->servo(4, 40, 0);
-	delay(500)
-	robot->servo(0, 50, 0);	
-	robot->servo(1, 20, 0);
-	robot->servo(2, 0, 0);
-	robot->servo(4, 100, 0);
-	*/
-	
 	Line line(robot);
 	line.start();
 
