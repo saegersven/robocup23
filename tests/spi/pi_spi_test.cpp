@@ -23,23 +23,12 @@ int main() {
 	}
 	std::cout << "SPI init successful.\n";
 
-	unsigned char buf1[3] = { 1, 32, 0 };
-	unsigned char buf2[3] = { 2, 21, 0 };
+	unsigned char buf1[3] = { 42, 13, 42};
 
-	for(int i = 0; i < 10; ++i) {
-
-		digitalWrite(8, LOW);	
-		wiringPiSPIDataRW(SPI_CHANNEL, buf1, 3);
-		digitalWrite(8, HIGH);	
-		usleep(100000);
-	}
-	return 0;
-
-	std::cout << "Data returned: " << std::to_string(buf1[2]) << "\n";
-
-	wiringPiSPIDataRW(SPI_CHANNEL, buf2, 3);
-
-	std::cout << "Data returned: " << std::to_string(buf2[2]) << "\n";
+	digitalWrite(8, LOW);	
+	wiringPiSPIDataRW(SPI_CHANNEL, buf1, 3);
+	digitalWrite(8, HIGH);	
+	usleep(100000);
 
 	return 0;
 }
