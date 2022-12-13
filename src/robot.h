@@ -10,6 +10,11 @@ extern "C" {
 
 #include "vl53l0x-linux/VL53L0X.hpp"
 
+#define SPI_MODE 0
+#define SPI_SPEED 500000 // Hz
+#define SPI_BITS_PER_WORD 8
+#define SPI_CS_CHANGE 0 // 0 for pull high after transfer
+
 #define TEENSY_I2C_ADDR 0x2a
 #define BNO055_I2C_ADDR 0x28
 
@@ -32,7 +37,6 @@ extern "C" {
 #define SERVO_GRIPPER1 2
 #define SERVO_GRIPPER2 3
 #define SERVO_GATE 4
-
 
 #define CAM_LOWER_POS 75
 #define CAM_HIGHER_POS 110
@@ -64,8 +68,9 @@ void i2c_delay_msec(uint32_t ms);
 
 class Robot {
 private:
-	// Linux I2C file handle
+	// Linux file handles
 	int i2c_fd;
+	int spi_fd;
 
 	// Orientation sensor
 	bno055_t bno055;
@@ -74,6 +79,16 @@ private:
 	VL53L0X vl53l0x;
 public:
 	Robot();
+
+	/**
+	 * Initialize spi
+	 */
+	void spi_init();
+
+	/**
+	 * Write bytes to Teensy over SPI
+	 */
+	void spi_write(uint8_t* data, uint8_t len);
 
 	/**
 	 * Simple digital read

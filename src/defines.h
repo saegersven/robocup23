@@ -8,3 +8,4 @@
 #define ERRCODE_I2C 2
 #define ERRCODE_CAM_CLOSED 3
 #define ERRCODE_BNO055 4
+#define ERRCODE_SPI 5

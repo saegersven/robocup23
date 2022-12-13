@@ -2,6 +2,7 @@
 
 extern "C" {
 #include <linux/i2c-dev.h>
+#include <linux/spi/spidev.h>
 #include <i2c/smbus.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -119,6 +120,8 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 
 	pinMode(BTN_RESTART, INPUT);
 
+	spi_init();
+
 #ifdef ENABLE_BNO055
 	bno055.bus_write = i2c_write;
 	bno055.bus_read = i2c_read;
@@ -157,13 +160,49 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 #endif // ENABLE_VL53L0X
 }
 
+void Robot::spi_init() {
+	// Open device
+	if((spi_fd = open("/dev/spidev0.0", O_RDWR)) < 0) {
+		std::cerr << "Could not open SPI device" << std::endl;
+		exit(ERRCODE_SPI);
+	}
+
+	// Set mode
+	if(ioctl(spi_fd, SPI_IOC_WR_MODE, SPI_MODE) < 0) {
+		std::cerr << "Could not set SPI mode" << std::endl;
+	}
+
+	// Set maximum speed
+	if(ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, SPI_SPEED) < 0) {
+		std::cerr << "Could not set SPI maximum speed" << std::endl;
+	}
+}
+
+void Robot::spi_write(uint8_t* data, uint8_t len) {
+	spi_ioc_transfer transfer;
+	transfer.tx_buf = data;
+	transfer.len = len;
+	transfer.speed_hz = SPI_SPEED;
+	transfer.bits_per_word = SPI_BITS_PER_WORD;
+	transfer.cs_change = SPI_CS_CHANGE;
+
+	int8_t ret = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &transfer);
+
+	if(ret < 0) {
+		std::cerr << "SPI transfer failed" << std::endl;
+	}
+
+	return ret;
+}
+
 bool Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }
 
 void Robot::m(int8_t left, int8_t right, uint16_t duration) {
-	uint8_t msg[2] = {*(uint8_t*)(&left), *(uint8_t*)(&right)};
-	i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
+	uint8_t msg[3] = {CMD_MOTOR, *(uint8_t*)(&left), *(uint8_t*)(&right)};
+	//i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
+	spi_write(msg, 3);
 
 	if(duration > 0) {
 		delay(duration);
@@ -185,12 +224,15 @@ void Robot::turn(float angle) {
 }
 
 void Robot::send_byte(char b) {
-	i2c_write_byte_single(TEENSY_I2C_ADDR, b);
+	//i2c_write_byte_single(TEENSY_I2C_ADDR, b);
+	uint8_t msg[1] = {b};
+	spi_write(msg, 1);
 }
 
 void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
-	uint8_t msg[2] = {servo_id, angle};
-	i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
+	uint8_t msg[3] = {CMD_SERVO, servo_id, angle};
+	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
+	spi_write(msg, 3);
 	delay(delay_ms);
 }
 
