@@ -42,7 +42,13 @@
 #define gate_open 100
 #define gate_closed 12
 
-// I2C commands
+// SPI Pins
+#define MISO_PIN 12
+#define MOSI_PIN 11
+#define SCK_PIN 13
+#define CS_PIN 15
+
+// SPI commands
 #define CMD_MOTOR 0x01
 #define CMD_STOP 0x02
 #define CMD_SERVO 0x03

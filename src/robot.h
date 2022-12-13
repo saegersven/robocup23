@@ -13,7 +13,6 @@ extern "C" {
 #define SPI_MODE 0
 #define SPI_SPEED 500000 // Hz
 #define SPI_BITS_PER_WORD 8
-#define SPI_CS_CHANGE 0 // 0 for pull high after transfer
 
 #define TEENSY_I2C_ADDR 0x2a
 #define BNO055_I2C_ADDR 0x28
@@ -53,7 +52,7 @@ extern "C" {
 
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 
-#define ENABLE_VL53L0X
+//#define ENABLE_VL53L0X
 //#define ENABLE_BNO055
 
 /*
@@ -71,6 +70,10 @@ private:
 	// Linux file handles
 	int i2c_fd;
 	int spi_fd;
+
+	uint8_t spi_mode;
+	uint32_t spi_speed;
+	uint8_t spi_bits_per_word;
 
 	// Orientation sensor
 	bno055_t bno055;

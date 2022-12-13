@@ -168,31 +168,51 @@ void Robot::spi_init() {
 	}
 
 	// Set mode
-	if(ioctl(spi_fd, SPI_IOC_WR_MODE, SPI_MODE) < 0) {
+	spi_mode = SPI_MODE;
+	if(ioctl(spi_fd, SPI_IOC_WR_MODE, &spi_mode) < 0) {
 		std::cerr << "Could not set SPI mode" << std::endl;
 	}
 
+	if(ioctl(spi_fd, SPI_IOC_RD_MODE, &spi_mode) < 0) {
+		std::cout << "Could not get SPI mode" << std::endl;
+	}
+
+	// Set bits per word
+	spi_bits_per_word = SPI_BITS_PER_WORD;
+	if(ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bits_per_word) < 0) {
+		std::cerr << "Could not set SPI bits per word" << std::endl;
+	}
+
+	if(ioctl(spi_fd, SPI_IOC_RD_BITS_PER_WORD, &spi_bits_per_word) < 0) {
+		std::cerr << "Could not get SPI bits per word" << std::endl;
+	}
+
 	// Set maximum speed
-	if(ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, SPI_SPEED) < 0) {
+	spi_speed = SPI_SPEED;
+	if(ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed) < 0) {
 		std::cerr << "Could not set SPI maximum speed" << std::endl;
+	}
+
+	if(ioctl(spi_fd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_speed) < 0) {
+		std::cout << "Could not get SPI maximum speed" << std::endl;
 	}
 }
 
 void Robot::spi_write(uint8_t* data, uint8_t len) {
 	spi_ioc_transfer transfer;
-	transfer.tx_buf = data;
+	memset(&transfer, 0, sizeof(transfer));
+	transfer.tx_buf = (unsigned long)data;
 	transfer.len = len;
-	transfer.speed_hz = SPI_SPEED;
-	transfer.bits_per_word = SPI_BITS_PER_WORD;
-	transfer.cs_change = SPI_CS_CHANGE;
+	transfer.delay_usecs = 0;
+	transfer.speed_hz = spi_speed;
+	transfer.bits_per_word = spi_bits_per_word;
+	transfer.cs_change = 0;
 
 	int8_t ret = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &transfer);
 
 	if(ret < 0) {
 		std::cerr << "SPI transfer failed" << std::endl;
 	}
-
-	return ret;
 }
 
 bool Robot::button(uint8_t pin) {

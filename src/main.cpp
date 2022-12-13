@@ -21,7 +21,10 @@ int main() {
 	Line line(robot);
 	line.start();
 
-	while(!robot->button(BTN_RESTART)) robot->send_byte(CMD_READY);
+	while(!robot->button(BTN_RESTART)) {
+		robot->send_byte(CMD_READY);
+		delay(20);
+	}
 	while(robot->button(BTN_RESTART));
 
 	auto last_started = millis(); // time at which robot has been restarted

@@ -17,6 +17,12 @@ void init() {
   pinMode(rb2, OUTPUT);
   pinMode(rb_pwm, OUTPUT);
 
+  pinMode(CS_PIN, INPUT);
+  pinMode(MOSI_PIN, INPUT);
+  pinMode(SCK_PIN, INPUT);
+  
+  attachInterrupt(SCK_PIN, sck_rising_interrupt, RISING);
+
   servo_cam.attach(servo_cam_pin);
   servo_arm.attach(servo_arm_pin);
   servo_gripper1.attach(servo_gripper1_pin);

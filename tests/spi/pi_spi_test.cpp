@@ -81,7 +81,7 @@ int main() {
 	spi.bits_per_word = bits;
 	spi.cs_change = 0;
 
-	ret = ioctl(fd, SPI_IOC_MESSAGE(1), &spi);
+	ret = ioctl(fd, SPI_IOC_MESSAGE(2), &spi);
 
 	if(ret < 0) {
 		std::cout << "Could not transfer" << std::endl;
