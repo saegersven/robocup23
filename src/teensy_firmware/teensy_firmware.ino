@@ -59,54 +59,44 @@ void loop() {
   }
   while (digitalRead(CS_PIN) != LOW);
   while (digitalRead(CS_PIN) == LOW);
+  debugln("RECEIVED COMMAND");
   int len = num_bits / 8;
   num_bits = 0;
+  
+  int cmd = (int)buffer[0]; // received command
+  
+  if (cmd == CMD_MOTOR) {
+    // [CMD_MOTOR, left, right]
+    int8_t left = (int8_t)buffer[1];
+    int8_t right = (int8_t)buffer[2];
 
-  // debugging, remove later
-  Serial.println();
-  for (int i = 0; i < len; ++i) {
-    Serial.print((uint8_t)buffer[i]);
-    if (i != len - 1) Serial.print("\t");
-  }
-  Serial.println();
+    m(left, right, 0);
 
-  switch (buffer[0]) {
-    case CMD_MOTOR:
-      // [CMD_MOTOR, left, right]
-      int8_t left = (int8_t)buffer[1];
-      int8_t right = (int8_t)buffer[2];
+    debug("M: ");
+    debug(left);
+    debug(" ");
+    debugln(right);
+  } else if(cmd == CMD_STOP) {
+    stop();
+  } else if(cmd == CMD_SERVO) {
+    // [CMD_SERVO, servo_id, angle]
+    uint8_t servo_id = buffer[1];
+    uint8_t angle = buffer[2];
 
-      m(left, right, 0);
+    if (!servos[servo_id].attached()) servos[servo_id].attach(servo_pins[servo_id]);
+    servos[servo_id].write(angle);
+    //servos[servo_id].detach();
 
-      debug("M: ");
-      debug(left);
-      debug(" ");
-      debugln(right);
-      break;
-    case CMD_STOP: // Motor stop command
-      stop();
-      break;
-    case CMD_SERVO:
-      // [CMD_SERVO, servo_id, angle]
-      uint8_t servo_id = buffer[1];
-      uint8_t angle = buffer[2];
-
-      if (!servos[servo_id].attached()) servos[servo_id].attach(servo_pins[servo_id]);
-      servos[servo_id].write(angle);
-      //servos[servo_id].detach();
-
-      /*
-        debug("S: ");
-        debug((int)data[1]);
-        debug(" to ");
-        debugln((int)data[2]);
-      */
-      break;
-    case CMD_READY:
-      //digitalWrite(LED3, HIGH);
-      //delay(50);
-      //digitalWrite(LED3, LOW);
-      break;
+    /*
+      debug("S: ");
+      debug((int)data[1]);
+      debug(" to ");
+      debugln((int)data[2]);
+    */
+  } else if (cmd == CMD_READY) {
+    digitalWrite(LED3, HIGH);
+    delay(200);
+    digitalWrite(LED3, LOW);
   }
 
   // clear buffer

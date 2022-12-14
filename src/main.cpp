@@ -21,9 +21,11 @@ int main() {
 	Line line(robot);
 	line.start();
 
+	robot->send_byte(CMD_READY);
+
 	while(!robot->button(BTN_RESTART)) {
-		robot->send_byte(CMD_READY);
-		delay(20);
+		delay(5);
+		//std::cout << robot->read_heading() << std::endl;
 	}
 	while(robot->button(BTN_RESTART));
 
@@ -40,7 +42,12 @@ int main() {
 			std::cout << "Stop." << std::endl;
 			delay(300);
 
-			while(!robot->button(BTN_RESTART)) robot->send_byte(CMD_READY);
+			while(!robot->button(BTN_RESTART)) {
+				robot->send_byte(CMD_READY);
+				delay(5);
+				robot->send_byte(CMD_STOP);
+				delay(5);
+			} 
 			while(robot->button(BTN_RESTART));
 			std::cout << "Start." << std::endl;
 			

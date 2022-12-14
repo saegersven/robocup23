@@ -17,7 +17,7 @@
 #define BLACK_MAX_SUM 200
 
 #define GREEN_RATIO_THRESHOLD 0.75f
-#define GREEN_MIN_VALUE 25
+#define GREEN_MIN_VALUE 15
 
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
@@ -27,8 +27,8 @@
 #define LINE_FRAME_WIDTH 80
 #define LINE_FRAME_HEIGHT 48
 
-#define LINE_FOLLOW_BASE_SPEED 50 //50
-#define LINE_FOLLOW_SENSITIVITY 80.0f //80.0f
+#define LINE_FOLLOW_BASE_SPEED 45 //50
+#define LINE_FOLLOW_SENSITIVITY 70.0f //80.0f
 
 /**
  * Single-pixel thresholding operation for line.

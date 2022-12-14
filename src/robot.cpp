@@ -235,11 +235,11 @@ void Robot::stop() {
 }
 
 void Robot::turn(float angle) {
-	uint16_t duration = (uint16_t)std::abs(angle) * 200.0f;
+	uint16_t duration = (uint16_t)std::abs(angle) * 360;
 	if(angle > 0) {
-		m(40, -40, duration);
+		m(70, -70, duration);
 	} else {
-		m(-40, 40, duration);
+		m(-70, 70, duration);
 	}
 }
 

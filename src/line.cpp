@@ -405,6 +405,7 @@ void Line::line() {
 		0.2, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 #endif
+	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
 }
