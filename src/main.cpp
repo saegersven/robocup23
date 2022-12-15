@@ -11,8 +11,6 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
 	/*while(true) {
-		//robot->m(50, 50, 500);
-		//robot->m(-50, -50, 500);
 		std::cout << robot->read_distance() << std::endl;
 	}*/
 
