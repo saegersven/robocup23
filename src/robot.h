@@ -37,9 +37,10 @@ extern "C" {
 #define SERVO_GRIPPER2 3
 #define SERVO_GATE 4
 
+// servo position
 #define CAM_LOWER_POS 75
-#define CAM_HIGHER_POS 110
-#define ARM_LOWER_POS 20
+#define CAM_HIGHER_POS 90
+#define ARM_LOWER_POS 0
 #define ARM_HIGHER_POS 180
 #define GRIPPER1_OPEN 60
 #define GRIPPER1_CLOSED 125

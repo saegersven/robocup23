@@ -23,6 +23,7 @@ void init() {
   
   attachInterrupt(SCK_PIN, sck_rising_interrupt, RISING);
 
+  /*
   servo_cam.attach(servo_cam_pin);
   servo_arm.attach(servo_arm_pin);
   servo_gripper1.attach(servo_gripper1_pin);
@@ -48,6 +49,7 @@ void init() {
   servo_gripper2.detach();
   servo_arm.detach();
   servo_gate.detach();
+  */
   displayBatVoltage();
   debugln("Setup completed");
 }

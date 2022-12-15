@@ -59,12 +59,11 @@ void loop() {
   }
   while (digitalRead(CS_PIN) != LOW);
   while (digitalRead(CS_PIN) == LOW);
-  debugln("RECEIVED COMMAND");
   int len = num_bits / 8;
   num_bits = 0;
-  
+
   int cmd = (int)buffer[0]; // received command
-  
+
   if (cmd == CMD_MOTOR) {
     // [CMD_MOTOR, left, right]
     int8_t left = (int8_t)buffer[1];
@@ -76,16 +75,21 @@ void loop() {
     debug(left);
     debug(" ");
     debugln(right);
-  } else if(cmd == CMD_STOP) {
+  } else if (cmd == CMD_STOP) {
     stop();
-  } else if(cmd == CMD_SERVO) {
+  } else if (cmd == CMD_SERVO) {
     // [CMD_SERVO, servo_id, angle]
     uint8_t servo_id = buffer[1];
     uint8_t angle = buffer[2];
 
-    if (!servos[servo_id].attached()) servos[servo_id].attach(servo_pins[servo_id]);
+    servos[servo_id].attach(servo_pins[servo_id]);
+    debug("Attached Servo: ");
+    debugln(servo_id);
     servos[servo_id].write(angle);
-    //servos[servo_id].detach();
+    debug("Written Angle: ");
+    debugln(angle);
+    delay(800); // wait for servos to finish turning
+    if (servo_id != 0) servos[servo_id].detach(); // detach servo after turning (despite camera servo)
 
     /*
       debug("S: ");
@@ -95,7 +99,7 @@ void loop() {
     */
   } else if (cmd == CMD_READY) {
     digitalWrite(LED3, HIGH);
-    delay(200);
+    delay(30);
     digitalWrite(LED3, LOW);
   }
 

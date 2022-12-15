@@ -6,7 +6,7 @@
 #include "robot.h"
 
 int main() {
-	std::cout << "Init" << std::endl;
+	std::cout << "Program started." << std::endl;
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
@@ -21,11 +21,19 @@ int main() {
 	Line line(robot);
 	line.start();
 
-	robot->send_byte(CMD_READY);
+	// set servos to default position
+	robot->servo(0, CAM_LOWER_POS, 1000);
+	robot->servo(1, ARM_HIGHER_POS, 1000);
+	robot->servo(2, GRIPPER1_CLOSED, 1000);
+	robot->servo(3, GRIPPER2_CLOSED, 1000);
+	robot->servo(4, GATE_CLOSED, 1000);
+
+	std::cout << "Init." << std::endl;
 
 	while(!robot->button(BTN_RESTART)) {
-		delay(5);
-		//std::cout << robot->read_heading() << std::endl;
+		robot->send_byte(CMD_READY);
+		delay(1);
+		//std::cout << robot->read_distance() << std::endl;
 	}
 	while(robot->button(BTN_RESTART));
 
@@ -44,9 +52,7 @@ int main() {
 
 			while(!robot->button(BTN_RESTART)) {
 				robot->send_byte(CMD_READY);
-				delay(5);
-				robot->send_byte(CMD_STOP);
-				delay(5);
+				delay(1);
 			} 
 			while(robot->button(BTN_RESTART));
 			std::cout << "Start." << std::endl;
