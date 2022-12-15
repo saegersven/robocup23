@@ -30,6 +30,7 @@ extern "C" {
 #define CMD_STOP 0x02
 #define CMD_SERVO 0x03
 #define CMD_READY 0x05
+#define CMD_SERVOS_HOME_POS 0x06
 
 #define SERVO_CAM 0
 #define SERVO_ARM 1

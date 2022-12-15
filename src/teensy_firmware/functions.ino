@@ -4,52 +4,25 @@ void init() {
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
 
-  pinMode(lf1, OUTPUT);
-  pinMode(lf2, OUTPUT);
-  pinMode(lf_pwm, OUTPUT);
-  pinMode(lb1, OUTPUT);
-  pinMode(lb2, OUTPUT);
-  pinMode(lb_pwm, OUTPUT);
-  pinMode(rf1, OUTPUT);
-  pinMode(rf2, OUTPUT);
-  pinMode(rf_pwm, OUTPUT);
-  pinMode(rb1, OUTPUT);
-  pinMode(rb2, OUTPUT);
-  pinMode(rb_pwm, OUTPUT);
+  pinMode(LF1_PIN, OUTPUT);
+  pinMode(LF2_PIN, OUTPUT);
+  pinMode(LF_PWM_PIN, OUTPUT);
+  pinMode(LB1_PIN, OUTPUT);
+  pinMode(LB2_PIN, OUTPUT);
+  pinMode(LB_PWM_PIN, OUTPUT);
+  pinMode(RF1_PIN, OUTPUT);
+  pinMode(RF2_PIN, OUTPUT);
+  pinMode(RF_PWM_PIN, OUTPUT);
+  pinMode(RB1_PIN, OUTPUT);
+  pinMode(RB2_PIN, OUTPUT);
+  pinMode(RB_PWM_PIN, OUTPUT);
 
   pinMode(CS_PIN, INPUT);
   pinMode(MOSI_PIN, INPUT);
   pinMode(SCK_PIN, INPUT);
   
   attachInterrupt(SCK_PIN, sck_rising_interrupt, RISING);
-
-  /*
-  servo_cam.attach(servo_cam_pin);
-  servo_arm.attach(servo_arm_pin);
-  servo_gripper1.attach(servo_gripper1_pin);
-  servo_gripper2.attach(servo_gripper2_pin);
-  servo_gate.attach(servo_gate_pin);
   
-  servo_cam.write(cam_lower_pos);
-  servo_gripper1.write(gripper1_closed);
-  servo_gripper2.write(gripper2_closed);
-  servo_arm.write(arm_higher_pos);
-  servo_gate.write(gate_closed);
-
-  // wait for servos to finish turning
-  for (int i = 0; i < 3; ++i) {
-    digitalWrite(LED3, HIGH);
-    delay(100);
-    digitalWrite(LED3, LOW);
-    delay(100);
-  }
-  
-  servo_cam.detach();
-  servo_gripper1.detach();
-  servo_gripper2.detach();
-  servo_arm.detach();
-  servo_gate.detach();
-  */
   displayBatVoltage();
   debugln("Setup completed");
 }
@@ -108,13 +81,13 @@ void single_m(int inA_pin, int inB_pin, int pwm_pin, int pwm) {
 
 // controls all four motors
 void m(int left_speed, int right_speed, int duration) {
-  single_m(lf1, lf2, lf_pwm, left_speed);
-  single_m(rf2, rf1, rf_pwm, right_speed);
+  single_m(LF1_PIN, LF2_PIN, LF_PWM_PIN, left_speed);
+  single_m(RF2_PIN, RF1_PIN, RF_PWM_PIN, right_speed);
 
   int s = (left_speed + right_speed) / 2;
   int d = right_speed - left_speed;
-  single_m(lb1, lb2, lb_pwm, (s - d) * backwheel_factor);
-  single_m(rb1, rb2, rb_pwm, (s + d) * backwheel_factor);
+  single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, (s - d) * BACKWHEEL_FACTOR);
+  single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, (s + d) * BACKWHEEL_FACTOR);
 
   //delay(duration);
 
@@ -123,15 +96,15 @@ void m(int left_speed, int right_speed, int duration) {
 }
 
 void stop() {
-  digitalWrite(lf1, LOW);
-  digitalWrite(lf2, LOW);
-  digitalWrite(lb1, LOW);
-  digitalWrite(lb2, LOW);
+  digitalWrite(LF1_PIN, LOW);
+  digitalWrite(LF2_PIN, LOW);
+  digitalWrite(LB1_PIN, LOW);
+  digitalWrite(LB2_PIN, LOW);
 
-  digitalWrite(rf1, LOW);
-  digitalWrite(rf2, LOW);
-  digitalWrite(rb1, LOW);
-  digitalWrite(rb2, LOW);
+  digitalWrite(RF1_PIN, LOW);
+  digitalWrite(RF2_PIN, LOW);
+  digitalWrite(RB1_PIN, LOW);
+  digitalWrite(RB2_PIN, LOW);
 }
 
 void m(int speed) {
@@ -139,21 +112,21 @@ void m(int speed) {
 }
 
 void pick_up_victim() {
-  servo_arm.write((int) arm_higher_pos / 3);
+  servo_arm.write((int) ARM_HIGHER_POS / 3);
   delay(450);
-  servo_gripper1.write(gripper1_open);
-  servo_gripper2.write(gripper2_open);
-  servo_arm.write(arm_lower_pos);
+  servo_gripper1.write(GRIPPER1_OPEN);
+  servo_gripper2.write(GRIPPER2_OPEN);
+  servo_arm.write(ARM_LOWER_POS);
   delay(300);
   m(100, 100, 300);
-  servo_gripper1.write(gripper1_closed);
-  servo_gripper2.write(gripper2_closed);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
   delay(1000);
-  servo_arm.write(arm_higher_pos);
+  servo_arm.write(ARM_HIGHER_POS);
   delay(800);
-  servo_gripper1.write(gripper1_open);
-  servo_gripper2.write(gripper2_open);
+  servo_gripper1.write(GRIPPER1_OPEN);
+  servo_gripper2.write(GRIPPER2_OPEN);
   m(-100, -100, 300);
-  servo_gripper1.write(gripper1_closed);
-  servo_gripper2.write(gripper2_closed);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
 }

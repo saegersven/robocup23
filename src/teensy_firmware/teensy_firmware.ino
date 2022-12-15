@@ -23,11 +23,11 @@ const Servo servos[5] = {
 };
 
 const int servo_pins[5] = {
-  servo_cam_pin,
-  servo_arm_pin,
-  servo_gripper1_pin,
-  servo_gripper2_pin,
-  servo_gate_pin
+  SERVO_CAM_PIN,
+  SERVO_ARM_PIN,
+  SERVO_GRIPPER1_PIN,
+  SERVO_GRIPPER2_PIN,
+  SERVO_GATE_PIN
 };
 
 #define DEBUG 1
@@ -88,8 +88,10 @@ void loop() {
     servos[servo_id].write(angle);
     debug("Written Angle: ");
     debugln(angle);
-    delay(800); // wait for servos to finish turning
-    if (servo_id != 0) servos[servo_id].detach(); // detach servo after turning (despite camera servo)
+    if (servo_id != 0) {
+      delay(800); // wait for servo to finish turning
+      servos[servo_id].detach(); // detach servo after turning (despite camera servo)
+    }
 
     /*
       debug("S: ");
@@ -101,6 +103,27 @@ void loop() {
     digitalWrite(LED3, HIGH);
     delay(30);
     digitalWrite(LED3, LOW);
+  } else if (cmd == CMD_SERVOS_HOME_POS) {
+    servo_cam.attach(SERVO_CAM_PIN);
+    servo_arm.attach(SERVO_ARM_PIN);
+    servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+    servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+    servo_gate.attach(SERVO_GATE_PIN);
+
+    servo_cam.write(CAM_LOWER_POS);
+    servo_gripper1.write(GRIPPER1_CLOSED);
+    servo_gripper2.write(GRIPPER2_CLOSED);
+    servo_arm.write(ARM_HIGHER_POS);
+    servo_gate.write(GATE_CLOSED);
+
+    // wait for servos to finish turning
+    delay(800);
+
+    //servo_cam.detach(); // cam servo stays attached
+    servo_gripper1.detach();
+    servo_gripper2.detach();
+    servo_arm.detach();
+    servo_gate.detach();
   }
 
   // clear buffer

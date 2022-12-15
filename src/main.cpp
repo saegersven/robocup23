@@ -22,11 +22,7 @@ int main() {
 	line.start();
 
 	// set servos to default position
-	robot->servo(0, CAM_LOWER_POS, 1000);
-	robot->servo(1, ARM_HIGHER_POS, 1000);
-	robot->servo(2, GRIPPER1_CLOSED, 1000);
-	robot->servo(3, GRIPPER2_CLOSED, 1000);
-	robot->servo(4, GATE_CLOSED, 1000);
+	robot->send_byte(CMD_SERVOS_HOME_POS);
 
 	std::cout << "Init." << std::endl;
 
@@ -48,6 +44,7 @@ int main() {
 			robot->stop();
 
 			std::cout << "Stop." << std::endl;
+			robot->send_byte(CMD_SERVOS_HOME_POS);
 			delay(300);
 
 			while(!robot->button(BTN_RESTART)) {
