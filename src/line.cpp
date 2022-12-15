@@ -110,7 +110,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 	uint32_t num_angles = 0;
 	float center_x = in.cols / 2.0f;
-	float center_y = in.rows;
+	float center_y = in.rows; // Why not devided by 2 @Sven?
 
 	for(int y = 0; y < in.rows; ++y) {
 		uint8_t* p = in.ptr<uint8_t>(y);
@@ -362,19 +362,18 @@ void Line::green() {
 		// TODO: See if checking the previous result is actually necessary
 		if(new_green_result == GREEN_RESULT_DEAD_END || green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "Result: DEAD END" << std::endl;
-			robot->turn(R180);
-			delay(70);
-			robot->m(60, 60, 150);
+			robot->turn(180);
+			robot->m(127, 127, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "Result: LEFT" << std::endl;
-			robot->turn(DTOR(-85.0f));
+			robot->turn(-42*2);
 			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
 			std::cout << "Result: RIGHT" << std::endl;
-			robot->turn(DTOR(85.0f));
+			robot->turn(42*2);
 			delay(70);
 		}
-		robot->m(127, 127, 50);
+		robot->m(127, 127, 70);
 		open_camera();
 	}
 }
@@ -391,7 +390,7 @@ void Line::line() {
 	/*if(silver_ml.get_current_prediction()) {
 		close_camera();
 		robot->stop();
-		delay(5000);
+		delay(3000);
 		open_camera();
 	}*/
 

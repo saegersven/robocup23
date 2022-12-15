@@ -54,6 +54,8 @@ extern "C" {
 
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 
+#define MS_PER_DEGREE 3.6 // milliseconds a one degree turn takes
+
 //#define ENABLE_VL53L0X
 //#define ENABLE_BNO055
 
@@ -115,7 +117,7 @@ public:
 	 * Turn by a specified angle (in radians). Positive angles result in clockwise
 	 * rotation when viewed from above. Uses BNO055 sensor.
 	 */
-	void turn(float angle);
+	void turn(int angle);
 
 	/**
 	 * Send a single byte to the Teensy.

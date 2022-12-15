@@ -14,8 +14,6 @@ int main() {
 		std::cout << robot->read_distance() << std::endl;
 	}*/
 
-	robot->stop();
-
 	Line line(robot);
 	line.start();
 

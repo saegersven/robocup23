@@ -27,8 +27,8 @@
 #define LINE_FRAME_WIDTH 80
 #define LINE_FRAME_HEIGHT 48
 
-#define LINE_FOLLOW_BASE_SPEED 45 //50
-#define LINE_FOLLOW_SENSITIVITY 70.0f //80.0f
+#define LINE_FOLLOW_BASE_SPEED 40 //50
+#define LINE_FOLLOW_SENSITIVITY 55.0f //80.0f
 
 /**
  * Single-pixel thresholding operation for line.

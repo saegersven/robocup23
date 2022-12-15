@@ -234,12 +234,12 @@ void Robot::stop() {
 	send_byte(CMD_STOP);
 }
 
-void Robot::turn(float angle) {
-	uint16_t duration = (uint16_t)std::abs(angle) * 360;
+void Robot::turn(int angle) {
+	uint16_t duration = (uint16_t)std::abs(angle) * MS_PER_DEGREE;
 	if(angle > 0) {
-		m(70, -70, duration);
+		m(127, -127, duration);
 	} else {
-		m(-70, 70, duration);
+		m(-127, 127, duration);
 	}
 }
 
