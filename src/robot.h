@@ -20,6 +20,9 @@ extern "C" {
 #define VL53L0X_FORWARD_XSHUT -1
 #define VL53L0X_FORWARD_ADDR 0x29
 
+#define HCSR04_TRIGGER 22
+#define HCSR04_ECHO 17
+
 #define DIST_FORWARD 0
 
 #define DEV_TEENSY 0
@@ -139,7 +142,7 @@ public:
 	float read_pitch();
 
 	/**
-	 * Read distance from forward VL53L0X in millimeters
+	 * Read distance from forward HCSR04 ultrasonic sensor in millimeters
 	 */
-	uint16_t read_distance();
+	int distance();
 };

@@ -119,6 +119,9 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	wiringPiSetupGpio();
 
 	pinMode(BTN_RESTART, INPUT);
+	pinMode(HCSR04_TRIGGER, OUTPUT);
+	pinMode(HCSR04_ECHO, INPUT);
+	digitalWrite(HCSR04_TRIGGER, LOW);
 
 	spi_init();
 
@@ -276,12 +279,20 @@ float Robot::read_pitch() {
 	return DTOR((float)data / 16.0f);
 }
 
-uint16_t Robot::read_distance() {
-	uint16_t dist = vl53l0x.readRangeSingleMillimeters();
+// returns front distance in cm
+int Robot::distance() {
+	digitalWrite(HCSR04_TRIGGER, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(HCSR04_TRIGGER, LOW);
 
-	if(vl53l0x.timeoutOccurred()) {
-		std::cerr << "VL53L0X timout" << std::endl;
-		return 4000;
-	}
-	return dist;
+	auto starttime = std::chrono::high_resolution_clock::now();
+	auto endtime = std::chrono::high_resolution_clock::now();
+
+	while (digitalRead(HCSR04_ECHO) == LOW) starttime = std::chrono::high_resolution_clock::now();
+	while (digitalRead(HCSR04_ECHO) == HIGH) endtime = std::chrono::high_resolution_clock::now();
+
+	auto travel_time = endtime - starttime;
+
+	// convert travel time of sound signal to cm (TODO: check for overflow)
+	return (int)(0.000000001 * 0.5 * travel_time.count() * 34300);
 }
