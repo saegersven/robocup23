@@ -366,7 +366,23 @@ void Line::green() {
 			robot->m(127, 127, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "Result: LEFT" << std::endl;
-			robot->turn(-42*2);
+			robot->turn(-45);
+			std::cout << "Turned 45 degrees" << std::endl;
+			// turns further using camera until positioned properly
+			open_camera();
+			delay(200);
+			float line_angle = 1.0f;
+			while (true) {
+				std::cout << "in while" << std::endl;	
+				grab_frame();
+				uint32_t num_black_pixels = 0;
+				black = in_range(frame, &is_black, &num_black_pixels);
+				line_angle = get_line_angle(black);
+				std::cout << line_angle << std::endl;
+				cv::imshow("binary", black);
+				cv::waitKey(0);
+			}
+			
 			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
 			std::cout << "Result: RIGHT" << std::endl;
