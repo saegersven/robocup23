@@ -225,6 +225,7 @@ bool Robot::button(uint8_t pin) {
 void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 	uint8_t msg[3] = {CMD_MOTOR, *(uint8_t*)(&left), *(uint8_t*)(&right)};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
+	
 	spi_write(msg, 3);
 
 	if(duration > 0) {

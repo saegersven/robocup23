@@ -25,6 +25,22 @@ int main() {
 	}
 	while(robot->button(BTN_RESTART));
 
+	// unloading victims test:
+	delay(1000);
+	robot->m(127, 127, 1000); //is not received by Teensy?! TODO: DEBUG (hardware)
+	exit(0);
+	
+	delay(1000);
+	robot->servo(4, GATE_OPEN, 500);
+	delay(500);
+	for (int i = 0; i < 5; ++i) {
+		robot->m(127, 127, 50);
+		delay(50);
+		robot->m(-127, -127, 50);
+		delay(50);
+	}
+	exit(0);
+
 	auto last_started = millis(); // time at which robot has been restarted
 
 	// MAIN LOOP
