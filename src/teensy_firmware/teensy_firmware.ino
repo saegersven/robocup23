@@ -85,7 +85,7 @@ void loop() {
     servos[servo_id].attach(servo_pins[servo_id]);
     debug("Attached Servo: ");
     debugln(servo_id);
-    servos[servo_id].write(angle);
+    //servos[servo_id].write(angle);
     debug("Written Angle: ");
     debugln(angle);
     if (servo_id != 0) {
@@ -104,6 +104,7 @@ void loop() {
     delay(30);
     digitalWrite(LED3, LOW);
   } else if (cmd == CMD_SERVOS_HOME_POS) {
+    /*
     servo_cam.attach(SERVO_CAM_PIN);
     servo_arm.attach(SERVO_ARM_PIN);
     servo_gripper1.attach(SERVO_GRIPPER1_PIN);
@@ -115,15 +116,16 @@ void loop() {
     servo_gripper2.write(GRIPPER2_CLOSED);
     servo_arm.write(ARM_HIGHER_POS);
     servo_gate.write(GATE_CLOSED);
-
+    */
     // wait for servos to finish turning
     delay(800);
-
+    /*
     //servo_cam.detach(); // cam servo stays attached
     servo_gripper1.detach();
     servo_gripper2.detach();
     servo_arm.detach();
     servo_gate.detach();
+    */
   }
 
   // clear buffer

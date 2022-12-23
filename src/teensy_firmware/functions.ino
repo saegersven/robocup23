@@ -25,6 +25,9 @@ void init() {
   
   displayBatVoltage();
   debugln("Setup completed");
+  
+  pick_up_victim();
+  exit(0);
 }
 
 // returns current battery voltage in Volts
@@ -89,10 +92,10 @@ void m(int left_speed, int right_speed, int duration) {
   single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, (s - d) * BACKWHEEL_FACTOR);
   single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, (s + d) * BACKWHEEL_FACTOR);
 
-  //delay(duration);
+  delay(duration);
 
   // stop all motors after movement
-  //if (duration != 0) stop();
+  if (duration != 0) stop();
 }
 
 void stop() {
@@ -112,21 +115,41 @@ void m(int speed) {
 }
 
 void pick_up_victim() {
-  servo_arm.write((int) ARM_HIGHER_POS / 3);
-  delay(450);
-  servo_gripper1.write(GRIPPER1_OPEN);
-  servo_gripper2.write(GRIPPER2_OPEN);
+  // move arm down a bit
+  servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
-  delay(300);
-  m(100, 100, 300);
-  servo_gripper1.write(GRIPPER1_CLOSED);
-  servo_gripper2.write(GRIPPER2_CLOSED);
-  delay(1000);
-  servo_arm.write(ARM_HIGHER_POS);
-  delay(800);
+  delay(500);
+
+  // open arm
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
   servo_gripper1.write(GRIPPER1_OPEN);
   servo_gripper2.write(GRIPPER2_OPEN);
-  m(-100, -100, 300);
+  delay(350);
+  m(80, 80, 150);
+  delay(20);
+  
+  // close arm
   servo_gripper1.write(GRIPPER1_CLOSED);
   servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(500);
+
+  // move arm up
+  servo_arm.write(ARM_HIGHER_POS);
+  delay(850);
+  m(-80, -80, 100);
+  delay(50);
+
+  // open arm (only one side)
+  servo_gripper1.write(GRIPPER1_OPEN);
+  delay(500);
+
+  // close arm
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  delay(500);
+
+  // detach servos
+  servo_arm.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
 }
