@@ -26,7 +26,12 @@ void init() {
   displayBatVoltage();
   debugln("Setup completed");
   
-  pick_up_victim();
+  arm_down();
+  m(30, 30, 600);
+  arm_half_up();
+  m(-80, -80, 400);
+  unload_victims();
+  m(50, 50, 2000);
   exit(0);
 }
 
@@ -114,7 +119,8 @@ void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }
 
-void pick_up_victim() {
+// opens gripper and moves arm down
+void arm_down() {
   // move arm down a bit
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
@@ -125,20 +131,27 @@ void pick_up_victim() {
   servo_gripper2.attach(SERVO_GRIPPER2_PIN);
   servo_gripper1.write(GRIPPER1_OPEN);
   servo_gripper2.write(GRIPPER2_OPEN);
-  delay(350);
-  m(80, 80, 150);
-  delay(20);
-  
+  delay(450);
+
+  // detach servos
+  servo_arm.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
+}
+
+// closes gripper and unloads into victim container
+void arm_up() {
   // close arm
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
   servo_gripper1.write(GRIPPER1_CLOSED);
   servo_gripper2.write(GRIPPER2_CLOSED);
   delay(500);
 
   // move arm up
+  servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_HIGHER_POS);
-  delay(850);
-  m(-80, -80, 100);
-  delay(50);
+  delay(900);
 
   // open arm (only one side)
   servo_gripper1.write(GRIPPER1_OPEN);
@@ -147,9 +160,38 @@ void pick_up_victim() {
   // close arm
   servo_gripper1.write(GRIPPER1_CLOSED);
   delay(500);
-
+  
   // detach servos
   servo_arm.detach();
   servo_gripper1.detach();
   servo_gripper2.detach();
+}
+
+// closes gripper and moves arm half up
+void arm_half_up() {
+  // close arm
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(500);
+
+  // move arm up a bit
+  servo_arm.attach(SERVO_ARM_PIN);
+  servo_arm.write((int)ARM_HIGHER_POS / 1.5);
+  delay(500);
+
+  // servos aren't detached so they stay in their positons
+}
+
+// unloads all victims from victim container and the dead one from within the gripper
+void unload_victims() {
+  servo_gate.attach(SERVO_GATE_PIN);
+  servo_gate.write(GATE_OPEN);
+  delay(1500);
+  arm_up();
+  delay(1000);
+  servo_gate.write(GATE_CLOSED);
+  delay(500);
+  servo_gate.detach();
 }
