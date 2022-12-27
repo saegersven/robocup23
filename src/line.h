@@ -16,8 +16,14 @@
 
 #define BLACK_MAX_SUM 200
 
-#define GREEN_RATIO_THRESHOLD 0.75f
-#define GREEN_MIN_VALUE 15
+#define GREEN_RATIO_THRESHOLD 0.7f
+#define GREEN_MIN_VALUE 14
+
+#define BLUE_RATIO_THRESHOLD 1.7f
+#define BLUE_MIN_VALUE 50
+
+#define RED_RATIO_THRESHOLD 1.3f
+#define RED_MIN_VALUE 20
 
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
@@ -27,8 +33,13 @@
 #define LINE_FRAME_WIDTH 80
 #define LINE_FRAME_HEIGHT 48
 
-#define LINE_FOLLOW_BASE_SPEED 55 //40 //50
-#define LINE_FOLLOW_SENSITIVITY 90 //55.0f //80.0f
+#define LINE_CORNER_WIDTH 7
+#define LINE_CORNER_HEIGHT 8
+
+#define LINE_FOLLOW_BASE_SPEED 45 //40 //50
+#define LINE_FOLLOW_SENSITIVITY 73 //55.0f //80.0f
+
+#define ARM_ANGLE_OFFSET DTOR(25.0f)
 
 /**
  * Single-pixel thresholding operation for line.
@@ -39,6 +50,10 @@ bool is_black(uint8_t b, uint8_t g, uint8_t r);
  * Thresholding operation for green dots.
  */
 bool is_green(uint8_t b, uint8_t g, uint8_t r);
+
+bool is_blue(uint8_t b, uint8_t g, uint8_t r);
+
+bool is_red(uint8_t b, uint8_t g, uint8_t r);
 
 /**
  * A group of pixels with a center and the number of pixels (size).
@@ -144,6 +159,8 @@ private:
 	 * calls green_direction again, then makes final decision and turns.
 	 */
 	void green();
+
+	void rescue_kit();
 
 public:
 	Line(std::shared_ptr<Robot> robot);

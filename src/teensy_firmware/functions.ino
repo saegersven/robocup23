@@ -22,17 +22,10 @@ void init() {
   pinMode(SCK_PIN, INPUT);
   
   attachInterrupt(SCK_PIN, sck_rising_interrupt, RISING);
+  attachInterrupt(MISO_PIN, stop, RISING);
   
   displayBatVoltage();
   debugln("Setup completed");
-  
-  arm_down();
-  m(30, 30, 600);
-  arm_half_up();
-  m(-80, -80, 400);
-  unload_victims();
-  m(50, 50, 2000);
-  exit(0);
 }
 
 // returns current battery voltage in Volts
@@ -113,6 +106,11 @@ void stop() {
   digitalWrite(RF2_PIN, LOW);
   digitalWrite(RB1_PIN, LOW);
   digitalWrite(RB2_PIN, LOW);
+
+  analogWrite(LF_PWM_PIN, 255);
+  analogWrite(RF_PWM_PIN, 255);
+  analogWrite(LB_PWM_PIN, 255);
+  analogWrite(RB_PWM_PIN, 255);
 }
 
 void m(int speed) {

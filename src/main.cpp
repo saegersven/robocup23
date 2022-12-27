@@ -10,21 +10,27 @@ int main() {
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
+	robot->stop();
+
 	Line line(robot);
 	line.start();
 
 	// set servos to default position
+	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
+	delay(810);
 
 	std::cout << "Init." << std::endl;
 
 	while(!robot->button(BTN_RESTART)) {
 		robot->send_byte(CMD_READY);
-		delay(1);
+		delay(10);
 		//std::cout << robot->read_distance() << std::endl;
 	}
 	while(robot->button(BTN_RESTART));
+	delay(40);
 
+	/*
 	// unloading victims test:
 	delay(1000);
 	robot->m(127, 127, 1000); //is not received by Teensy?! TODO: DEBUG (hardware)
@@ -40,7 +46,7 @@ int main() {
 		delay(50);
 	}
 	exit(0);
-
+	*/
 	auto last_started = millis(); // time at which robot has been restarted
 
 	// MAIN LOOP

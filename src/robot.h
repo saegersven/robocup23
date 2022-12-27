@@ -11,7 +11,7 @@ extern "C" {
 #include "vl53l0x-linux/VL53L0X.hpp"
 
 #define SPI_MODE 0
-#define SPI_SPEED 500000 // Hz
+#define SPI_SPEED 1000000 // Hz
 #define SPI_BITS_PER_WORD 8
 
 #define TEENSY_I2C_ADDR 0x2a
@@ -34,6 +34,8 @@ extern "C" {
 #define CMD_SERVO 0x03
 #define CMD_READY 0x05
 #define CMD_SERVOS_HOME_POS 0x06
+#define CMD_ARM_DOWN 0x07
+#define CMD_ARM_UP 0x08
 
 #define SERVO_CAM 0
 #define SERVO_ARM 1
@@ -42,7 +44,7 @@ extern "C" {
 #define SERVO_GATE 4
 
 // servo position
-#define CAM_LOWER_POS 75
+#define CAM_LOWER_POS 65
 #define CAM_HIGHER_POS 90
 #define ARM_LOWER_POS 0
 #define ARM_HIGHER_POS 180
@@ -55,9 +57,11 @@ extern "C" {
 
 #define BTN_RESTART 4
 
+#define STOP_PIN 9
+
 #define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
 
-#define MS_PER_DEGREE 3.6 // milliseconds a one degree turn takes
+#define MS_PER_DEGREE (4.2f - 0.15f) // milliseconds a one degree turn takes
 
 //#define ENABLE_VL53L0X
 //#define ENABLE_BNO055
@@ -120,7 +124,7 @@ public:
 	 * Turn by a specified angle (in radians). Positive angles result in clockwise
 	 * rotation when viewed from above. Uses BNO055 sensor.
 	 */
-	void turn(int angle);
+	void turn(float angle);
 
 	/**
 	 * Send a single byte to the Teensy.

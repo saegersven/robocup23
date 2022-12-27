@@ -19,7 +19,7 @@
  * Radians to Degrees macros
  */
 #define DTOR(x) (x / 180.0f * PI)
-#define RTOR(x) (x * 180.0f / PI)
+#define RTOD(x) (x * 180.0f / PI)
 
 /**
  * Millisecond delay

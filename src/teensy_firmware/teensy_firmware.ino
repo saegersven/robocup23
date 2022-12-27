@@ -104,7 +104,7 @@ void loop() {
     delay(30);
     digitalWrite(LED3, LOW);
   } else if (cmd == CMD_SERVOS_HOME_POS) {
-    /*
+    
     servo_cam.attach(SERVO_CAM_PIN);
     servo_arm.attach(SERVO_ARM_PIN);
     servo_gripper1.attach(SERVO_GRIPPER1_PIN);
@@ -116,16 +116,20 @@ void loop() {
     servo_gripper2.write(GRIPPER2_CLOSED);
     servo_arm.write(ARM_HIGHER_POS);
     servo_gate.write(GATE_CLOSED);
-    */
+    
     // wait for servos to finish turning
     delay(800);
-    /*
+    
     //servo_cam.detach(); // cam servo stays attached
     servo_gripper1.detach();
     servo_gripper2.detach();
     servo_arm.detach();
     servo_gate.detach();
-    */
+    
+  } else if(cmd == CMD_ARM_DOWN) {
+    arm_down();
+  } else if(cmd == CMD_ARM_UP) {
+    arm_up();
   }
 
   // clear buffer

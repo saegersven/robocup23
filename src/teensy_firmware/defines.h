@@ -31,7 +31,7 @@
 #define SERVO_GATE_PIN 23 // servo to empty victim container
 
 // servo position
-#define CAM_LOWER_POS 75
+#define CAM_LOWER_POS 65
 #define CAM_HIGHER_POS 90
 #define ARM_LOWER_POS 0
 #define ARM_HIGHER_POS 180
@@ -54,3 +54,5 @@
 #define CMD_SERVO 0x03
 #define CMD_READY 0x05
 #define CMD_SERVOS_HOME_POS 0x06
+#define CMD_ARM_DOWN 0x07
+#define CMD_ARM_UP 0x08

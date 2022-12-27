@@ -119,6 +119,8 @@ Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
 	wiringPiSetupGpio();
 
 	pinMode(BTN_RESTART, INPUT);
+	pinMode(STOP_PIN, OUTPUT);
+	digitalWrite(STOP_PIN, LOW);
 	pinMode(HCSR04_TRIGGER, OUTPUT);
 	pinMode(HCSR04_ECHO, INPUT);
 	digitalWrite(HCSR04_TRIGGER, LOW);
@@ -235,15 +237,18 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 }
 
 void Robot::stop() {
-	send_byte(CMD_STOP);
+	//send_byte(CMD_STOP);
+	digitalWrite(STOP_PIN, HIGH);
+	delayMicroseconds(100);
+	digitalWrite(STOP_PIN, LOW);
 }
 
-void Robot::turn(int angle) {
-	uint16_t duration = (uint16_t)std::abs(angle) * MS_PER_DEGREE;
+void Robot::turn(float angle) {
+	uint16_t duration = std::abs(angle) * RTOD(MS_PER_DEGREE);
 	if(angle > 0) {
-		m(127, -127, duration);
+		m(70, -70, duration);
 	} else {
-		m(-127, 127, duration);
+		m(-70, 70, duration);
 	}
 }
 
