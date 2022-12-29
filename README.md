@@ -10,13 +10,15 @@
 
 #### Software TODOs
 
-- [ ] intersections
-- [ ] adjust weight for linefollowing
-- [ ] rescue
+- [ ] obstacle
+- [ ] train silver ml
+- [ ] label victim data
+- [ ] train victim ml
+
 
 #### Hardware TODOs
 
-- [ ] replace gate servo
+- [ ] replace gate and camera servo
 
 #### CAD TODOs
 ...
