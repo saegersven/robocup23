@@ -19,9 +19,7 @@ int main() {
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
 	delay(810);
-
 	std::cout << "Init." << std::endl;
-
 	while(!robot->button(BTN_RESTART)) {
 		robot->send_byte(CMD_READY);
 		delay(10);
@@ -29,7 +27,6 @@ int main() {
 	}
 	while(robot->button(BTN_RESTART));
 	delay(40);
-
 	/*
 	// unloading victims test:
 	delay(1000);

@@ -3,6 +3,16 @@
 #include <stdio.h>
 #include <chrono>
 
+// compiling & executing:
+
+// navigate to capture_from_camera dir
+// mkdir -p build/default
+// cd build/default
+// cmake -GNinja ../..
+// ninja
+// ./capture_from_camera
+
+
 /**
  * Milliseconds since January 1st, 1970 at 00:00:00
  */
@@ -12,8 +22,8 @@
 // Rescue victims: 160x120
 // Rescue corner: 160x120
 // Rescue exit: 640x480
-#define WIDTH 80
-#define HEIGHT 48
+#define WIDTH 160
+#define HEIGHT 120
 
 void save_img(cv::Mat& img, const std::string& subfolder) {
     std::string filename = "/home/pi/Desktop/iamges/" + subfolder + "/" + std::to_string(millis()) + ".png";
@@ -47,8 +57,10 @@ int main(int, char**) {
 
         cv::imshow("Live", frame);
         if(cv::waitKey(1) == 'c') {
-            save_img(frame, "silver");
+            save_img(frame, "victims");
         }
+        //save_img(frame, "victims");
+        //cv::waitKey(50);
     }
     return 0;
 }
