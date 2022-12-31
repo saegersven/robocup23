@@ -25,9 +25,34 @@ void Rescue::stop() {
 	pthread_cancel(this->native_handle);
 }
 
+// main routine for rescue area
 void Rescue::rescue() {
-    // TODO: write whole rescue code!
-    robot->m(100, 100, 100);
+	std::cout << "in rescue function" << std::endl;
+
+	robot->m(127, 127, 500);
+	// turn towards the (potential) wall with as little space as possible
+	robot->turn(DTOR(22));
+	robot->m(127, 127, 100);
+	robot->turn(DTOR(15));
+	robot->m(127, 127, 80);
+	robot->turn(DTOR(15));
+	robot->m(127, 127, 50);
+	robot->turn(DTOR(15));
+	robot->m(127, 127, 40);
+	robot->turn(DTOR(45));
+
+	if (robot->distance() < 40) {
+		robot->m(-127, -127, 500);
+		robot->turn(DTOR(-135));
+	} else {
+		robot->turn(DTOR(-45));
+	}
+	robot->m(127, 127, 600);
+
+	// robot is roughly in the centre of the rescue area, no matter where the entrace was
+
+	// search for victims
+	exit(0);
 }
 /*
 void Rescue::test() {

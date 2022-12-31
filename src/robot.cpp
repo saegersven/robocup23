@@ -232,6 +232,9 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 
 	if(duration > 0) {
 		delay(duration);
+		// stop a few times in case Teensy misses first stop signal
+		stop();
+		stop();
 		stop();
 	}
 }
@@ -243,6 +246,7 @@ void Robot::stop() {
 	digitalWrite(STOP_PIN, LOW);
 }
 
+// turns given angle in radians
 void Robot::turn(float angle) {
 	uint16_t duration = std::abs(angle) * RTOD(MS_PER_DEGREE);
 	if(angle > 0) {

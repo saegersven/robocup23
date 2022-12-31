@@ -18,12 +18,11 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
 	robot->stop();
-
-	exit(0);
 	Line line(robot);
 	line.start();
 	Rescue rescue(robot);
 	rescue.start();
+	while (1);
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
