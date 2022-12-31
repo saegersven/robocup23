@@ -56,11 +56,13 @@ int main(int, char**) {
         }
 
         cv::imshow("Live", frame);
+        
         if(cv::waitKey(1) == 'c') {
             save_img(frame, "victims");
         }
-        //save_img(frame, "victims");
-        //cv::waitKey(50);
+        /*
+        save_img(frame, "victims");
+        cv::waitKey(20);*/
     }
     return 0;
 }
