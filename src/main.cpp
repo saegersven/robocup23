@@ -18,8 +18,11 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
 	robot->stop();
+	/* Camera is not being closed after stopping of line. Cant restart cam from rescue thread
 	Line line(robot);
 	line.start();
+	line.stop();
+	*/
 	Rescue rescue(robot);
 	rescue.start();
 	while (1);

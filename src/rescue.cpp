@@ -10,7 +10,6 @@
 #include "line.h"
 #include "robot.h"
 #include "utils.h"
-
 Rescue::Rescue(std::shared_ptr<Robot> robot) : finished(false) {
 	this->robot = robot;
 }
@@ -28,7 +27,7 @@ void Rescue::stop() {
 // main routine for rescue area
 void Rescue::rescue() {
 	std::cout << "in rescue function" << std::endl;
-
+	/*
 	robot->m(127, 127, 500);
 	// turn towards the (potential) wall with as little space as possible
 	robot->turn(DTOR(22));
@@ -50,12 +49,54 @@ void Rescue::rescue() {
 	robot->m(127, 127, 600);
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
-
+	*/
 	// search for victims
+	open_camera();
+	delay(1000);
+	while (1) {
+		grab_frame();
+		cv::imshow("Frame", frame);
+		std::cout << "Width : " << frame.cols << std::endl;
+		std::cout << "Height: " << frame.rows << std::endl;
+		cv::waitKey(1);
+	}
 	exit(0);
 }
-/*
-void Rescue::test() {
-    std::cout << "IN test function" << std::endl;
+
+void Rescue::open_camera() {
+	if(camera_opened) return;
+
+	cap.open(0, cv::CAP_V4L2);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, RESCUE_FRAME_WIDTH * 4);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, RESCUE_FRAME_HEIGHT * 4);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+	cap.set(cv::CAP_PROP_FPS, 120);
+
+	if(!cap.isOpened()) {
+		std::cerr << "Could not open camera" << std::endl;
+		exit(ERRCODE_CAM_SETUP);
+	}
+	camera_opened = true;
 }
-*/
+
+void Rescue::close_camera() {
+	if(!camera_opened) return;
+
+	cap.release();
+	camera_opened = false;
+}
+
+void Rescue::grab_frame() {
+	if(!camera_opened) {
+		std::cerr << "Tried to grab frame with closed camera" << std::endl;
+		exit(ERRCODE_CAM_CLOSED);
+	}
+
+	cap.grab();
+	cap.retrieve(frame);
+	cv::resize(frame, frame, cv::Size(RESCUE_FRAME_WIDTH, RESCUE_FRAME_HEIGHT));
+	debug_frame = frame.clone();
+	cv::flip(debug_frame, frame, 0);
+	cv::flip(frame, debug_frame, 1);
+	frame = debug_frame.clone();
+}

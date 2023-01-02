@@ -12,6 +12,9 @@
 #include "robot.h"
 #include "utils.h"
 
+#define RESCUE_FRAME_WIDTH 160
+#define RESCUE_FRAME_HEIGHT 120
+
 #define CAM_FAR 0
 #define CAM_SHORT 1
 
@@ -33,6 +36,19 @@ private:
 	std::shared_ptr<Robot> robot;
 
 	std::thread::native_handle_type native_handle;
+
+
+	// Camera control
+	cv::VideoCapture cap;
+	bool camera_opened;
+	void open_camera();
+	void close_camera();
+	void grab_frame();
+
+	// Current frame from camera
+	cv::Mat frame;
+	// Clone of frame for drawing debug data
+	cv::Mat debug_frame;
 
 
 	void rescue();
