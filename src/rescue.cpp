@@ -100,3 +100,16 @@ void Rescue::grab_frame() {
 	cv::flip(frame, debug_frame, 1);
 	frame = debug_frame.clone();
 }
+
+// finds black corner. Important: robot needs to be roughly in centre of rescue area allowing for 360 deg turns
+void Rescue::find_black_corner() {
+	open_camera();
+	// TODO: either implement own algorithm, or use NN
+	// ideas to detect black corner:
+	// - many black pixels in frame
+	// - contours (the one around the black corner) width is larger than height
+	// - distance < 120cm
+	// - contours width > contours height (at least when robot is far away from black corner)
+	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
+	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
+}
