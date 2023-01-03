@@ -44,6 +44,7 @@ private:
 	void open_camera();
 	void close_camera();
 	void grab_frame();
+	void find_black_corner();
 
 	// Current frame from camera
 	cv::Mat frame;

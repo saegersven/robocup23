@@ -56,10 +56,27 @@ void Rescue::rescue() {
 	while (1) {
 		grab_frame();
 		cv::imshow("Frame", frame);
-		std::cout << "Width : " << frame.cols << std::endl;
-		std::cout << "Height: " << frame.rows << std::endl;
 		cv::waitKey(1);
 	}
+	/*
+	uint8_t rescued_victims = 0;
+	bool ignore_dead = false;
+	while (rescued_victims < 3) {
+		grab_frame()
+		if (victim_in_frame(ignore_dead)) {
+			drive to victim
+			if (victim is close enough) {
+				pick up victim
+				++rescued_victims
+				if (rescued_victims == 2) ignore_dead = false
+			}
+		}
+	}
+	find_black_corner()
+	unload victims()
+	m(127, 127, 500); // drive to centre of rescue area
+	find_exit();
+	*/
 	exit(0);
 }
 

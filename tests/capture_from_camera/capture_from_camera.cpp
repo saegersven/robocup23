@@ -22,8 +22,8 @@
 // Rescue victims: 160x120
 // Rescue corner: 160x120
 // Rescue exit: 640x480
-#define WIDTH 160
-#define HEIGHT 120
+#define WIDTH 80
+#define HEIGHT 48
 
 void save_img(cv::Mat& img, const std::string& subfolder) {
     std::string filename = "/home/pi/Desktop/iamges/" + subfolder + "/" + std::to_string(millis()) + ".png";
@@ -56,13 +56,14 @@ int main(int, char**) {
         }
 
         cv::imshow("Live", frame);
-        
+        /*
         if(cv::waitKey(1) == 'c') {
             save_img(frame, "victims");
         }
-        /*
+        */
+        
         save_img(frame, "victims");
-        cv::waitKey(20);*/
+        cv::waitKey(20);
     }
     return 0;
 }

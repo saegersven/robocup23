@@ -5,7 +5,6 @@
 
 #include "utils.h"
 #include "defines.h"
-
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
 }
@@ -491,6 +490,10 @@ void Line::rescue_kit() {
 void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
 	grab_frame();
+	//frame = cv::imread("/home/pi/robocup23/runtime_data/b.png");
+	//cv::imshow("frame", frame); 
+	//cv::waitKey(0);
+
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
 	follow();
@@ -511,12 +514,13 @@ void Line::line() {
 	std::cout << frame_time << "\t|\t" << main_time << "\t|\t" << silver_time << "\n" << total_time << "\n";*/
 	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
-	/*if(silver_ml.get_current_prediction()) {
+	if(silver_ml.get_current_prediction()) {
+		//save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
-		delay(3000);
+		delay(1000);
 		open_camera();
-	}*/
+	}
 
 #ifdef DEBUG
 #ifdef DRAW_FPS
@@ -528,7 +532,7 @@ void Line::line() {
 		0.4, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 #endif
-	cv::imshow("Debug", debug_frame);
+	//cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
 }

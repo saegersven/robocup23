@@ -18,14 +18,11 @@ int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
 	robot->stop();
-	/* Camera is not being closed after stopping of line. Cant restart cam from rescue thread
+	//Camera is not being closed after stopping of line. Cant restart cam from rescue thread
 	Line line(robot);
 	line.start();
-	line.stop();
-	*/
-	Rescue rescue(robot);
-	rescue.start();
-	while (1);
+	//Rescue rescue(robot);
+	//rescue.start();
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
@@ -40,7 +37,9 @@ int main() {
 	delay(40);
 	
 	auto last_started = millis(); // time at which robot has been restarted
-
+	while (1) {
+		line.line();
+	}
 	/*
 	// TODO: Testing for errors
 	// MAIN LOOP
