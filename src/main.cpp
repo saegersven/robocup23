@@ -17,12 +17,12 @@ int main() {
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
+	State state = State::line;
 	robot->stop();
-	//Camera is not being closed after stopping of line. Cant restart cam from rescue thread
 	Line line(robot);
 	line.start();
-	//Rescue rescue(robot);
-	//rescue.start();
+	Rescue rescue(robot);
+
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
@@ -30,22 +30,19 @@ int main() {
 	std::cout << "Init." << std::endl;
 	while(!robot->button(BTN_RESTART)) {
 		robot->send_byte(CMD_READY);
-		delay(10);
+		delay(1);		
 		//std::cout << robot->read_distance() << std::endl;
 	}
 	while(robot->button(BTN_RESTART));
 	delay(40);
 	
 	auto last_started = millis(); // time at which robot has been restarted
-	while (1) {
-		line.line();
-	}
-	/*
-	// TODO: Testing for errors
+	
 	// MAIN LOOP
 	while(1) {
 		if(robot->button(BTN_RESTART) && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
 			while(robot->button(BTN_RESTART));
+			robot->stop();
 			switch(state) {
 				case State::line:
 					line.stop();
@@ -55,8 +52,6 @@ int main() {
 					state = State::line;
 					break;
 			}
-			line.stop();
-			robot->stop();
 			
 			std::cout << "Stop." << std::endl;
 			robot->send_byte(CMD_SERVOS_HOME_POS);
@@ -90,7 +85,6 @@ int main() {
 			}
 		}
 	}
-	*/
 
 	return 0;
 }

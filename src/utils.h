@@ -42,4 +42,4 @@ cv::Mat in_range(cv::Mat in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, 
  */
 float clamp(float n, float min, float max);
 
-void save_img(cv::Mat img, const std::string& subfolder);
+void save_img(cv::Mat& img, const std::string& subfolder);

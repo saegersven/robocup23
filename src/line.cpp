@@ -515,7 +515,7 @@ void Line::line() {
 	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
 	if(silver_ml.get_current_prediction()) {
-		//save_img(frame, "potential_silver");
+		save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
 		delay(1000);
