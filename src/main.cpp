@@ -26,6 +26,14 @@ int main() {
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
+	delay(20);
+	robot->send_byte(CMD_SERVOS_HOME_POS);
+	delay(20);
+	robot->send_byte(CMD_SERVOS_HOME_POS);
+	delay(20);
+	robot->send_byte(CMD_SERVOS_HOME_POS);
+	delay(20);
+	
 	delay(810);
 	std::cout << "Init." << std::endl;
 	while(!robot->button(BTN_RESTART)) {

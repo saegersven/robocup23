@@ -355,6 +355,7 @@ void Line::green() {
 		// Take another frame and reevaluate
 		open_camera();
 		grab_frame();
+		save_img(frame, "green");
 		close_camera();
 		black = in_range(frame, &is_black);
 		delay(1000);
@@ -456,33 +457,20 @@ void Line::rescue_kit() {
 		float center_y = frame.rows + 20.0f;
 		float angle = std::atan2(group.y - center_y, group.x - center_x) + R90;
 		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
-
+		save_img(frame, "rescue_kit");
 		close_camera();
-
-		delay(500);
-		std::cout << "TEST" << std::endl;
 		robot->turn(angle - ARM_ANGLE_OFFSET);
-
-		delay(500);
-
 		robot->m(-80, -80, 200);
-		/*if(distance < 44) {
-			robot->m(-60, -60, DISTANCE_FACTOR * (distance - 44));
-		} else {
-			robot->m(60, 60, DISTANCE_FACTOR * (distance - 44));
-		}*/
-
-		delay(500);
+		delay(210);
 		robot->send_byte(CMD_ARM_DOWN);
-		delay(2000);
+		delay(1000);
 		robot->m(50, 50, 420);
-		delay(500);
+		delay(430);
 		robot->send_byte(CMD_ARM_UP);
-		delay(3500);
-
+		delay(2600);
 		robot->m(-80, -80, 200);
+		delay(210);
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
-
 		open_camera();
 	}
 }
