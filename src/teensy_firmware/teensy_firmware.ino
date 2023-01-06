@@ -130,6 +130,10 @@ void loop() {
     arm_down();
   } else if(cmd == CMD_ARM_UP) {
     arm_up();
+  } else if(cmd == CMD_ARM_HALF_UP) {
+    arm_half_up();
+  } else if(cmd == CMD_UNLOAD) {
+    unload_victims();
   }
 
   // clear buffer

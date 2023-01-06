@@ -51,7 +51,6 @@ void Rescue::rescue() {
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 	find_centre();
 	*/
-	find_black_corner();
 	/*
 	// search for victims
 	open_camera();
@@ -77,11 +76,9 @@ void Rescue::rescue() {
 			}
 		}
 	}
-	find_black_corner();
-	unload victims()
-	m(127, 127, 500); // drive to centre of rescue area
-	find_exit();
 	*/
+	find_black_corner(); // find black corner and unload victims
+	// find_exit();
 	exit(0);
 }
 
@@ -115,7 +112,6 @@ void Rescue::grab_frame() {
 
 	cap.grab();
 	cap.retrieve(frame);
-	//cv::resize(frame, frame, cv::Size(RESCUE_FRAME_WIDTH * 4, RESCUE_FRAME_HEIGHT * 4));
 	debug_frame = frame.clone();
 	cv::flip(debug_frame, frame, 0);
 	cv::flip(frame, debug_frame, 1);
@@ -140,22 +136,19 @@ void Rescue::find_centre() {
 	exit(0);
 }
 
-// finds black corner
+// finds black corner and unloads victims
 void Rescue::find_black_corner() {
 	std::cout << "in find_black_corner function" << std::endl;
 	robot->servo(SERVO_CAM, 132);
 	std::cout << "Adjusted servo position" << std::endl;
-	close_camera();
-	delay(500);
 	open_camera();
-	delay(500);
 	while (1) {
 		grab_frame();
 		uint32_t num_black_pixels = 0;
 		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
-		cv::imshow("Frame", black);
+		//cv::imshow("Frame", black);
 		std::cout << "Black pixels: " << num_black_pixels << std::endl;
-		if (num_black_pixels > 2000) { // possibly black corner
+		if (num_black_pixels > 5000) { // possibly black corner
 			std::vector<std::vector<cv::Point>> contours;
   			cv::findContours(black, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
@@ -167,11 +160,44 @@ void Rescue::find_black_corner() {
 
   			cv::rectangle(frame, bounding_box, cv::Scalar(0, 255, 0), 2);
 
+  			if (bounding_box.width > bounding_box.height) {
+  				std::cout << "Approaching possible corner" << std::endl;
+  				save_img(frame, "possible_corner");
+				close_camera();
 
+				// TODO: Calculate angle to turn a bit towards centre of corner (take inspiration from last years code)
+
+  				robot->servo(SERVO_CAM, 65);
+  				robot->m(127, 127, 1300);
+  				open_camera();
+  				grab_frame();
+  				close_camera();
+				cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
+				if (num_black_pixels > 3000 && robot->distance_avg(5, 0.2f) < 45) { // found black corner
+  					save_img(frame, "possible_corner");
+					std::cout << "Found black corner, black pixels: " << num_black_pixels << std::endl;
+					robot->m(-127, -127, 600);
+					robot->turn(DTOR(180));
+					robot->m(-80, -80, 1000);
+					robot->send_byte(CMD_UNLOAD);
+					delay(7000);
+					robot->m(127, 127, 1200);
+					return;
+				} else {
+					std::cout << "No black corner here" << std::endl;
+  					robot->m(-127, -127, 1300);
+  					delay(500);
+  					robot->turn(DTOR(30));
+  					delay(500);
+					robot->servo(SERVO_CAM, 132);
+  					open_camera();
+  					delay(300);
+				}
+  			}
 		} else {
-			robot->turn(DTOR(10));
+			robot->turn(DTOR(5));
 		}
-  		cv::imshow("Frame", frame);
+  		//cv::imshow("Frame", frame);
 		cv::waitKey(1);
 	}
 

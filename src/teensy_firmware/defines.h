@@ -56,3 +56,5 @@
 #define CMD_SERVOS_HOME_POS 0x06
 #define CMD_ARM_DOWN 0x07
 #define CMD_ARM_UP 0x08
+#define CMD_ARM_HALF_UP 0x09
+#define CMD_UNLOAD 0x10
