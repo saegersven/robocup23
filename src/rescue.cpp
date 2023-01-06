@@ -7,7 +7,6 @@
 #include <opencv2/opencv.hpp>
 #include <pthread.h>
 
-#include "line.h"
 #include "robot.h"
 #include "utils.h"
 Rescue::Rescue(std::shared_ptr<Robot> robot) : finished(false) {
@@ -26,8 +25,18 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
-	std::cout << "in rescue function" << std::endl;
+	find_centre();
 	/*
+	open_camera();
+	delay(100);
+	while (1) {
+		grab_frame();
+		std::cout << frame.rows << " " << frame.cols << std::endl;
+		cv::imshow("frame", frame);
+		cv::waitKey(1);
+	}
+	std::cout << "in rescue function" << std::endl;
+	
 	robot->m(127, 127, 500);
 	// turn towards the (potential) wall with as little space as possible
 	robot->turn(DTOR(22));
@@ -49,16 +58,17 @@ void Rescue::rescue() {
 	robot->m(127, 127, 600);
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
-	*/
+	
 	// search for victims
 	open_camera();
 	delay(1000);
 	while (1) {
+		std::cout << "searching for victims" << std::endl;
 		grab_frame();
 		cv::imshow("Frame", frame);
 		cv::waitKey(1);
 	}
-	/*
+	
 	uint8_t rescued_victims = 0;
 	bool ignore_dead = false;
 	while (rescued_victims < 3) {
@@ -84,8 +94,8 @@ void Rescue::open_camera() {
 	if(camera_opened) return;
 
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, RESCUE_FRAME_WIDTH * 4);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, RESCUE_FRAME_HEIGHT * 4);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 480); // 480
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 270); // 270
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	cap.set(cv::CAP_PROP_FPS, 120);
 
@@ -111,14 +121,28 @@ void Rescue::grab_frame() {
 
 	cap.grab();
 	cap.retrieve(frame);
-	cv::resize(frame, frame, cv::Size(RESCUE_FRAME_WIDTH, RESCUE_FRAME_HEIGHT));
+	//cv::resize(frame, frame, cv::Size(RESCUE_FRAME_WIDTH * 4, RESCUE_FRAME_HEIGHT * 4));
 	debug_frame = frame.clone();
 	cv::flip(debug_frame, frame, 0);
 	cv::flip(frame, debug_frame, 1);
 	frame = debug_frame.clone();
 }
 
-// finds black corner. Important: robot needs to be roughly in centre of rescue area allowing for 360 deg turns
+// drives roughly to centre of rescue area
+void Rescue::find_centre() {
+	while (1) {
+		uint16_t dist = robot->distance_avg(5, 0.2f);
+		std::cout << "Distance: " << dist << std::endl;
+		if (dist < 140) { // no entry or exit ahead
+			if (dist < 60) robot->m(-40, -40, 200);
+			else robot->m(40, 40, 200);
+			robot->turn(DTOR(5));
+			delay(500);			
+		}
+	}
+}
+
+// finds black corner
 void Rescue::find_black_corner() {
 	open_camera();
 	// TODO: either implement own algorithm, or use NN
@@ -129,4 +153,8 @@ void Rescue::find_black_corner() {
 	// - contours width > contours height (at least when robot is far away from black corner)
 	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
 	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
+
+	while (true) {
+
+	}
 }

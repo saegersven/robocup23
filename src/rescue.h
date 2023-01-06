@@ -44,6 +44,7 @@ private:
 	void open_camera();
 	void close_camera();
 	void grab_frame();
+	void find_centre();
 	void find_black_corner();
 
 	// Current frame from camera
@@ -52,11 +53,11 @@ private:
 	cv::Mat debug_frame;
 
 
-	void rescue();
 public:
 	std::atomic<bool> finished;
 
 	Rescue(std::shared_ptr<Robot> robot);
 	void start();
 	void stop();
+	void rescue();
 };

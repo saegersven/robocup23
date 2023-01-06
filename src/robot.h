@@ -149,4 +149,5 @@ public:
 	 * Read distance from forward HCSR04 ultrasonic sensor in millimeters
 	 */
 	int distance();
+	int distance_avg(uint8_t num_measurements, float remove_percentage);
 };

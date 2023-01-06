@@ -14,7 +14,7 @@
 - [ ] train silver ml
 - [ ] label victim data
 - [ ] train victim ml
-- [ ] check cam init (in rescue.cpp), field of view seems suspiciously small.
+- [ ] change cam resolution to 16:9?
 
 
 #### Hardware TODOs

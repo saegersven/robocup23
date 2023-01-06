@@ -19,10 +19,13 @@ int main() {
 	
 	State state = State::line;
 	robot->stop();
-	Line line(robot);
-	line.start();
+	delay(2000);
+	//Line line(robot);
+	//line.start();
 	Rescue rescue(robot);
-
+	rescue.start();
+	delay(100000000);
+	/*
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
@@ -30,9 +33,6 @@ int main() {
 	robot->send_byte(CMD_SERVOS_HOME_POS);
 	delay(20);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
-	delay(20);
-	robot->send_byte(CMD_SERVOS_HOME_POS);
-	delay(20);
 	
 	delay(810);
 	std::cout << "Init." << std::endl;
@@ -43,6 +43,7 @@ int main() {
 	}
 	while(robot->button(BTN_RESTART));
 	delay(40);
+
 	
 	auto last_started = millis(); // time at which robot has been restarted
 	
@@ -94,5 +95,5 @@ int main() {
 		}
 	}
 
-	return 0;
+	return 0;*/
 }

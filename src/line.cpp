@@ -506,6 +506,7 @@ void Line::line() {
 		save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
+		std::cout << "Detected silver, returning from line" << std::endl;
 		delay(1000);
 		open_camera();
 	}

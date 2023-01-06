@@ -306,3 +306,29 @@ int Robot::distance() {
 	// convert travel time of sound signal to cm (TODO: check for overflow)
 	return (int)(0.000000001 * 0.5 * travel_time.count() * 34300);
 }
+
+int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
+	float arr[num_measurements];
+
+	// take measurements
+	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
+		float dist = distance();
+		arr[i] = dist;
+		delay(15);
+	}
+
+	// calculate avg after removing n percent of exteme measurements
+	int arr_len = sizeof(arr) / sizeof(arr[0]);
+
+	std::sort(arr, arr + arr_len);
+	int kthPercent = (arr_len * remove_percentage);
+	float sum = 0;
+
+	for(int i = 0; i < arr_len; i++)
+		if (i >= kthPercent && i < (arr_len - kthPercent))
+			sum += arr[i];
+
+	float avg = sum / (arr_len - 2 * kthPercent);
+
+	return (int)avg;
+}
