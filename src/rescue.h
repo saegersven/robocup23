@@ -31,11 +31,17 @@
 #define CORNER_ROI_X_MIN 0
 #define CORNER_ROI_X_MAX 640
 
+/**
+ * Single-pixel thresholding operation for detecting the black corner.
+ */
+bool is_black2(uint8_t b, uint8_t g, uint8_t r);
+
 class Rescue {
 private:
 	std::shared_ptr<Robot> robot;
 
 	std::thread::native_handle_type native_handle;
+
 
 
 	// Camera control

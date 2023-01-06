@@ -5,6 +5,7 @@
 #include <chrono>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/imgproc_c.h>
 #include <pthread.h>
 
 #include "robot.h"
@@ -142,7 +143,7 @@ void Rescue::find_centre() {
 // finds black corner
 void Rescue::find_black_corner() {
 	std::cout << "in find_black_corner function" << std::endl;
-	robot->servo(SERVO_CAM, 140);
+	robot->servo(SERVO_CAM, 132);
 	std::cout << "Adjusted servo position" << std::endl;
 	close_camera();
 	delay(500);
@@ -150,8 +151,27 @@ void Rescue::find_black_corner() {
 	delay(500);
 	while (1) {
 		grab_frame();
-		cv::imshow("Frame", frame);
-		
+		uint32_t num_black_pixels = 0;
+		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
+		cv::imshow("Frame", black);
+		std::cout << "Black pixels: " << num_black_pixels << std::endl;
+		if (num_black_pixels > 2000) { // possibly black corner
+			std::vector<std::vector<cv::Point>> contours;
+  			cv::findContours(black, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  			std::sort(contours.begin(), contours.end(), [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2) {
+    		return cv::contourArea(c1, false) > cv::contourArea(c2, false);
+  			});
+
+  			cv::Rect bounding_box = cv::boundingRect(contours[0]);
+
+  			cv::rectangle(frame, bounding_box, cv::Scalar(0, 255, 0), 2);
+
+
+		} else {
+			robot->turn(DTOR(10));
+		}
+  		cv::imshow("Frame", frame);
 		cv::waitKey(1);
 	}
 
@@ -167,4 +187,8 @@ void Rescue::find_black_corner() {
 	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
 	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
 
+}
+
+bool is_black2(uint8_t b, uint8_t g, uint8_t r) {
+	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
 }
