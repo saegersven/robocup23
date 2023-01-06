@@ -40,7 +40,7 @@ private:
 
 	// Camera control
 	cv::VideoCapture cap;
-	bool camera_opened;
+	bool camera_opened = false;
 	void open_camera();
 	void close_camera();
 	void grab_frame();

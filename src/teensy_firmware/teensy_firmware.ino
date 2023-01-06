@@ -85,7 +85,7 @@ void loop() {
     servos[servo_id].attach(servo_pins[servo_id]);
     debug("Attached Servo: ");
     debugln(servo_id);
-    //servos[servo_id].write(angle);
+    servos[servo_id].write(angle);
     debug("Written Angle: ");
     debugln(angle);
     if (servo_id != 0) {

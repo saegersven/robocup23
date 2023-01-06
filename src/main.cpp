@@ -19,12 +19,11 @@ int main() {
 	
 	State state = State::line;
 	robot->stop();
-	delay(2000);
 	//Line line(robot);
 	//line.start();
 	Rescue rescue(robot);
 	rescue.start();
-	delay(100000000);
+	delay(10000000000);
 	/*
 	// set servos to default position
 	delay(50);
