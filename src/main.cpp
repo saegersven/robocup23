@@ -19,6 +19,17 @@ int main() {
 	
 	State state = State::line;
 	robot->stop();
+	/*
+	// obstacle motor values:
+	robot->m(50, 50, 0);
+	while (robot->distance() > 8);
+	robot->m(-50, -50, 100);
+	robot->turn(DTOR(92));
+	delay(3000);
+	robot->m(54, 127, 0);
+	delay(3000);
+	robot->stop();
+	*/
 	//Line line(robot);
 	//line.start();
 	Rescue rescue(robot);
