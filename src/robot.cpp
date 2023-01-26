@@ -244,6 +244,10 @@ void Robot::stop() {
 	digitalWrite(STOP_PIN, HIGH);
 	delayMicroseconds(100);
 	digitalWrite(STOP_PIN, LOW);
+	delayMicroseconds(200),
+	digitalWrite(STOP_PIN, HIGH);
+	delayMicroseconds(100);
+	digitalWrite(STOP_PIN, LOW);
 }
 
 // turns given angle in radians

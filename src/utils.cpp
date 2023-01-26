@@ -34,10 +34,24 @@ float clamp(float n, float min, float max) {
 }
 
 /*
- * Saves .png image to subfolder in /home/pi/Desktop/images
+ * Saves .png image to subfolder in /home/pi/Desktop/iamges
  */
 void save_img(cv::Mat& img, const std::string& subfolder) {
     std::string filename = "/home/pi/Desktop/iamges/" + subfolder + "/" + std::to_string(millis()) + ".png";
     //std::cout << filename << std::endl;
 	cv::imwrite(filename, img);
+}
+
+cv::Mat two_channel_to_three_channel(cv::Mat in) {
+	cv::Mat out(in.rows, in.cols, CV_32FC3);
+	for(int i = 0; i < in.rows; ++i) {
+		float* p_in = in.ptr<float>(i);
+		float* p_out = out.ptr<float>(i);
+		for(int j = 0; j < in.cols; ++j) {
+			p_out[j * 3] = p_in[j * 2];
+			p_out[j * 3 + 1] = p_in[j * 2 + 1];
+			p_out[j * 3 + 2] = 0.0f;
+		}
+	}
+	return out;
 }

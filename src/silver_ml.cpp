@@ -58,8 +58,7 @@ void SilverML::internal_loop() {
 
 		//std::cout << "[" << output_layer[0] << "\t" << output_layer[1] << "]" << std::endl;
 
-		//current_prediction = output_layer[0] > output_layer[1];
-		current_prediction = output_layer[0] > 0.05f;
+		current_prediction = output_layer[0] > output_layer[1];
 		if(current_prediction) {
 			std::cout << "Detected silver (" << output_layer[0] << ")" << std::endl;
 		}

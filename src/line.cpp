@@ -31,8 +31,10 @@ Line::Line(std::shared_ptr<Robot> robot) {
 void Line::start() {
 	last_line_angle = 0.0f;
 	camera_opened = false;
-	open_camera();
+	found_silver = false;
+	open_camera(1280, 960);
 	silver_ml.start();
+	victim_ml.init();
 }
 
 void Line::stop() {
@@ -41,12 +43,12 @@ void Line::stop() {
 	silver_ml.stop();
 }
 
-void Line::open_camera() {
+void Line::open_camera(int width, int height) {
 	if(camera_opened) return;
 
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, LINE_FRAME_WIDTH * 4);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, LINE_FRAME_HEIGHT * 4);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	cap.set(cv::CAP_PROP_FPS, 120);
 
@@ -64,7 +66,7 @@ void Line::close_camera() {
 	camera_opened = false;
 }
 
-void Line::grab_frame() {
+void Line::grab_frame(int width, int height) {
 	if(!camera_opened) {
 		std::cerr << "Tried to grab frame with closed camera" << std::endl;
 		exit(ERRCODE_CAM_CLOSED);
@@ -72,7 +74,7 @@ void Line::grab_frame() {
 
 	cap.grab();
 	cap.retrieve(frame);
-	cv::resize(frame, frame, cv::Size(LINE_FRAME_WIDTH, LINE_FRAME_HEIGHT));
+	cv::resize(frame, frame, cv::Size(width, height));
 	debug_frame = frame.clone();
 	cv::flip(debug_frame, frame, 0);
 	cv::flip(frame, debug_frame, 1);
@@ -351,7 +353,8 @@ void Line::green() {
 		close_camera();
 		robot->turn(angle);
 		delay(50);
-		robot->m(100, 100, DISTANCE_FACTOR * (distance - 45));
+		robot->m(100, 100, DISTANCE_FACTOR * (distance - 50));
+		delay(50);
 		// Take another frame and reevaluate
 		open_camera();
 		grab_frame();
@@ -477,20 +480,28 @@ void Line::rescue_kit() {
 
 void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
-	grab_frame();
+	grab_frame(160, 120);
 	//frame = cv::imread("/home/pi/robocup23/runtime_data/b.png");
 	//cv::imshow("frame", frame); 
 	//cv::waitKey(0);
 
+	cv::Mat res = victim_ml.invoke(frame);
+	//cv::resize(res, res, cv::Size(160, 120));
+	cv::imshow("victim result", two_channel_to_three_channel(res));
+	std::vector<Victim> victims = victim_ml.extract_victims(res);
+	for(int i = 0; i < victims.size(); ++i) {
+		cv::circle(debug_frame, cv::Point(victims[i].x, victims[i].y), 3, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 3);
+	}
+
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
-	follow();
-	green();
-	rescue_kit();
+	//follow();
+	//green();
+	//rescue_kit();
 
 	//auto silver_start_time = std::chrono::high_resolution_clock::now();
 
-	silver_ml.set_frame(frame);
+	//silver_ml.set_frame(frame);
 
 	//auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -502,13 +513,14 @@ void Line::line() {
 	std::cout << frame_time << "\t|\t" << main_time << "\t|\t" << silver_time << "\n" << total_time << "\n";*/
 	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
-	if(silver_ml.get_current_prediction()) {
+	if(false && silver_ml.get_current_prediction()) {
 		save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
+		found_silver = true;
 		std::cout << "Detected silver, returning from line" << std::endl;
-		delay(1000);
-		open_camera();
+		//delay(1000);
+		//open_camera();
 	}
 
 #ifdef DEBUG
@@ -521,7 +533,7 @@ void Line::line() {
 		0.4, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 #endif
-	//cv::imshow("Debug", debug_frame);
+	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
 #endif
 }

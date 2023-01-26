@@ -45,8 +45,8 @@ extern "C" {
 #define SERVO_GRIPPER2 3
 #define SERVO_GATE 4
 
-// servo position
-#define CAM_LOWER_POS 65
+// servo position (UPDATE IN BOTH FILES!!!)
+#define CAM_LOWER_POS 71
 #define CAM_HIGHER_POS 90
 #define ARM_LOWER_POS 0
 #define ARM_HIGHER_POS 180
@@ -61,7 +61,7 @@ extern "C" {
 
 #define STOP_PIN 9
 
-#define DISTANCE_FACTOR (4.2f + 3 * 0.42f)
+#define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 
 #define MS_PER_DEGREE (4.2f - 0.15f) // milliseconds a one degree turn takes
 

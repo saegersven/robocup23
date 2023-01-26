@@ -1,5 +1,20 @@
 #pragma once
 
+#include <memory>
+#include <mutex>
+#include <thread>
+#include <atomic>
+#include <vector>
+
+#include <opencv2/opencv.hpp>
+
+#include "tensorflow/lite/interpreter.h"
+#include "tensorflow/lite/kernels/register.h"
+#include "tensorflow/lite/model.h"
+#include "tensorflow/lite/optional_debug_tools.h"
+
+#include "utils.h"
+
 #define IN_WIDTH 160
 #define IN_HEIGHT 120
 
@@ -13,7 +28,7 @@ struct Victim {
     bool dead;
     float x;
     float y;
-}
+};
 
 class VictimML {
 private:
@@ -38,4 +53,4 @@ public:
      * neural net using cv::findContours and thresholding operations.
      */
     std::vector<Victim> extract_victims(cv::Mat probability_map);
-}
+};

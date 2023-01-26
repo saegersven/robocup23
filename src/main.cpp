@@ -16,7 +16,7 @@ int main() {
 	std::cout << "Program started." << std::endl;
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-	
+
 	State state = State::line;
 	robot->stop();
 	/*
@@ -30,12 +30,13 @@ int main() {
 	delay(3000);
 	robot->stop();
 	*/
-	//Line line(robot);
-	//line.start();
+	Line line(robot);
+	line.start();
+	
 	Rescue rescue(robot);
-	rescue.start();
-	delay(10000000000);
-	/*
+	//rescue.start();
+	//delay(10000000000);
+	
 	// set servos to default position
 	delay(50);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
@@ -43,7 +44,7 @@ int main() {
 	robot->send_byte(CMD_SERVOS_HOME_POS);
 	delay(20);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
-	
+
 	delay(810);
 	std::cout << "Init." << std::endl;
 	while(!robot->button(BTN_RESTART)) {
@@ -54,6 +55,9 @@ int main() {
 	while(robot->button(BTN_RESTART));
 	delay(40);
 
+	robot->servo(SERVO_CAM, 135);
+	delay(10);
+	robot->servo(SERVO_CAM, 135);
 	
 	auto last_started = millis(); // time at which robot has been restarted
 	
@@ -90,13 +94,20 @@ int main() {
 		switch(state) {
 			case State::line: {
 				line.line();
+
+				if(line.found_silver) {
+					std::cout << "Starting rescue" << std::endl;
+					line.stop();
+					rescue.start();
+					state = State::rescue;
+				}
 				break;
 			}
 			case State::rescue: {
 				// Monitor rescue thread
 				if(rescue.finished) {
 					std::cout << "Starting line" << std::endl;
-					//rescue.stop();
+					rescue.stop();
 					line.start();
 					state = State::line;
 				}
@@ -105,5 +116,5 @@ int main() {
 		}
 	}
 
-	return 0;*/
+	return 0;
 }

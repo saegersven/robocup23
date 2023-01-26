@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "defines.h"
 #include "silver_ml.h"
+#include "victim_ml.h"
 
 #define BLACK_MAX_SUM 200
 
@@ -32,6 +33,8 @@
 // LINE PARAMETERS
 #define LINE_FRAME_WIDTH 80
 #define LINE_FRAME_HEIGHT 48
+#define LINE_CAPTURE_WIDTH 320
+#define LINE_CAPTURE_HEIGHT 192
 
 #define LINE_CORNER_WIDTH 7
 #define LINE_CORNER_HEIGHT 8
@@ -88,12 +91,13 @@ private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 
 	SilverML silver_ml;
+	VictimML victim_ml;
 
 	// Camera control
 	bool camera_opened;
-	void open_camera();
+	void open_camera(int width=LINE_CAPTURE_WIDTH, int height=LINE_CAPTURE_HEIGHT);
 	void close_camera();
-	void grab_frame();
+	void grab_frame(int width=LINE_FRAME_WIDTH, int height=LINE_FRAME_HEIGHT);
 
 	/*########################
 	METHODS FOR LINE-FOLLOWING
@@ -163,6 +167,8 @@ private:
 	void rescue_kit();
 
 public:
+	bool found_silver = false;
+
 	Line(std::shared_ptr<Robot> robot);
 
 	void start();

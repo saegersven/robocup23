@@ -30,8 +30,8 @@
 #define SERVO_GRIPPER2_PIN 36 // 2th servo to grab victims
 #define SERVO_GATE_PIN 23 // servo to empty victim container
 
-// servo position
-#define CAM_LOWER_POS 65
+// servo position (UPDATE IN BOTH FILES!!!)
+#define CAM_LOWER_POS 71
 #define CAM_HIGHER_POS 90
 #define ARM_LOWER_POS 0
 #define ARM_HIGHER_POS 180

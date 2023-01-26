@@ -4,7 +4,7 @@ VictimML::VictimML() {}
 
 void VictimML::init() {
     model = tflite::FlatBufferModel::BuildFromFile(VICTIM_MODEL_PATH);
-    tflite::ops::builtin::BuiltInOpResolver resolver;
+    tflite::ops::builtin::BuiltinOpResolver resolver;
     tflite::InterpreterBuilder builder(*model, resolver);
     if(builder(&interpreter) != kTfLiteOk) {
         std::cout << "Failed building interpreter (Victims)" << std::endl;
@@ -21,9 +21,9 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     cv::resize(image, image, cv::Size(IN_WIDTH, IN_HEIGHT));
 
     for(int i = 0; i < image.rows; ++i) {
-        uint8_t* p = image.ptr<uint8_t>(i);
+        cv::Vec3b* p = image.ptr<cv::Vec3b>(i);
         for(int j = 0; j < image.cols; ++j) {
-            float d = ((float)p[j] + p[j + 1] + p[j + 2]) / 3.0f;
+            float d = ((float)p[j][0] + p[j][1] + p[j][2]) / 3.0f;
             input_layer[i * image.cols + j] = d;
         }
     }
@@ -38,8 +38,8 @@ cv::Mat VictimML::invoke(cv::Mat image) {
         for(int j = 0; j < OUT_WIDTH; ++j) {
             for(int k = 0; k < OUT_CHANNELS; ++k) {
                 float val = output_layer[i * OUT_WIDTH * OUT_CHANNELS + j * OUT_CHANNELS + k];
-                val = clamp(val, 0.0f, 1.0f);
-                
+                if(val > 1.0f) val = 1.0f;
+                else if(val < 0.0f) val = 0.0f;
                 p[j * OUT_CHANNELS + k] = val;
             }
         }
@@ -47,7 +47,7 @@ cv::Mat VictimML::invoke(cv::Mat image) {
     return out;
 }
 
-std::vector<Victim> extract_victims(cv::Mat probability_map) {
+std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map) {
     const float THRESHOLD_DEAD = 0.3f;
     const float THRESHOLD_ALIVE = 0.4f;
 
