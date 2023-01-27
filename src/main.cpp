@@ -47,7 +47,7 @@ int main() {
 	std::cout << "Init." << std::endl;
 	while(!robot->button(BTN_RESTART)) {
 		robot->send_byte(CMD_READY);
-		delay(1);		
+		delay(1);	
 	}
 	while(robot->button(BTN_RESTART));
 	delay(40);

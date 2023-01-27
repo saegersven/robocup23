@@ -91,7 +91,6 @@ private:
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 
 	SilverML silver_ml;
-	VictimML victim_ml;
 
 	// Camera control
 	bool camera_opened;

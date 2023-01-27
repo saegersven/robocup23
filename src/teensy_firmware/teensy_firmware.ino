@@ -128,6 +128,7 @@ void loop() {
     
   } else if(cmd == CMD_ARM_DOWN) {
     arm_down();
+    Serial.println("Received CMD_ARM DOWN");
   } else if(cmd == CMD_ARM_UP) {
     arm_up();
   } else if(cmd == CMD_ARM_HALF_UP) {

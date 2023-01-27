@@ -56,7 +56,7 @@ void SilverML::internal_loop() {
 
 		interpreter->Invoke();
 
-		//std::cout << "[" << output_layer[0] << "\t" << output_layer[1] << "]" << std::endl;
+		std::cout << "[" << output_layer[0] << "\t" << output_layer[1] << "]" << std::endl;
 
 		current_prediction = output_layer[0] > output_layer[1];
 		if(current_prediction) {

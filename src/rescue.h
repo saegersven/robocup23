@@ -42,16 +42,17 @@ private:
 
 	std::thread::native_handle_type native_handle;
 
-
+	VictimML victim_ml;
 
 	// Camera control
 	cv::VideoCapture cap;
 	bool camera_opened = false;
-	void open_camera();
+	void open_camera(int width, int height);
 	void close_camera();
-	void grab_frame();
+	cv::Mat grab_frame(int width, int height);
 	void find_centre();
 	void find_black_corner();
+	void find_victims(float& x, float& y, bool ignore_dead);
 
 	// Current frame from camera
 	cv::Mat frame;

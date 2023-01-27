@@ -18,16 +18,17 @@ void Rescue::start() {
 	std::thread rescue_thread([this]() { this->rescue(); });
 	this->native_handle = rescue_thread.native_handle();
 	rescue_thread.detach();
+	victim_ml.init();
 }
 
 void Rescue::stop() {
 	pthread_cancel(this->native_handle);
 }
 
+#define VICTIM_CAP_RES 1280, 960
+
 // main routine for rescue area
 void Rescue::rescue() {
-	std::cout << "in rescue function" << std::endl;
-	/*
 	robot->m(127, 127, 500);
 	// turn towards the (potential) wall with as little space as possible
 	robot->turn(DTOR(22));
@@ -49,24 +50,33 @@ void Rescue::rescue() {
 	robot->m(127, 127, 600);
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
-	find_centre();
-	*/
-	/*
-	// search for victims
-	open_camera();
-	delay(1000);
-	while (1) {
-		std::cout << "searching for victims" << std::endl;
-		grab_frame();
-		cv::imshow("Frame", frame);
-		cv::waitKey(1);
+
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(20);
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(20);
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(500);
+
+	open_camera(VICTIM_CAP_RES);
+	//find_centre();
+	float x = 0.0f;
+	float y = 0.0f;
+	bool dead = false;
+	while(1) {
+		find_victims(x, y, dead);
+
+		if(x != -1.0f) robot->turn(DTOR(60.0f) * ((x - 80.0f) / 160.0f));
 	}
 	
-	
+	// search for victims
+	exit(0);
+	delay(1000);	
+	/*
 	uint8_t rescued_victims = 0;
 	bool ignore_dead = false;
 	while (rescued_victims < 3) {
-		grab_frame()
+		grab_frame();
 		if (victim_in_frame(ignore_dead)) {
 			drive to victim
 			if (victim is close enough) {
@@ -75,18 +85,18 @@ void Rescue::rescue() {
 				if (rescued_victims == 2) ignore_dead = false
 			}
 		}
-	}
-	*/
+	}*/
+	
 	find_black_corner(); // find black corner and unload victims
 	// find_exit();
 	exit(0);
 }
 
-void Rescue::open_camera() {
+void Rescue::open_camera(int width, int height) {
 	if(camera_opened) return;
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, 480); // 480
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 270); // 270
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, width); // 480
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, height); // 270
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	cap.set(cv::CAP_PROP_FPS, 120);
 	if(!cap.isOpened()) {
@@ -104,7 +114,9 @@ void Rescue::close_camera() {
 	camera_opened = false;
 }
 
-void Rescue::grab_frame() {
+cv::Mat Rescue::grab_frame(int width, int height) {
+	cv::Mat frame;
+	cv::Mat temp;
 	if(!camera_opened) {
 		std::cerr << "Tried to grab frame with closed camera" << std::endl;
 		exit(ERRCODE_CAM_CLOSED);
@@ -112,10 +124,12 @@ void Rescue::grab_frame() {
 
 	cap.grab();
 	cap.retrieve(frame);
-	debug_frame = frame.clone();
-	cv::flip(debug_frame, frame, 0);
-	cv::flip(frame, debug_frame, 1);
-	frame = debug_frame.clone();
+	cv::resize(frame, frame, cv::Size(width, height));
+	temp = frame.clone();
+	cv::flip(temp, frame, 0);
+	cv::flip(frame, temp, 1);
+	frame = temp.clone();
+	return frame;
 }
 
 // drives roughly to centre of rescue area
@@ -136,14 +150,16 @@ void Rescue::find_centre() {
 	exit(0);
 }
 
+#define BLACK_CORNER_RES 480, 270
+
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
 	std::cout << "in find_black_corner function" << std::endl;
 	robot->servo(SERVO_CAM, 132);
 	std::cout << "Adjusted servo position" << std::endl;
-	open_camera();
+	open_camera(BLACK_CORNER_RES);
 	while (1) {
-		grab_frame();
+		grab_frame(BLACK_CORNER_RES);
 		uint32_t num_black_pixels = 0;
 		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
 		//cv::imshow("Frame", black);
@@ -169,8 +185,8 @@ void Rescue::find_black_corner() {
 
   				robot->servo(SERVO_CAM, 65);
   				robot->m(127, 127, 1300);
-  				open_camera();
-  				grab_frame();
+  				open_camera(BLACK_CORNER_RES);
+  				grab_frame(BLACK_CORNER_RES);
   				close_camera();
 				cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
 				if (num_black_pixels > 3000 && robot->distance_avg(5, 0.2f) < 45) { // found black corner
@@ -190,7 +206,7 @@ void Rescue::find_black_corner() {
   					robot->turn(DTOR(30));
   					delay(500);
 					robot->servo(SERVO_CAM, 132);
-  					open_camera();
+  					open_camera(BLACK_CORNER_RES);
   					delay(300);
 				}
   			}
@@ -213,6 +229,29 @@ void Rescue::find_black_corner() {
 	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
 	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
 
+}
+
+void Rescue::find_victims(float& x, float& y, bool ignore_dead) {
+	x = -1.0f;
+	y = -1.0f;
+	cv::Mat frame = grab_frame(160, 120);
+	cv::Mat res = victim_ml.invoke(frame);
+	//cv::resize(res, res, cv::Size(160, 120));
+	cv::imshow("victim result", two_channel_to_three_channel(res));
+	std::vector<Victim> victims = victim_ml.extract_victims(res);
+	for(int i = 0; i < victims.size(); ++i) {
+		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 3, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 3);
+	}
+	cv::imshow("frame", frame);
+	cv::waitKey(1);
+
+	for(int i = 0; i < victims.size(); ++i) {
+		if(ignore_dead && victims[i].dead) continue;
+		if(victims[i].y > y) {
+			y = victims[i].y;
+			x = victims[i].x;
+		}
+	}
 }
 
 bool is_black2(uint8_t b, uint8_t g, uint8_t r) {

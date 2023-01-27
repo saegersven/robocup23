@@ -32,9 +32,8 @@ void Line::start() {
 	last_line_angle = 0.0f;
 	camera_opened = false;
 	found_silver = false;
-	open_camera(1280, 960);
+	open_camera(320, 192);
 	silver_ml.start();
-	victim_ml.init();
 }
 
 void Line::stop() {
@@ -486,7 +485,7 @@ void Line::line() {
 
 	//auto silver_start_time = std::chrono::high_resolution_clock::now();
 
-	//silver_ml.set_frame(frame);
+	silver_ml.set_frame(frame);
 
 	//auto end_time = std::chrono::high_resolution_clock::now();
 
@@ -496,16 +495,15 @@ void Line::line() {
 	uint32_t silver_time = std::chrono::duration_cast<std::chrono::microseconds>(end_time - silver_start_time).count();
 
 	std::cout << frame_time << "\t|\t" << main_time << "\t|\t" << silver_time << "\n" << total_time << "\n";*/
-	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
 	if(silver_ml.get_current_prediction()) {
-		std::count << "NN detected silver, checking distance..." << std::endl;
+		std::cout << "NN detected silver, checking distance..." << std::endl;
 		save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
 		int dist = robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
-		if (!(dist < 140 && dist > 90)) return; // dist must be between 120 and 90cm for rescue area
+		if (dist < 140 && dist > 90) return; // dist must be between 120 and 90cm for rescue area
 		// TODO: add further redundance like counting black pixels in frame
 		std::cout << "Distance within range, returning from line" << std::endl;
 		found_silver = true;
