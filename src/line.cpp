@@ -357,7 +357,7 @@ void Line::green() {
 		delay(50);
 		// Take another frame and reevaluate
 		open_camera();
-		grab_frame();
+		grab_frame(80, 48);
 		save_img(frame, "green");
 		close_camera();
 		black = in_range(frame, &is_black);
@@ -373,23 +373,7 @@ void Line::green() {
 			robot->m(127, 127, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "Result: LEFT" << std::endl;
-			robot->turn(DTOR(-73.0f));
-			/*std::cout << "Turned 45 degrees" << std::endl;
-			// turns further using camera until positioned properly
-			open_camera();
-			delay(200);
-			float line_angle = 1.0f;
-			while (true) {
-				std::cout << "in while" << std::endl;	
-				grab_frame();
-				uint32_t num_black_pixels = 0;
-				black = in_range(frame, &is_black, &num_black_pixels);
-				line_angle = get_line_angle(black);
-				std::cout << line_angle << std::endl;
-				cv::imshow("binary", black);
-				cv::waitKey(0);
-			}*/
-			
+			robot->turn(DTOR(-73.0f));			
 			delay(70);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
 			std::cout << "Result: RIGHT" << std::endl;
@@ -398,7 +382,7 @@ void Line::green() {
 		}
 		robot->m(127, 127, 70);
 		open_camera();
-		grab_frame();
+		grab_frame(80, 48);
 		uint32_t num_black_pixels = 0;
 		black = in_range(frame, &is_black, &num_black_pixels);
 		
@@ -408,13 +392,13 @@ void Line::green() {
 			uint32_t num_black_pixels_right = 0;
 			uint32_t num_black_pixels_left = 0;
 
-			grab_frame();
+			grab_frame(80, 48);
 			close_camera();
 
 			robot->turn(DTOR(50.0f));
 			delay(50);
 			open_camera();
-			grab_frame();
+			grab_frame(80, 48);
 			close_camera();
 
 			black = in_range(frame, &is_black, &num_black_pixels_right);
@@ -422,7 +406,7 @@ void Line::green() {
 			robot->turn(DTOR(-50.0f));
 			delay(50);
 			open_camera();
-			grab_frame();
+			grab_frame(80, 48);
 			close_camera();
 
 			black = in_range(frame, &is_black, &num_black_pixels_left);
@@ -480,11 +464,10 @@ void Line::rescue_kit() {
 
 void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
-	grab_frame(160, 120);
-	//frame = cv::imread("/home/pi/robocup23/runtime_data/b.png");
-	//cv::imshow("frame", frame); 
-	//cv::waitKey(0);
 
+	/*
+	// victim ml test, delete later
+	grab_frame(160, 120);
 	cv::Mat res = victim_ml.invoke(frame);
 	//cv::resize(res, res, cv::Size(160, 120));
 	cv::imshow("victim result", two_channel_to_three_channel(res));
@@ -492,12 +475,14 @@ void Line::line() {
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(debug_frame, cv::Point(victims[i].x, victims[i].y), 3, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 3);
 	}
+	*/
 
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
-	//follow();
-	//green();
-	//rescue_kit();
+	grab_frame(80, 48);
+	follow();
+	green();
+	rescue_kit();
 
 	//auto silver_start_time = std::chrono::high_resolution_clock::now();
 
@@ -513,14 +498,17 @@ void Line::line() {
 	std::cout << frame_time << "\t|\t" << main_time << "\t|\t" << silver_time << "\n" << total_time << "\n";*/
 	//std::cout << "S: " << silver_ml.get_current_prediction() << std::endl;
 
-	if(false && silver_ml.get_current_prediction()) {
+	if(silver_ml.get_current_prediction()) {
+		std::count << "NN detected silver, checking distance..." << std::endl;
 		save_img(frame, "potential_silver");
 		close_camera();
 		robot->stop();
+		int dist = robot->distance_avg(10, 0.2f);
+		std::cout << "Distance: " << dist << std::endl;
+		if (!(dist < 140 && dist > 90)) return; // dist must be between 120 and 90cm for rescue area
+		// TODO: add further redundance like counting black pixels in frame
+		std::cout << "Distance within range, returning from line" << std::endl;
 		found_silver = true;
-		std::cout << "Detected silver, returning from line" << std::endl;
-		//delay(1000);
-		//open_camera();
 	}
 
 #ifdef DEBUG

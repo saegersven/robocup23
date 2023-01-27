@@ -34,8 +34,6 @@ int main() {
 	line.start();
 	
 	Rescue rescue(robot);
-	//rescue.start();
-	//delay(10000000000);
 	
 	// set servos to default position
 	delay(50);
@@ -44,20 +42,15 @@ int main() {
 	robot->send_byte(CMD_SERVOS_HOME_POS);
 	delay(20);
 	robot->send_byte(CMD_SERVOS_HOME_POS);
-
 	delay(810);
+
 	std::cout << "Init." << std::endl;
 	while(!robot->button(BTN_RESTART)) {
 		robot->send_byte(CMD_READY);
 		delay(1);		
-		//std::cout << robot->read_distance() << std::endl;
 	}
 	while(robot->button(BTN_RESTART));
 	delay(40);
-
-	robot->servo(SERVO_CAM, 135);
-	delay(10);
-	robot->servo(SERVO_CAM, 135);
 	
 	auto last_started = millis(); // time at which robot has been restarted
 	
