@@ -40,6 +40,7 @@ void Line::stop() {
 	robot->stop();
 	close_camera();
 	silver_ml.stop();
+	std::cout << "Line stopped." << std::endl;
 }
 
 void Line::open_camera(int width, int height) {
@@ -464,20 +465,8 @@ void Line::rescue_kit() {
 void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
 
-	/*
-	// victim ml test, delete later
-	grab_frame(160, 120);
-	cv::Mat res = victim_ml.invoke(frame);
-	//cv::resize(res, res, cv::Size(160, 120));
-	cv::imshow("victim result", two_channel_to_three_channel(res));
-	std::vector<Victim> victims = victim_ml.extract_victims(res);
-	for(int i = 0; i < victims.size(); ++i) {
-		cv::circle(debug_frame, cv::Point(victims[i].x, victims[i].y), 3, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 3);
-	}
-	*/
-
-
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
+	std::cout << "Trying to grab frame" << std::endl;
 	grab_frame(80, 48);
 	follow();
 	green();
@@ -499,14 +488,17 @@ void Line::line() {
 	if(silver_ml.get_current_prediction()) {
 		std::cout << "NN detected silver, checking distance..." << std::endl;
 		save_img(frame, "potential_silver");
-		close_camera();
+		robot->turn(last_line_angle / 1.5f);
 		robot->stop();
+		delay(2000);
 		int dist = robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
-		if (dist < 140 && dist > 90) return; // dist must be between 120 and 90cm for rescue area
-		// TODO: add further redundance like counting black pixels in frame
-		std::cout << "Distance within range, returning from line" << std::endl;
-		found_silver = true;
+		if (dist < 140 && dist > 90) { // dist must be between 120 and 90cm for rescue area
+			// TODO: add further redundance like counting black pixels in frame
+			std::cout << "Distance within range, returning from line" << std::endl;
+			close_camera();
+			found_silver = true;
+		}
 	}
 
 #ifdef DEBUG

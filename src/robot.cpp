@@ -252,6 +252,7 @@ void Robot::stop() {
 
 // turns given angle in radians
 void Robot::turn(float angle) {
+	if(angle == 0.0f) return;
 	uint16_t duration = std::abs(angle) * RTOD(MS_PER_DEGREE);
 	if(angle > 0) {
 		m(70, -70, duration);

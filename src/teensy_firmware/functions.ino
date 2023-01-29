@@ -117,6 +117,46 @@ void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }
 
+void pick_up() {
+  servo_arm.attach(SERVO_ARM_PIN);
+  servo_arm.write(ARM_LOWER_POS);
+  delay(500);
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_OPEN);
+  servo_gripper2.write(GRIPPER2_OPEN);
+  delay(450);
+  m(70, 70, 200);
+  m(70, 70, 0);
+  
+  // close arm
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(250);
+  stop();
+  
+  // move arm up
+  servo_arm.attach(SERVO_ARM_PIN);
+  servo_arm.write(ARM_HIGHER_POS);
+  delay(900);
+
+  // open arm (only one side)
+  servo_gripper1.write(GRIPPER1_OPEN);
+  delay(300);
+
+  // close arm
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  
+  m(-70, -70, 400);
+  
+  // detach servos
+  servo_arm.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
+}
+
 // opens gripper and moves arm down
 void arm_down() {
   // move arm down a bit
@@ -132,9 +172,9 @@ void arm_down() {
   delay(450);
 
   // detach servos
-  servo_arm.detach();
-  servo_gripper1.detach();
-  servo_gripper2.detach();
+  //servo_arm.detach();
+  //servo_gripper1.detach();
+  //servo_gripper2.detach();
 }
 
 // closes gripper and unloads into victim container

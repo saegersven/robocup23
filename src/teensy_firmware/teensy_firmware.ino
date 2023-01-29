@@ -50,13 +50,8 @@ void sck_rising_interrupt() {
   ++num_bits;
 }
 
-int time_since_last_bat_update = 0;
 float minvol = 10.0;
 void loop() {
-  if (millis() - time_since_last_bat_update >= 500) {
-    time_since_last_bat_update = millis();
-    displayBatVoltage();
-  }
   while (digitalRead(CS_PIN) != LOW);
   while (digitalRead(CS_PIN) == LOW);
   int len = num_bits / 8;
@@ -100,11 +95,12 @@ void loop() {
       debugln((int)data[2]);
     */
   } else if (cmd == CMD_READY) {
+    displayBatVoltage();
     digitalWrite(LED3, HIGH);
     delay(30);
     digitalWrite(LED3, LOW);
   } else if (cmd == CMD_SERVOS_HOME_POS) {
-    
+
     servo_cam.attach(SERVO_CAM_PIN);
     servo_arm.attach(SERVO_ARM_PIN);
     servo_gripper1.attach(SERVO_GRIPPER1_PIN);
@@ -116,25 +112,27 @@ void loop() {
     servo_gripper2.write(GRIPPER2_CLOSED);
     servo_arm.write(ARM_HIGHER_POS);
     servo_gate.write(GATE_CLOSED);
-    
+
     // wait for servos to finish turning
     delay(800);
-    
+
     //servo_cam.detach(); // cam servo stays attached
     servo_gripper1.detach();
     servo_gripper2.detach();
     servo_arm.detach();
     servo_gate.detach();
-    
-  } else if(cmd == CMD_ARM_DOWN) {
+
+  } else if (cmd == CMD_ARM_DOWN) {
     arm_down();
     Serial.println("Received CMD_ARM DOWN");
-  } else if(cmd == CMD_ARM_UP) {
+  } else if (cmd == CMD_ARM_UP) {
     arm_up();
-  } else if(cmd == CMD_ARM_HALF_UP) {
+  } else if (cmd == CMD_ARM_HALF_UP) {
     arm_half_up();
-  } else if(cmd == CMD_UNLOAD) {
+  } else if (cmd == CMD_UNLOAD) {
     unload_victims();
+  } else if (cmd == CMD_PICK_UP) {
+    pick_up();
   }
 
   // clear buffer

@@ -29,6 +29,7 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
+	std::cout << "Rescue start." << std::endl;
 	robot->m(127, 127, 500);
 	// turn towards the (potential) wall with as little space as possible
 	robot->turn(DTOR(22));
@@ -60,13 +61,63 @@ void Rescue::rescue() {
 
 	open_camera(VICTIM_CAP_RES);
 	//find_centre();
+	float last_x = -1.0f;
 	float x = 0.0f;
 	float y = 0.0f;
 	bool dead = false;
+
+	const float sensitivity = 0.5f;
+	const int base_speed = 40;
+
+	int num_frames = 0;
+	int cam_angle = CAM_HIGHER_POS;
+
 	while(1) {
 		find_victims(x, y, dead);
-
-		if(x != -1.0f) robot->turn(DTOR(60.0f) * ((x - 80.0f) / 160.0f));
+		float angle = DTOR(60.0f) * ((x - 80.0f) / 160.0f);
+		if(x != -1.0f) {
+			if(last_x == -1.0f) {
+				robot->turn(angle);
+				close_camera();
+				robot->servo(SERVO_CAM, CAM_HIGHER_POS - 25);
+				open_camera(VICTIM_CAP_RES);
+				for(find_victims(x, y, dead); x == -1.0f;find_victims(x, y, dead)) {
+					robot->m(40, 40);
+				}
+				robot->m(-50, -50, 100);
+			}
+			std::cout << "Angle: " << RTOD(angle) << std::endl;
+			std::cout << y << std::endl;
+			if(y > 45.0f) {
+				robot->turn(angle / 2.5f);
+				if(angle < DTOR(5.0f)) {
+					if(num_frames < 10) {
+						++num_frames;
+					} else {
+						num_frames = 0;
+						std::cout << "Pick UP!" << std::endl;
+						close_camera();
+						robot->turn(DTOR(-16.0f));
+						robot->send_byte(CMD_PICK_UP);
+						delay(4200 + 300);
+						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+						open_camera(VICTIM_CAP_RES);
+					}
+				}
+			} else {
+				num_frames = 0;
+				robot->m(clamp((float)base_speed + angle * sensitivity, -128.0f, 127.0f),
+					clamp((float)base_speed - angle * sensitivity, -128.0f, 127.0f));
+			}
+		} else if(x != last_x) {
+			//robot->m(-70, -70, 300);
+		} else  {
+			close_camera();
+			robot->turn(DTOR(30.0f));
+			delay(50);
+			open_camera(VICTIM_CAP_RES);
+		}
+		last_x = x;
 	}
 	
 	// search for victims
@@ -240,7 +291,7 @@ void Rescue::find_victims(float& x, float& y, bool ignore_dead) {
 	cv::imshow("victim result", two_channel_to_three_channel(res));
 	std::vector<Victim> victims = victim_ml.extract_victims(res);
 	for(int i = 0; i < victims.size(); ++i) {
-		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 3, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 3);
+		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
 	cv::imshow("frame", frame);
 	cv::waitKey(1);

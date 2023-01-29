@@ -33,10 +33,10 @@
 // servo position (UPDATE IN BOTH FILES!!!)
 #define CAM_LOWER_POS 71
 #define CAM_HIGHER_POS 120
-#define ARM_LOWER_POS 0
+#define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
-#define GRIPPER1_OPEN 60
-#define GRIPPER1_CLOSED 125
+#define GRIPPER1_OPEN 70
+#define GRIPPER1_CLOSED 150
 #define GRIPPER2_OPEN 95
 #define GRIPPER2_CLOSED 15
 #define GATE_OPEN 100
@@ -48,13 +48,14 @@
 #define SCK_PIN 13
 #define CS_PIN 15
 
-// SPI commands
-#define CMD_MOTOR 0x01
-#define CMD_STOP 0x02
-#define CMD_SERVO 0x03
-#define CMD_READY 0x05
-#define CMD_SERVOS_HOME_POS 0x06
-#define CMD_ARM_DOWN 0x07
-#define CMD_ARM_UP 0x08
-#define CMD_ARM_HALF_UP 0x09
-#define CMD_UNLOAD 0x10
+// SPI commands (abitrary numbers)
+#define CMD_MOTOR 11
+#define CMD_STOP 21
+#define CMD_SERVO 31
+#define CMD_READY 41
+#define CMD_SERVOS_HOME_POS 51
+#define CMD_ARM_DOWN 61
+#define CMD_ARM_UP 71
+#define CMD_ARM_HALF_UP 81
+#define CMD_UNLOAD 91
+#define CMD_PICK_UP 101
