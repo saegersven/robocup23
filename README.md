@@ -10,19 +10,17 @@
 
 #### Software TODOs
 
-- [ ] obstacle
-- [ ] train silver ml
-- [ ] label victim data
-- [ ] train victim ml
-- [ ] change cam resolution to 16:9?
+- [ ] silver redundance (count black pxls)
+- [ ] checking for silver when starting (without NN in case it does not work)
 
 
 #### Hardware TODOs
 
-- [ ] replace gate and camera servo
+- [ ]
 
 #### CAD TODOs
-...
+
+- [ ] design new gripping mechanism using Polulu 20D instead of servos
 
 #### Testing TODOs
 - [ ] find out max speed
