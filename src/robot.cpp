@@ -220,11 +220,17 @@ void Robot::spi_write(uint8_t* data, uint8_t len) {
 	}
 }
 
+void Robot::set_blocked(bool blocked) {
+	this->blocked = blocked;
+}
+
 bool Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }
 
 void Robot::m(int8_t left, int8_t right, uint16_t duration) {
+	if(blocked) return;
+
 	uint8_t msg[3] = {CMD_MOTOR, *(uint8_t*)(&left), *(uint8_t*)(&right)};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
 	
@@ -240,6 +246,8 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 }
 
 void Robot::stop() {
+	if(blocked) return;
+
 	//send_byte(CMD_STOP);
 	digitalWrite(STOP_PIN, HIGH);
 	delayMicroseconds(100);
@@ -252,6 +260,8 @@ void Robot::stop() {
 
 // turns given angle in radians
 void Robot::turn(float angle) {
+	if(blocked) return;
+
 	if(angle == 0.0f) return;
 	uint16_t duration = std::abs(angle) * RTOD(MS_PER_DEGREE);
 	if(angle > 0) {
@@ -262,12 +272,15 @@ void Robot::turn(float angle) {
 }
 
 void Robot::send_byte(char b) {
+	if(blocked) return;
 	//i2c_write_byte_single(TEENSY_I2C_ADDR, b);
 	uint8_t msg[1] = {b};
 	spi_write(msg, 1);
 }
 
 void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
+	if(blocked) return;
+
 	uint8_t msg[3] = {CMD_SERVO, servo_id, angle};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
 	spi_write(msg, 3);

@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <vector>
+#include <atomic>
 
 extern "C" {
 #include "BNO055_driver/bno055.h"
@@ -86,6 +87,8 @@ private:
 	int i2c_fd;
 	int spi_fd;
 
+	std::atomic<bool> blocked;
+
 	uint8_t spi_mode;
 	uint32_t spi_speed;
 	uint8_t spi_bits_per_word;
@@ -97,6 +100,8 @@ private:
 	VL53L0X vl53l0x;
 public:
 	Robot();
+
+	void set_blocked(bool blocked);
 
 	/**
 	 * Initialize spi

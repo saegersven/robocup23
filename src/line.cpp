@@ -34,12 +34,22 @@ void Line::start() {
 	found_silver = false;
 	open_camera(320, 192);
 	silver_ml.start();
+	// Start obstacle thread
+	running = true;
+	obstacle_enabled = true;
+	obstacle_active = false;
+	std::thread t([this] {this->obstacle();});
+	t.detach();
 }
 
 void Line::stop() {
 	robot->stop();
 	close_camera();
 	silver_ml.stop();
+	running = false; // Stop obstacle thread
+	obstacle_enabled = true;
+	obstacle_active = false;
+	cv::destroyAllWindows();
 	std::cout << "Line stopped." << std::endl;
 }
 
@@ -79,6 +89,69 @@ void Line::grab_frame(int width, int height) {
 	cv::flip(debug_frame, frame, 0);
 	cv::flip(frame, debug_frame, 1);
 	frame = debug_frame.clone();
+}
+
+void Line::obstacle() {
+	while(running) {
+		if((obstacle_enabled == false) || (obstacle_active == true)) continue;
+
+		int dist = robot->distance();
+		std::cout << dist << std::endl;
+		delay(30);
+
+		if(dist < 10) {
+			robot->stop();
+			robot->set_blocked(true);
+			delay(10);
+
+			if(robot->distance_avg(10, 0.2f) < 12) {
+				if(robot->distance_avg(10, 0.2f) < 12) {
+					robot->set_blocked(false);
+					delay(50);
+					obstacle_active = true;
+
+					/*std::cout << "OBSTACLE!" << std::endl;
+					obstacle_active = false;
+					delay(3000);*/
+				}
+			}
+			robot->set_blocked(false);
+		}
+	}
+}
+
+bool Line::obstacle_straight_line(int duration) {
+	auto start_t = std::chrono::high_resolution_clock::now();
+
+	close_camera();
+	open_camera();
+
+	while(1) {
+		robot->m(50, 50);
+
+		grab_frame();
+		cv::imshow("Debug", frame);
+		cv::waitKey(1);
+
+		cv::Mat roi = frame(cv::Range(0, 48), cv::Range(30, 80));
+		uint32_t roi_size = roi.cols * roi.rows;
+
+		uint32_t num_black = 0;
+		in_range(frame, &is_black, &num_black);
+
+		float p = (float)num_black / roi_size;
+		std::cout << p << std::endl;
+
+		if(p > 0.2f) {
+			// Abort
+			robot->stop();
+			return true;
+		}
+
+		auto now = std::chrono::high_resolution_clock::now();
+		uint32_t elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_t).count();
+		if(elapsed >= duration) return false;
+	}
 }
 
 float Line::difference_weight(float x) {
@@ -340,6 +413,9 @@ void Line::green() {
 	uint8_t green_result = green_direction(global_average_x, global_average_y);
 
 	if(green_result != 0) {
+		obstacle_enabled = false;
+		obstacle_active = false;
+
 		std::cout << "Approaching intersection (" << std::to_string(green_result) << ")\n";
 
 		robot->stop();
@@ -369,7 +445,7 @@ void Line::green() {
 		// TODO: See if checking the previous result is actually necessary
 		if(new_green_result == GREEN_RESULT_DEAD_END || green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "Result: DEAD END" << std::endl;
-			robot->turn(R180);
+			robot->turn(DTOR(170.0f));
 			robot->m(127, 127, 150);
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "Result: LEFT" << std::endl;
@@ -418,6 +494,7 @@ void Line::green() {
 			}
 			open_camera();
 		}
+		obstacle_enabled = true;
 	}
 }
 
@@ -466,7 +543,6 @@ void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
-	std::cout << "Trying to grab frame" << std::endl;
 	grab_frame(80, 48);
 	follow();
 	green();
@@ -499,6 +575,41 @@ void Line::line() {
 			close_camera();
 			found_silver = true;
 		}
+	}
+
+	if(obstacle_active) {
+		std::cout << "OBSTACLE ACTIVE" << std::endl;
+		close_camera();
+
+		robot->m(-100, -100, 120);
+		delay(20);
+		robot->turn(-R90);
+		robot->m(100, 100, 450);
+		delay(20);
+		robot->turn(R90);
+		open_camera();
+
+		const uint32_t durations[] = {1150, 1150, 1150, 675};
+
+		for(int i = 0; i < 4; ++i) {
+			if(obstacle_straight_line(durations[i])) break;
+
+			close_camera();
+			robot->turn(R90);
+			open_camera();
+		}
+
+		close_camera();
+
+		robot->m(-40, -40, 170);
+		robot->m(-40, 40, 200);
+		robot->m(80, 80, 200);
+		robot->m(-80, 80, 180);
+		robot->m(-40, -40, 350);
+
+		open_camera();
+
+		obstacle_active = false;
 	}
 
 #ifdef DEBUG

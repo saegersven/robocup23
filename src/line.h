@@ -86,6 +86,10 @@ private:
 	// used for silver testing
 	bool test = false;
 
+	std::atomic<bool> running;
+	std::atomic<bool> obstacle_enabled;
+	std::atomic<bool> obstacle_active;
+
 	float last_line_angle;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
@@ -97,6 +101,12 @@ private:
 	void open_camera(int width=LINE_CAPTURE_WIDTH, int height=LINE_CAPTURE_HEIGHT);
 	void close_camera();
 	void grab_frame(int width=LINE_FRAME_WIDTH, int height=LINE_FRAME_HEIGHT);
+
+	/**
+	 * Async method, checks distance
+	 */
+	void obstacle();
+	bool obstacle_straight_line(int duration);
 
 	/*########################
 	METHODS FOR LINE-FOLLOWING

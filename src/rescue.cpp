@@ -23,6 +23,8 @@ void Rescue::start() {
 
 void Rescue::stop() {
 	pthread_cancel(this->native_handle);
+	close_camera();
+	cv::destroyAllWindows();
 }
 
 #define VICTIM_CAP_RES 1280, 960

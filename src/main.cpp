@@ -31,7 +31,6 @@ int main() {
 	robot->stop();
 	*/
 	Line line(robot);
-	line.start();
 	
 	Rescue rescue(robot);
 	
@@ -50,6 +49,7 @@ int main() {
 		delay(1);	
 	}
 	while(robot->button(BTN_RESTART));
+	line.start();
 	delay(40);
 	
 	auto last_started = millis(); // time at which robot has been restarted
