@@ -562,11 +562,14 @@ void Line::line() {
 	std::cout << frame_time << "\t|\t" << main_time << "\t|\t" << silver_time << "\n" << total_time << "\n";*/
 
 	if(silver_ml.get_current_prediction()) {
+		obstacle_enabled = false;
+		robot->set_blocked(false);
+		delay(50);
 		std::cout << "NN detected silver, checking distance..." << std::endl;
 		save_img(frame, "potential_silver");
 		robot->turn(last_line_angle / 1.5f);
 		robot->stop();
-		delay(2000);
+		delay(1000);
 		int dist = robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
 		if (dist < 140 && dist > 90) { // dist must be between 120 and 90cm for rescue area
@@ -574,7 +577,9 @@ void Line::line() {
 			std::cout << "Distance within range, returning from line" << std::endl;
 			close_camera();
 			found_silver = true;
+			return;
 		}
+		obstacle_enabled = true;
 	}
 
 	if(obstacle_active) {
