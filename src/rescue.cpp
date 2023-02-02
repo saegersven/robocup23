@@ -54,14 +54,6 @@ void Rescue::rescue() {
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 
-	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-	delay(20);
-	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-	delay(20);
-	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-	delay(500);
-
-	open_camera(VICTIM_CAP_RES);
 	//find_centre();
 	float last_x = -1.0f;
 	float x = 0.0f;
@@ -73,6 +65,13 @@ void Rescue::rescue() {
 
 	int num_frames = 0;
 	int cam_angle = CAM_HIGHER_POS;
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(20);
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(20);
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+	delay(100);
+	open_camera(VICTIM_CAP_RES);
 
 	while(1) {
 		find_victims(x, y, dead);
@@ -108,6 +107,15 @@ void Rescue::rescue() {
 
 						std::cout << "Found centre, finding black corner" << std::endl;
 						find_black_corner();
+						
+						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+						delay(20);
+						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+						delay(20);
+						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+						delay(100);
+
+						open_camera(VICTIM_CAP_RES);
 					}
 				}
 			} else {
@@ -188,17 +196,11 @@ void Rescue::find_centre() {
 
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
-	std::cout << "in find_black_corner function" << std::endl;
 	robot->servo(SERVO_CAM, 140);
-	std::cout << "Adjusted servo position" << std::endl;
 	close_camera();
 	open_camera(BLACK_CORNER_RES);
-	std::cout << "openend camera" << std::endl;
 	while (1) {
 		frame = grab_frame(BLACK_CORNER_RES);
-		std::cout << "grabbed camera" << std::endl;
-		cv::imshow("Frame", frame);
-		cv::waitKey(1);
 		uint32_t num_black_pixels = 0;
 		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
 		//cv::imshow("Frame", black);
@@ -252,7 +254,7 @@ void Rescue::find_black_corner() {
 		} else {
 			robot->turn(DTOR(5));
 		}
-  		//cv::imshow("Frame", frame);
+  		cv::imshow("Frame", frame);
 		cv::waitKey(1);
 	}
 
