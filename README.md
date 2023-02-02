@@ -11,17 +11,5 @@
 #### Software TODOs
 
 - [ ] silver redundance (count black pxls)
-- [ ] checking for silver when starting (without NN in case it does not work)
-
-
-#### Hardware TODOs
-
-- [ ]
-
-#### CAD TODOs
-
-- [ ] design new gripping mechanism using Polulu 20D instead of servos
-
-#### Testing TODOs
-- [ ] find out max speed
+- [ ] checking for silver when starting (without NN in case it does not work
 - [ ] find corrent backwheel_factor through intensive testing

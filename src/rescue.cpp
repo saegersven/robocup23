@@ -103,7 +103,11 @@ void Rescue::rescue() {
 						robot->send_byte(CMD_PICK_UP);
 						delay(4200 + 300);
 						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-						open_camera(VICTIM_CAP_RES);
+
+						find_centre();
+
+						std::cout << "Found centre, finding black corner" << std::endl;
+						find_black_corner();
 					}
 				}
 			} else {
@@ -121,35 +125,13 @@ void Rescue::rescue() {
 		}
 		last_x = x;
 	}
-	
-	// search for victims
-	exit(0);
-	delay(1000);	
-	/*
-	uint8_t rescued_victims = 0;
-	bool ignore_dead = false;
-	while (rescued_victims < 3) {
-		grab_frame();
-		if (victim_in_frame(ignore_dead)) {
-			drive to victim
-			if (victim is close enough) {
-				pick up victim
-				++rescued_victims
-				if (rescued_victims == 2) ignore_dead = false
-			}
-		}
-	}*/
-	
-	find_black_corner(); // find black corner and unload victims
-	// find_exit();
-	exit(0);
 }
 
 void Rescue::open_camera(int width, int height) {
 	if(camera_opened) return;
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, width); // 480
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, height); // 270
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, width);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, height);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	cap.set(cv::CAP_PROP_FPS, 120);
 	if(!cap.isOpened()) {
@@ -200,7 +182,6 @@ void Rescue::find_centre() {
 		}
 	}
 	robot->stop();
-	exit(0);
 }
 
 #define BLACK_CORNER_RES 480, 270
@@ -208,11 +189,16 @@ void Rescue::find_centre() {
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
 	std::cout << "in find_black_corner function" << std::endl;
-	robot->servo(SERVO_CAM, 132);
+	robot->servo(SERVO_CAM, 140);
 	std::cout << "Adjusted servo position" << std::endl;
+	close_camera();
 	open_camera(BLACK_CORNER_RES);
+	std::cout << "openend camera" << std::endl;
 	while (1) {
-		grab_frame(BLACK_CORNER_RES);
+		frame = grab_frame(BLACK_CORNER_RES);
+		std::cout << "grabbed camera" << std::endl;
+		cv::imshow("Frame", frame);
+		cv::waitKey(1);
 		uint32_t num_black_pixels = 0;
 		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
 		//cv::imshow("Frame", black);
