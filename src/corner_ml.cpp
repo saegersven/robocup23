@@ -18,7 +18,7 @@ void CornerML::init() {
 }
 
 cv::Mat CornerML::invoke(cv::Mat image) {
-    cv::resize(image, image, cv::Size(IN_WIDTH, IN_HEIGHT));
+    cv::resize(image, image, cv::Size(CORNER_IN_WIDTH, CORNER_IN_HEIGHT));
 
     for(int i = 0; i < image.rows; ++i) {
         cv::Vec3b* p = image.ptr<cv::Vec3b>(i);
@@ -31,16 +31,16 @@ cv::Mat CornerML::invoke(cv::Mat image) {
     interpreter->Invoke();
     output_layer = interpreter->typed_output_tensor<float>(0);
 
-    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC1);
+    cv::Mat out(CORNER_OUT_HEIGHT, CORNER_OUT_WIDTH, CV_32FC1);
 
-    for(int i = 0; i < OUT_HEIGHT; ++i) {
+    for(int i = 0; i < CORNER_OUT_HEIGHT; ++i) {
         float* p = out.ptr<float>(i);
-        for(int j = 0; j < OUT_WIDTH; ++j) {
-            for(int k = 0; k < OUT_CHANNELS; ++k) {
-                float val = output_layer[i * OUT_WIDTH * OUT_CHANNELS + j * OUT_CHANNELS + k];
+        for(int j = 0; j < CORNER_OUT_WIDTH; ++j) {
+            for(int k = 0; k < CORNER_OUT_CHANNELS; ++k) {
+                float val = output_layer[i * CORNER_OUT_WIDTH * CORNER_OUT_CHANNELS + j * CORNER_OUT_CHANNELS + k];
                 if(val > 1.0f) val = 1.0f;
                 else if(val < 0.0f) val = 0.0f;
-                p[j * OUT_CHANNELS + k] = val;
+                p[j * CORNER_OUT_CHANNELS + k] = val;
             }
         }
     }
@@ -76,8 +76,8 @@ bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y) {
 
     if(largest_contour_area < 8.0f) return false; // TODO: Minimum area value may not be perfec
 
-    const float CHUNK_WIDTH = (float)IN_WIDTH / OUT_WIDTH;
-    const float CHUNK_HEIGHT = (float)IN_HEIGHT / OUT_HEIGHT;
+    const float CHUNK_WIDTH = (float)CORNER_IN_WIDTH / CORNER_OUT_WIDTH;
+    const float CHUNK_HEIGHT = (float)CORNER_IN_HEIGHT / CORNER_OUT_HEIGHT;
 
     cv::Rect rect = cv::boundingRect(contours[largest_contour_idx]);
 

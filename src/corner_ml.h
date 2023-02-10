@@ -15,12 +15,12 @@
 
 #include "utils.h"
 
-#define IN_WIDTH 160
-#define IN_HEIGHT 120
+#define CORNER_IN_WIDTH 160
+#define CORNER_IN_HEIGHT 120
 
-#define OUT_WIDTH 32
-#define OUT_HEIGHT 12
-#define OUT_CHANNELS 1
+#define CORNER_OUT_WIDTH 32
+#define CORNER_OUT_HEIGHT 12
+#define CORNER_OUT_CHANNELS 1
 
 #define CORNER_MODEL_PATH "/home/pi/robocup23/runtime_data/corner.tflite"
 

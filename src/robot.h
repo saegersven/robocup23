@@ -68,6 +68,8 @@ extern "C" {
 
 #define MS_PER_DEGREE (4.2f - 0.15f) // milliseconds a one degree turn takes
 
+#define T180_ERR (-DTOR(6.0f))
+
 //#define ENABLE_VL53L0X
 //#define ENABLE_BNO055
 

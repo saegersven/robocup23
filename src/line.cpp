@@ -579,6 +579,7 @@ void Line::line() {
 			found_silver = true;
 			return;
 		}
+		robot->m(80, 80, 50);
 		obstacle_enabled = true;
 	}
 

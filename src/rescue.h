@@ -11,6 +11,8 @@
 #include "line.h"
 #include "robot.h"
 #include "utils.h"
+#include "victim_ml.h"
+#include "corner_ml.h"
 
 #define RESCUE_FRAME_WIDTH 160
 #define RESCUE_FRAME_HEIGHT 120
@@ -43,6 +45,7 @@ private:
 	std::thread::native_handle_type native_handle;
 
 	VictimML victim_ml;
+	CornerML corner_ml;
 
 	// Camera control
 	cv::VideoCapture cap;
