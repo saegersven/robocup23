@@ -10,6 +10,7 @@
 
 #include "robot.h"
 #include "utils.h"
+
 Rescue::Rescue(std::shared_ptr<Robot> robot) : finished(false) {
 	this->robot = robot;
 }
@@ -19,6 +20,7 @@ void Rescue::start() {
 	this->native_handle = rescue_thread.native_handle();
 	rescue_thread.detach();
 	victim_ml.init();
+	corner_ml.init();
 }
 
 void Rescue::stop() {
@@ -55,9 +57,9 @@ void Rescue::rescue() {
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 
 	//find_centre();
-	float last_x = -1.0f;
-	float x = 0.0f;
-	float y = 0.0f;
+	float last_x_victim = -1.0f;
+	float x_victim = 0.0f;
+	float y_victim = 0.0f;
 	bool dead = false;
 
 	const float sensitivity = 0.5f;
@@ -74,24 +76,24 @@ void Rescue::rescue() {
 	open_camera(VICTIM_CAP_RES);
 
 	while(1) {
-		find_victims(x, y, dead);
-		float angle = DTOR(60.0f) * ((x - 80.0f) / 160.0f);
-		if(x != -1.0f) {
-			if(last_x == -1.0f) {
-				robot->turn(angle);
+		find_victims(x_victim, y_victim, dead);
+		float angle_victim = DTOR(60.0f) * ((x_victim - 80.0f) / 160.0f);
+		if(x_victim != -1.0f) {
+			if(last_x_victim == -1.0f) {
+				robot->turn(angle_victim);
 				close_camera();
 				robot->servo(SERVO_CAM, CAM_HIGHER_POS - 25);
 				open_camera(VICTIM_CAP_RES);
-				for(find_victims(x, y, dead); x == -1.0f;find_victims(x, y, dead)) {
+				for(find_victims(x, y, dead); x == -1.0f;find_victims(x_victim, y_victim, dead)) {
 					robot->m(40, 40);
 				}
 				robot->m(-50, -50, 100);
 			}
-			std::cout << "Angle: " << RTOD(angle) << std::endl;
-			std::cout << y << std::endl;
+			std::cout << "Angle: " << RTOD(angle_victim) << std::endl;
+			std::cout << "Y: " << y_victim << std::endl;
 			if(y > 45.0f) {
-				robot->turn(angle / 2.5f);
-				if(angle < DTOR(5.0f)) {
+				robot->turn(angle_victim / 2.5f);
+				if(angle_victim < DTOR(5.0f)) {
 					if(num_frames < 10) {
 						++num_frames;
 					} else {
@@ -120,10 +122,10 @@ void Rescue::rescue() {
 				}
 			} else {
 				num_frames = 0;
-				robot->m(clamp((float)base_speed + angle * sensitivity, -128.0f, 127.0f),
-					clamp((float)base_speed - angle * sensitivity, -128.0f, 127.0f));
+				robot->m(clamp((float)base_speed + angle_victim * sensitivity, -128.0f, 127.0f),
+					clamp((float)base_speed - angle_victim * sensitivity, -128.0f, 127.0f));
 			}
-		} else if(x != last_x) {
+		} else if(x != last_x_victim) {
 			//robot->m(-70, -70, 300);
 		} else  {
 			close_camera();
@@ -131,7 +133,7 @@ void Rescue::rescue() {
 			delay(50);
 			open_camera(VICTIM_CAP_RES);
 		}
-		last_x = x;
+		last_x_victim = x;
 	}
 }
 
@@ -196,6 +198,8 @@ void Rescue::find_centre() {
 
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
+	/*
+	### OLD STUFF, COULD BE DELETED ###
 	robot->servo(SERVO_CAM, 140);
 	close_camera();
 	open_camera(BLACK_CORNER_RES);
@@ -270,27 +274,55 @@ void Rescue::find_black_corner() {
 	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
 	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
 
+	### END OF OLD STUFF ###
+	*/
+	robot->servo(0, CAM_HIGHER_POS);
+	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
+
+	float last_x_victim = -1.0f;
+	float x_victim = 0.0f;
+	
+	while (1) {
+		for (int i = 0; i < (int) 360 / deg_per_iteration; ++i) {
+			cv::Mat frame = grab_frame(160, 120);
+			cv::Mat res = corner_ml.invoke(frame);
+			cv::imshow("Black corner", two_channel_to_three_channel(res));
+
+			std::vector<Corner> corner = corner_ml.extract_corner(res, x_corner, y_corner);
+
+
+			robot->turn(DTOR(deg_per_iteration));
+		}
+		// robot turned full 360 deg and did not find corner
+		// recentre and increase cam angle a bit
+		find_centre();
+		robot->servo(0, CAM_HIGHER_POS + 5);
+
+	}
+
+
+
 }
 
-void Rescue::find_victims(float& x, float& y, bool ignore_dead) {
-	x = -1.0f;
-	y = -1.0f;
+void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead) {
+	x_victim = -1.0f;
+	y_victim = -1.0f;
 	cv::Mat frame = grab_frame(160, 120);
 	cv::Mat res = victim_ml.invoke(frame);
 	//cv::resize(res, res, cv::Size(160, 120));
-	cv::imshow("victim result", two_channel_to_three_channel(res));
+	cv::imshow("Victim result", two_channel_to_three_channel(res));
 	std::vector<Victim> victims = victim_ml.extract_victims(res);
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
-	cv::imshow("frame", frame);
+	cv::imshow("Victims", frame);
 	cv::waitKey(1);
 
 	for(int i = 0; i < victims.size(); ++i) {
 		if(ignore_dead && victims[i].dead) continue;
 		if(victims[i].y > y) {
-			y = victims[i].y;
-			x = victims[i].x;
+			x_victims = victims[i].x;
+			y_victims = victims[i].y;
 		}
 	}
 }
