@@ -1,0 +1,88 @@
+#include "corner_ml.h"
+
+CornerML::CornerML() {}
+
+void CornerML::init() {
+    model = tflite::FlatBufferModel::BuildFromFile(CORNER_MODEL_PATH);
+    tflite::ops::builtin::BuiltinOpResolver resolver;
+    tflite::InterpreterBuilder builder(*model, resolver);
+    if(builder(&interpreter) != kTfLiteOk) {
+        std::cout << "Failed building interpreter (Corner)" << std::endl;
+    }
+	
+	if(interpreter->AllocateTensors() != kTfLiteOk) {
+		std::cerr << "Failed allocating tensors (Corner)" << std::endl;
+	}
+
+    input_layer = interpreter->typed_input_tensor<float>(0);
+}
+
+cv::Mat CornerML::invoke(cv::Mat image) {
+    cv::resize(image, image, cv::Size(IN_WIDTH, IN_HEIGHT));
+
+    for(int i = 0; i < image.rows; ++i) {
+        cv::Vec3b* p = image.ptr<cv::Vec3b>(i);
+        for(int j = 0; j < image.cols; ++j) {
+            float d = ((float)p[j][0] + p[j][1] + p[j][2]) / 3.0f;
+            input_layer[i * image.cols + j] = d;
+        }
+    }
+
+    interpreter->Invoke();
+    output_layer = interpreter->typed_output_tensor<float>(0);
+
+    cv::Mat out(OUT_HEIGHT, OUT_WIDTH, CV_32FC1);
+
+    for(int i = 0; i < OUT_HEIGHT; ++i) {
+        float* p = out.ptr<float>(i);
+        for(int j = 0; j < OUT_WIDTH; ++j) {
+            for(int k = 0; k < OUT_CHANNELS; ++k) {
+                float val = output_layer[i * OUT_WIDTH * OUT_CHANNELS + j * OUT_CHANNELS + k];
+                if(val > 1.0f) val = 1.0f;
+                else if(val < 0.0f) val = 0.0f;
+                p[j * OUT_CHANNELS + k] = val;
+            }
+        }
+    }
+    return out;
+}
+
+bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y) {
+    const float THRESHOLD = 0.4f;
+
+    cv::Mat blurred;
+    cv::GaussianBlur(probability_map, blurred, cv::Size(3, 3), 0);
+
+    cv::Mat thresh;
+    cv::inRange(blurred, cv::Scalar(THRESHOLD), cv::Scalar(1.0f), thresh);
+
+    std::vector<std::vector<cv::Point>> contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+    if(contours.size() == 0) return false;
+
+    // Find largest contour
+    float largest_contour_area = 10000.0f;
+    int largest_contour_idx = 0;
+
+    for(int i = 0; i < contours.size(); ++i) {
+        float area = cv::contourArea(contours[i]);
+        if(area > largest_contour_area) {
+            largest_contour_area = area;
+            largest_contour_idx = i;
+        }
+    }
+
+    if(largest_contour_area < 8.0f) return false; // TODO: Minimum area value may not be perfec
+
+    const float CHUNK_WIDTH = (float)IN_WIDTH / OUT_WIDTH;
+    const float CHUNK_HEIGHT = (float)IN_HEIGHT / OUT_HEIGHT;
+
+    cv::Rect rect = cv::boundingRect(contours[largest_contour_idx]);
+
+    x = (rect.x + rect.width / 2.0f) * CHUNK_WIDTH;
+    y = (rect.y + rect.height / 2.0f) * CHUNK_HEIGHT;
+
+    return true;
+}
