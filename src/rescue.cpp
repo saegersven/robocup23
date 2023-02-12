@@ -200,90 +200,11 @@ void Rescue::find_centre() {
 
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
-	/*
-	### OLD STUFF, COULD BE DELETED ###
-	robot->servo(SERVO_CAM, 140);
-	close_camera();
-	open_camera(BLACK_CORNER_RES);
-	while (1) {
-		frame = grab_frame(BLACK_CORNER_RES);
-		uint32_t num_black_pixels = 0;
-		cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
-		//cv::imshow("Frame", black);
-		std::cout << "Black pixels: " << num_black_pixels << std::endl;
-		if (num_black_pixels > 5000) { // possibly black corner
-			std::vector<std::vector<cv::Point>> contours;
-  			cv::findContours(black, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-  			std::sort(contours.begin(), contours.end(), [](const std::vector<cv::Point>& c1, const std::vector<cv::Point>& c2) {
-    		return cv::contourArea(c1, false) > cv::contourArea(c2, false);
-  			});
-
-  			cv::Rect bounding_box = cv::boundingRect(contours[0]);
-
-  			cv::rectangle(frame, bounding_box, cv::Scalar(0, 255, 0), 2);
-
-  			if (bounding_box.width > bounding_box.height) {
-  				std::cout << "Approaching possible corner" << std::endl;
-  				save_img(frame, "possible_corner");
-				close_camera();
-
-				// TODO: Calculate angle to turn a bit towards centre of corner (take inspiration from last years code)
-
-  				robot->servo(SERVO_CAM, 65);
-  				robot->m(127, 127, 1300);
-  				open_camera(BLACK_CORNER_RES);
-  				grab_frame(BLACK_CORNER_RES);
-  				close_camera();
-				cv::Mat black = in_range(frame, &is_black2, &num_black_pixels);
-				if (num_black_pixels > 3000 && robot->distance_avg(5, 0.2f) < 45) { // found black corner
-  					save_img(frame, "possible_corner");
-					std::cout << "Found black corner, black pixels: " << num_black_pixels << std::endl;
-					robot->m(-127, -127, 600);
-					robot->turn(DTOR(180));
-					robot->m(-80, -80, 1000);
-					robot->send_byte(CMD_UNLOAD);
-					delay(7000);
-					robot->m(127, 127, 1200);
-					return;
-				} else {
-					std::cout << "No black corner here" << std::endl;
-  					robot->m(-127, -127, 1300);
-  					delay(500);
-  					robot->turn(DTOR(30));
-  					delay(500);
-					robot->servo(SERVO_CAM, 132);
-  					open_camera(BLACK_CORNER_RES);
-  					delay(300);
-				}
-  			}
-		} else {
-			robot->turn(DTOR(5));
-		}
-  		cv::imshow("Frame", frame);
-		cv::waitKey(1);
-	}
-
-
-
-
-	// TODO: either implement own algorithm, or use NN
-	// ideas to detect black corner:
-	// - many black pixels in frame
-	// - contours (the one around the black corner) width is larger than height
-	// - distance < 120cm
-	// - contours width > contours height (at least when robot is far away from black corner)
-	// - make us of adjustable cam angle? Maybe start with low angle and incrementally increase angle when theres no large black contour
-	// - general problem: prevent the robot from approaching the corner at an oblique angle as it makes unloading the victims hard
-
-	### END OF OLD STUFF ###
-	*/
-
 	open_camera(VICTIM_CAP_RES);
 	robot->servo(0, CAM_HIGHER_POS);
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 
-	long total_time = 6000;
+	long total_time = 8000;
 
 	float x_corner = 0.0f;
 	float last_x_corner = 0.0f;
@@ -294,9 +215,6 @@ void Rescue::find_black_corner() {
 	while (!found_corner) {
 		deg_per_iteration = 10;
 		uint64_t start_time = millis();
-
-		std::cout << sizeof(long long) << std::endl;
-		std::cout << sizeof(uint64_t) << std::endl;
 
 		while (millis() - start_time < total_time) {
 			cv::Mat frame = grab_frame(160, 120);
@@ -328,14 +246,11 @@ void Rescue::find_black_corner() {
 	}
 	close_camera();
 
-	robot->m(35, 35, 4200);
-	robot->m(-127, -127, 650);
-	delay(80);
 	robot->turn(R180 + T180_ERR);
-	delay(80);
-	robot->m(-35, -35, 2000);
+	robot->m(-50, -50, 420 * 10);
+	delay(42);
 	robot->send_byte(CMD_UNLOAD);
-	delay(5000);
+	delay(8000);
 	robot->m(127, 127, 1500);
 }
 

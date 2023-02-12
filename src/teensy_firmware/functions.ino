@@ -226,9 +226,16 @@ void arm_half_up() {
 void unload_victims() {
   servo_gate.attach(SERVO_GATE_PIN);
   servo_gate.write(GATE_OPEN);
-  delay(1500);
-  arm_up();
-  delay(1000);
+  delay(1200);
+  m(50, 50, 50);
+  m(-127, -127, 50);
+  delay(100);
+  m(50, 50, 50);
+  m(-127, -127, 50);
+  delay(100);
+  m(50, 50, 50);
+  m(-127, -127, 50);
+  delay(800);
   servo_gate.write(GATE_CLOSED);
   delay(500);
   servo_gate.detach();
