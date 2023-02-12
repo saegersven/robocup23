@@ -8,8 +8,20 @@
 
 ### <u>Our ToDo List:</u>
 
-#### Software TODOs
+#### Software
 
 - [ ] silver redundance (count black pxls)
-- [ ] checking for silver when starting (without NN in case it does not work
-- [ ] find corrent backwheel_factor through intensive testing
+- [ ] checking for silver when starting (without NN in case it does not work)
+- [ ] improve obstacle
+- [ ] dont't stall servos when picking up victim
+- [ ] rescue kit: sometimes arm won't move up/down (maybe send servo CMD twice?)
+
+#### CAD
+
+- [ ] redesign gripper to reliably pick up BOTH rescue kit and victims
+
+#### 3D Printing
+
+- [ ] print chassis as a spare part
+- [ ] print multiple motor mounts
+- [ ] print new gripper
