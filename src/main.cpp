@@ -79,8 +79,11 @@ int main() {
 			} 
 			while(robot->button(BTN_RESTART));
 			std::cout << "Start." << std::endl;
-			
+			std::cout << "Checking silver" << std::endl;
 			last_started = millis();
+
+			// TODO: check for silver without NN (eg by counting black pixels in frame)
+
 			line.start();
 		}
 
