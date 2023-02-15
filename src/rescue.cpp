@@ -52,11 +52,11 @@ void Rescue::rescue() {
 	} else {
 		robot->turn(DTOR(-45));
 	}
-	robot->m(127, 127, 600);
+	robot->m(127, 127, 300);
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 
-	//find_centre();
+	find_center_new();
 	find_black_corner();
 	
 	float last_x_victim = -1.0f;
@@ -107,9 +107,9 @@ void Rescue::rescue() {
 						delay(4200 + 300);
 						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 
-						find_centre();
+						find_center_new();
 
-						std::cout << "Found centre, finding black corner" << std::endl;
+						std::cout << "Found center, finding black corner" << std::endl;
 						find_black_corner();
 						
 						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
@@ -210,8 +210,8 @@ void Rescue::find_center_new() {
 	float y = 0.0f;
 	float last_dist = 50.0f;
 	for(int i = 0; i < NUM_DATA_POINTS; ++i) {
-		robot->m(60, -60, 100); // Tune this so its exactly 12°
-		delay(20);
+		robot->m(60, -60, 70); // Tune this so its exactly 12°
+		delay(100);
 		float dist = (float)robot->distance_avg(5, 0.2f);
 		if(dist > 90.0f) {
 			// Likely entrance or exit, use last distance
@@ -219,16 +219,25 @@ void Rescue::find_center_new() {
 		}
 		float a_x = dist * std::cos(i * step);
 		float a_y = dist * std::sin(i * step);
-		x += std::pow(a_x, gamma);
-		y += std::pow(a_y, gamma);
+
+		if(a_x < 0) a_x = -std::pow(-a_x, gamma);
+		else a_x = std::pow(a_x, gamma);
+
+		if(a_y < 0) a_y = -std::pow(-a_y, gamma);
+		else a_y = std::pow(a_y, gamma);
+
+		x += a_x;
+		y += a_y;
 
 		last_dist = dist;
 	}
+	std::cout << "360" << std::endl;
+	delay(3000);
 	x /= NUM_DATA_POINTS;
 	y /= NUM_DATA_POINTS;
 
 	if(x < 0) x = -std::pow(-x, 1.0f/gamma);
-	else x = std::pow(-x, 1.0f/gamma);
+	else x = std::pow(x, 1.0f/gamma);
 	
 	if(y < 0) y = -std::pow(-y, 1.0f/gamma);
 	else y = std::pow(y, 1.0f/gamma);
@@ -236,6 +245,9 @@ void Rescue::find_center_new() {
 	// x and y are now a vector pointing roughly to the center of the evac zone
 	float angle = std::atan2(y, x);
 	float mag = std::sqrt(x*x + y*y);
+
+	std::cout << "x: " << x << ", y: " << y << std::endl;
+	std::cout << "angle: " << RTOD(angle) << ", mag: " << mag << std::endl;
 
 	robot->turn(angle);
 	robot->m(127, 127, CM_TO_MS_FULL_SPEED * mag);
@@ -285,18 +297,32 @@ void Rescue::find_black_corner() {
 		// robot turned full 360 deg and did not find corner
 		// recentre and increase cam angle a bit
 		if(!found_corner) {
-			find_centre();
+			find_center_new();
 			robot->servo(0, CAM_HIGHER_POS + 5);
 		}
 	}
 	close_camera();
+	robot->servo(0, CAM_LOWER_POS);
 
-	robot->turn(R180 + T180_ERR);
-	robot->m(-50, -50, 420 * 10);
+	open_camera(BLACK_CORNER_RES);
+
+	while(1) {
+		robot->m(42, 42);
+		frame = grab_frame(BLACK_CORNER_RES);
+		uint32_t num_black_pixels = 0;
+		in_range(frame, &is_black, &num_black_pixels);
+
+		if(num_black_pixels > 25000) break;
+	}
+	robot->stop();
 	delay(42);
+	robot->m(-127, -127, 550);
+	robot->turn(R180 + T180_ERR);
+	delay(80);
+	robot->m(-50, -50, 1500);
 	robot->send_byte(CMD_UNLOAD);
-	delay(8000);
-	robot->m(127, 127, 1500);
+	delay(7000);
+	robot->m(127, 127, 1000);
 }
 
 void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead) {

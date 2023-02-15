@@ -590,7 +590,7 @@ void Line::line() {
 			uint32_t num_black_pixels = 0;
 			black = in_range(frame, &is_black, &num_black_pixels);
 			std::cout << "Black pixels: " << num_black_pixels << std::endl;
-			if(num_black_pixels < 500) {
+			if(num_black_pixels < 200) {
 				std::cout << "Few black pixels, should be rescue" << std::endl;
 				close_camera();
 				found_silver = true;
