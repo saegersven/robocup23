@@ -180,7 +180,7 @@ cv::Mat Rescue::grab_frame(int width, int height) {
 }
 
 // drives roughly to centre of rescue area
-void Rescue::find_centre() {
+void Rescue::find_center() {
 	for (int8_t i = 0; i < 25; ++i) {
 		uint16_t dist = robot->distance_avg(5, 0.2f);
 		if (dist < 120) { // no entry or exit ahead
@@ -194,6 +194,51 @@ void Rescue::find_centre() {
 		}
 	}
 	robot->stop();
+}
+
+void Rescue::find_center_new() {
+	const int NUM_DATA_POINTS = 30;
+	const float step = PI2 / NUM_DATA_POINTS;
+	const float gamma = 1.8f;
+	// Gyro data would be nice here
+
+	// Calculate center of evac zone:
+	// For x coordinate:
+	// \vec{M}_x = \left[{\frac{1}{n}\sum_{i = 0}^{n} \left[d_i \cos \left(i \alpha\right) \right]^\gamma} \right]^\frac{1}{\gamma}
+	// Similarly for y coordinate. Using root mean square instead of mean is fairly accurate, but not 100%.
+	float x = 0.0f;
+	float y = 0.0f;
+	float last_dist = 50.0f;
+	for(int i = 0; i < NUM_DATA_POINTS; ++i) {
+		robot->m(60, -60, 100); // Tune this so its exactly 12°
+		delay(20);
+		float dist = (float)robot->distance_avg(5, 0.2f);
+		if(dist > 90.0f) {
+			// Likely entrance or exit, use last distance
+			dist = last_dist;
+		}
+		float a_x = dist * std::cos(i * step);
+		float a_y = dist * std::sin(i * step);
+		x += std::pow(a_x, gamma);
+		y += std::pow(a_y, gamma);
+
+		last_dist = dist;
+	}
+	x /= NUM_DATA_POINTS;
+	y /= NUM_DATA_POINTS;
+
+	if(x < 0) x = -std::pow(-x, 1.0f/gamma);
+	else x = std::pow(-x, 1.0f/gamma);
+	
+	if(y < 0) y = -std::pow(-y, 1.0f/gamma);
+	else y = std::pow(y, 1.0f/gamma);
+
+	// x and y are now a vector pointing roughly to the center of the evac zone
+	float angle = std::atan2(y, x);
+	float mag = std::sqrt(x*x + y*y);
+
+	robot->turn(angle);
+	robot->m(127, 127, CM_TO_MS_FULL_SPEED * mag);
 }
 
 #define BLACK_CORNER_RES 480, 270

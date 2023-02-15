@@ -18,11 +18,11 @@ Now we use a simple binary thresholding operation to find every black pixel. We 
 
 ![](/docs/linefollowing_example_frame_pixel.png)
 
-This angle is weighed according to its distance from the bottom center since we don't want pixels near the bottom center to to contribute as much to the line angle. Pixels very far away also have lower weights. The pixels are also weighed according to how close their angle is to the angle of the last line. This prevents the robot from following the wrong lines and also helps it navigate T-shaped intersections. We now use a weighted average of all the angles of the black pixels to obtain the line angle, which might look like this:
+This angle is weighed according to its distance from the bottom center since we don't want pixels near the bottom center to contribute as much to the line angle. Pixels very far away also have lower weights. The pixels are also weighed according to how close their angle is to the angle of the last line. This prevents the robot from following the wrong lines and also helps it navigate T-shaped intersections. The weights are calculated when starting the program and saved in maps for quick access. We now use a weighted average of all the angles of the black pixels to obtain the line angle, which might look like this:
 
 ![](/docs/linefollowing_example_frame_angle.png)
 
-This angle is then multiplied by a sensitivity factor and simply added or subtracted from the motor speeds. There is no need for integration or differentiation. This algorithm, combined center of rotation around the front axis, allows the robot to follow even complicated lines very quickly.
+This angle is then multiplied by a sensitivity factor and simply added or subtracted from the motor speeds. There is no need for integration or differentiation. This algorithm, combined with a center of rotation of the robot around the front axis, allows the robot to follow even complicated lines very quickly.
 
 ### Intersections
 
