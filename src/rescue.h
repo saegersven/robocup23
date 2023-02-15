@@ -53,7 +53,8 @@ private:
 	void open_camera(int width, int height);
 	void close_camera();
 	cv::Mat grab_frame(int width, int height);
-	void find_centre();
+	void find_center();
+	void find_center_new();
 	void find_black_corner();
 	void find_victims(float& x, float& y, bool ignore_dead);
 
