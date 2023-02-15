@@ -34,6 +34,7 @@ void Line::start() {
 	found_silver = false;
 	open_camera(320, 192);
 	silver_ml.start();
+	robot->set_blocked(false);
 	// Start obstacle thread
 	running = true;
 	obstacle_enabled = true;
@@ -46,6 +47,7 @@ void Line::stop() {
 	robot->stop();
 	close_camera();
 	silver_ml.stop();
+	robot->set_blocked(false);
 	running = false; // Stop obstacle thread
 	obstacle_enabled = true;
 	obstacle_active = false;
@@ -130,20 +132,23 @@ bool Line::obstacle_straight_line(int duration) {
 		robot->m(50, 50);
 
 		grab_frame();
-		cv::imshow("Debug", frame);
+		cv::imshow("Obstacle", frame);
 		cv::waitKey(1);
 
-		cv::Mat roi = frame(cv::Range(0, 48), cv::Range(30, 80));
+		cv::Mat roi = frame(cv::Range(0, 48), cv::Range(50, 80));
 		uint32_t roi_size = roi.cols * roi.rows;
 
 		uint32_t num_black = 0;
-		in_range(frame, &is_black, &num_black);
+		in_range(roi, &is_black, &num_black);
 
 		float p = (float)num_black / roi_size;
 		std::cout << p << std::endl;
 
-		if(p > 0.2f) {
+		if(p > 0.1f) {
 			// Abort
+			save_img(roi, "obstacle_roi");
+			save_img(frame, "obstacle_frame");
+
 			robot->stop();
 			return true;
 		}
@@ -572,11 +577,11 @@ void Line::line() {
 		delay(1000);
 		int dist = robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
-		if (dist < 140 && dist > 90) { // dist must be between 120 and 90cm for rescue area
+		if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 			std::cout << "Distance within range, counting black pixels..." << std::endl;
 			close_camera();
 
-			robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2))
+			robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2));
 			delay(200);
 
 			open_camera();
@@ -613,7 +618,7 @@ void Line::line() {
 		robot->turn(R90);
 		open_camera();
 
-		const uint32_t durations[] = {1150, 1150, 1150, 675};
+		const uint32_t durations[] = {1250, 1250, 1250, 675};
 
 		for(int i = 0; i < 4; ++i) {
 			if(obstacle_straight_line(durations[i])) break;
@@ -625,11 +630,11 @@ void Line::line() {
 
 		close_camera();
 
-		robot->m(-40, -40, 170);
+		robot->m(-40, -40, 180);
 		robot->m(-40, 40, 200);
-		robot->m(80, 80, 200);
+		robot->m(80, 80, 330);
 		robot->m(-80, 80, 180);
-		robot->m(-40, -40, 350);
+		robot->m(-40, -40, 260);
 
 		open_camera();
 

@@ -115,7 +115,11 @@ void i2c_delay_msec(uint32_t ms) {
 	usleep(ms * 1000);
 }
 
-Robot::Robot() : vl53l0x(VL53L0X_FORWARD_XSHUT) {
+Robot::Robot() : blocked(false)
+#ifdef ENABLE_VL53L0X
+	, vl53l0x(VL53L0X_FORWARD_XSHUT)
+#endif // ENABLE_VL53L0X
+{
 	wiringPiSetupGpio();
 
 	pinMode(BTN_RESTART, INPUT);

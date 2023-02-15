@@ -9,7 +9,7 @@ extern "C" {
 #include "BNO055_driver/bno055.h"
 }
 
-#include "vl53l0x-linux/VL53L0X.hpp"
+//#include "vl53l0x-linux/VL53L0X.hpp"
 
 #define SPI_MODE 0
 #define SPI_SPEED 1000000 // Hz
@@ -98,8 +98,10 @@ private:
 	// Orientation sensor
 	bno055_t bno055;
 
+#ifdef ENABLE_VL53L0X
 	// Distance sensor
 	VL53L0X vl53l0x;
+#endif // ENABLE_VL53L0X
 public:
 	Robot();
 

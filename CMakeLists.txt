@@ -29,13 +29,13 @@ include_directories("libs")
 
 add_library(bno055-driver STATIC libs/BNO055_driver/bno055.c libs/BNO055_driver/bno055.h)
 
-add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/VL53L0X.hpp libs/vl53l0x-linux/VL53L0X_defines.hpp)
+#add_library(vl53l0x-linux STATIC libs/vl53l0x-linux/VL53L0X.cpp libs/vl53l0x-linux/VL53L0X.hpp libs/vl53l0x-linux/VL53L0X_defines.hpp)
 
 add_executable(robocup src/main.cpp src/robot.cpp src/utils.cpp src/line.cpp
     src/silver_ml.cpp src/victim_ml.cpp src/corner_ml.cpp libs/BNO055_driver/bno055.c)
 
 target_link_libraries(robocup bno055-driver)
-target_link_libraries(robocup vl53l0x-linux)
+#target_link_libraries(robocup vl53l0x-linux)
 target_link_libraries(robocup atomic)
 target_link_libraries(robocup ${OpenCV_LIBS})
 target_link_libraries(robocup tensorflow-lite)
