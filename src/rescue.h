@@ -33,6 +33,8 @@
 #define CORNER_ROI_X_MIN 0
 #define CORNER_ROI_X_MAX 640
 
+#define X_TO_ANGLE(x_res, x) (x / x_res * DTOR(65.0f))
+
 /**
  * Single-pixel thresholding operation for detecting the black corner.
  */

@@ -288,7 +288,7 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	uint8_t msg[3] = {CMD_SERVO, servo_id, angle};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
 	spi_write(msg, 3);
-	delay(delay_ms);
+	if(delay_ms != 0) delay(delay_ms);
 }
 
 float Robot::read_heading() {

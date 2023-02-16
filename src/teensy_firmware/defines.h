@@ -42,8 +42,8 @@
 #define GRIPPER2_OPEN 70
 #define GRIPPER2_CLOSED 160
 
-#define GATE_OPEN 100
-#define GATE_CLOSED 12
+#define GATE_OPEN 110
+#define GATE_CLOSED 17
 
 // SPI Pins
 #define MISO_PIN 12

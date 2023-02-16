@@ -30,6 +30,7 @@ void Rescue::stop() {
 }
 
 #define VICTIM_CAP_RES 1280, 960
+#define X_RES 160
 
 // main routine for rescue area
 void Rescue::rescue() {
@@ -68,15 +69,84 @@ void Rescue::rescue() {
 	const int base_speed = 40;
 
 	int num_frames = 0;
-	int cam_angle = CAM_HIGHER_POS;
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(20);
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(20);
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(100);
-	open_camera(VICTIM_CAP_RES);
 
+	while(1) {
+		open_camera(VICTIM_CAP_RES);
+		find_victims(x_victim, y_victim, dead);
+		close_camera();
+		delay(50);
+
+		if(x_victim != -1.0f) {
+			int cam_angle = CAM_HIGHER_POS;
+			robot->turn(X_TO_ANGLE(X_RES, x_victim) - DTOR(30.0f));
+			std::cout << "Found victim, approaching..." << std::endl;
+			delay(100);
+			robot->m(40, 40, 200);
+			while(1) {
+				bool enable_pickup = false;
+
+				open_camera(VICTIM_CAP_RES);
+				find_victims(x_victim, y_victim, dead);
+				close_camera();
+
+				float cam_angle_error = 20.0f * (30.0f - y_victim) / (cam_angle - CAM_LOWER_POS);
+				int new_cam_angle = (int)(cam_angle + cam_angle_error);
+
+				if(new_cam_angle > CAM_HIGHER_POS) new_cam_angle = CAM_HIGHER_POS;
+
+				if(new_cam_angle < CAM_LOWER_POS + 25) {
+					enable_pickup = true;
+					new_cam_angle = CAM_LOWER_POS + 25;
+				}
+				std::cout << "Cam angle: " << cam_angle << std::endl;
+				cam_angle = new_cam_angle;
+				robot->servo(SERVO_CAM, new_cam_angle, 200);
+
+				if(enable_pickup && y_victim > 40.0f) {
+					close_camera();
+					robot->turn(-DTOR(25.0f));
+					robot->send_byte(CMD_PICK_UP_VICTIM);
+
+					robot->m(-70, -70, 400);
+
+					find_center_new();
+					find_black_corner();
+
+					break;
+				}
+				/*if(x_victim == -1.0f) {
+					std::cout << "Lost victims" << std::endl;
+					robot->stop();
+
+					robot->servo(SERVO_CAM, cam_angle += 2, 100);
+
+					find_victims(x_victim, y_victim, dead);
+					close_camera();
+
+					if(x_victim == -1.0f) {
+						std::cout << "Really lost victim" << std::endl;
+						break;
+					}
+				}*/
+
+				float x_error = X_TO_ANGLE(X_RES, (x_victim - 80.0f));
+				robot->turn(x_error);
+				robot->m(base_speed, base_speed, 300);
+				delay(300);
+			}
+		}
+
+		robot->turn(DTOR(30.0f));
+		delay(50);
+	}
+
+	/*
 	bool camera_not_up = false;
 	while(1) {
 		find_victims(x_victim, y_victim, dead);
@@ -141,7 +211,7 @@ void Rescue::rescue() {
 			open_camera(VICTIM_CAP_RES);
 		}
 		last_x_victim = x_victim;
-	}
+	}*/
 }
 
 void Rescue::open_camera(int width, int height) {
@@ -267,7 +337,7 @@ void Rescue::find_black_corner() {
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 
 	long total_time = 8000;
-	long max_time = 20000;
+	long max_time = 16000;
 
 	float x_corner = 0.0f;
 	float last_x_corner = 0.0f;
