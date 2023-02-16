@@ -26,19 +26,6 @@ void init() {
   
   displayBatVoltage();
   debugln("Setup completed");
-
-  
-  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
-  //servo_gripper2.attach(SERVO_GRIPPER2_PIN);
-  servo_gripper1.write(GRIPPER1_OPEN);
-  //servo_gripper2.write(GRIPPER2_OPEN);
-  delay(1000);
-  servo_gripper1.write(GRIPPER1_CLOSED);
-  //servo_gripper2.write(GRIPPER2_CLOSED);
-  delay(1000);
-  servo_gripper1.detach();
-  //servo_gripper2.detach();
-  exit(0);
 }
 
 // returns current battery voltage in Volts
@@ -130,6 +117,7 @@ void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }
 
+// is never used, but who cares
 void pick_up_rescue_kit() {
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
@@ -139,6 +127,8 @@ void pick_up_rescue_kit() {
   servo_gripper1.write(GRIPPER1_OPEN);
   servo_gripper2.write(GRIPPER2_OPEN);
   delay(450);
+  servo_gripper1.detach();
+  servo_gripper2.detach();
   m(70, 70, 200);
   m(70, 70, 0);
   
@@ -171,7 +161,57 @@ void pick_up_rescue_kit() {
 }
 
 void pick_up_victim() {
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(200);
+  servo_gripper1.detach();
+  servo_gripper2.detach();
+  servo_arm.attach(SERVO_ARM_PIN);
+  servo_arm.write(ARM_LOWER_POS);
+  delay(500);
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write((int)((GRIPPER1_OPEN * 0.6f + GRIPPER1_CLOSED * 0.4f)));
+  servo_gripper2.write((int)((GRIPPER2_OPEN * 0.6f + GRIPPER2_CLOSED * 0.4f)));
+  delay(350);
+  m(42, 42, 0);
+  delay(200);
+  servo_gripper1.write((int)((GRIPPER1_OPEN * 0.35f + GRIPPER1_CLOSED * 0.65f)));
+  servo_gripper2.write((int)((GRIPPER2_OPEN * 0.35f + GRIPPER2_CLOSED * 0.65f)));
+  delay(200);
+  servo_gripper1.detach();
+  servo_gripper2.detach();
   
+  // close arm
+  m(-70, -70, 0);
+  delay(30);
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(420);
+  stop();
+  
+  // move arm up
+  servo_arm.attach(SERVO_ARM_PIN);
+  servo_arm.write(ARM_HIGHER_POS);
+  delay(900);
+  m(70, 70, 200);
+
+  // open arm (only one side)
+  servo_gripper2.write(GRIPPER2_OPEN);
+  delay(400);
+
+  // close arm
+  servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(200);
+  
+  // detach servos
+  servo_arm.detach();
+  servo_gripper1.detach();
+  servo_gripper2.detach();
 }
 // opens gripper and moves arm down
 void arm_down() {

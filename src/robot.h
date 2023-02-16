@@ -40,7 +40,8 @@ extern "C" {
 #define CMD_ARM_UP 71
 #define CMD_ARM_HALF_UP 81
 #define CMD_UNLOAD 91
-#define CMD_PICK_UP 101
+#define CMD_PICK_UP_RESCUE_KIT 101
+#define CMD_PICK_UP_VICTIM 111
 
 #define SERVO_CAM 0
 #define SERVO_ARM 1

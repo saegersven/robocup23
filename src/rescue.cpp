@@ -77,6 +77,7 @@ void Rescue::rescue() {
 	delay(100);
 	open_camera(VICTIM_CAP_RES);
 
+	bool camera_not_up = false;
 	while(1) {
 		find_victims(x_victim, y_victim, dead);
 		float angle_victim = DTOR(60.0f) * ((x_victim - 80.0f) / 160.0f);
@@ -90,6 +91,10 @@ void Rescue::rescue() {
 					robot->m(40, 40);
 				}
 				robot->m(-50, -50, 100);
+				robot->servo(SERVO_CAM, CAM_LOWER_POS + 5);
+				for(find_victims(x_victim, y_victim, dead); x_victim == -1.0f; find_victims(x_victim, y_victim, dead)) {
+					robot->m(40, 40);
+				}
 			}
 			std::cout << "Angle: " << RTOD(angle_victim) << std::endl;
 			std::cout << "Y: " << y_victim << std::endl;
@@ -103,7 +108,7 @@ void Rescue::rescue() {
 						std::cout << "Pick UP!" << std::endl;
 						close_camera();
 						robot->turn(DTOR(-16.0f));
-						robot->send_byte(CMD_PICK_UP);
+						robot->send_byte(CMD_PICK_UP_VICTIM);
 						delay(4200 + 300);
 						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 
@@ -262,6 +267,7 @@ void Rescue::find_black_corner() {
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 
 	long total_time = 8000;
+	long max_time = 20000;
 
 	float x_corner = 0.0f;
 	float last_x_corner = 0.0f;
@@ -270,15 +276,18 @@ void Rescue::find_black_corner() {
 	bool found_corner = false;
 
 	while (!found_corner) {
-		deg_per_iteration = 10;
 		uint64_t start_time = millis();
+		uint64_t real_start_time = millis();
 
-		while (millis() - start_time < total_time) {
+		while (millis() - real_start_time < max_time || millis() - start_time < total_time) {
+			deg_per_iteration = 10;
 			cv::Mat frame = grab_frame(160, 120);
 			cv::Mat res = corner_ml.invoke(frame);
 			cv::imshow("Black corner", res);
 
 			if(corner_ml.extract_corner(res, x_corner, y_corner)) {
+				uint64_t new_start_time = millis() - 2000;
+				start_time = start_time > new_start_time ? start_time : new_start_time;
 				robot->m(35, -35);
 				deg_per_iteration = 5;
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
@@ -312,7 +321,7 @@ void Rescue::find_black_corner() {
 		uint32_t num_black_pixels = 0;
 		in_range(frame, &is_black, &num_black_pixels);
 
-		if(num_black_pixels > 25000) break;
+		if(num_black_pixels > 20000) break;
 	}
 	robot->stop();
 	delay(42);
