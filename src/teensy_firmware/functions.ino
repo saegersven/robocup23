@@ -26,6 +26,19 @@ void init() {
   
   displayBatVoltage();
   debugln("Setup completed");
+
+  
+  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
+  //servo_gripper2.attach(SERVO_GRIPPER2_PIN);
+  servo_gripper1.write(GRIPPER1_OPEN);
+  //servo_gripper2.write(GRIPPER2_OPEN);
+  delay(1000);
+  servo_gripper1.write(GRIPPER1_CLOSED);
+  //servo_gripper2.write(GRIPPER2_CLOSED);
+  delay(1000);
+  servo_gripper1.detach();
+  //servo_gripper2.detach();
+  exit(0);
 }
 
 // returns current battery voltage in Volts
@@ -117,7 +130,7 @@ void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }
 
-void pick_up() {
+void pick_up_rescue_kit() {
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
   delay(500);
@@ -157,6 +170,9 @@ void pick_up() {
   servo_gripper2.detach();
 }
 
+void pick_up_victim() {
+  
+}
 // opens gripper and moves arm down
 void arm_down() {
   // move arm down a bit

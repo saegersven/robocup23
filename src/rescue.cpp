@@ -213,10 +213,11 @@ void Rescue::find_center_new() {
 		robot->m(60, -60, 70); // Tune this so its exactly 12°
 		delay(100);
 		float dist = (float)robot->distance_avg(5, 0.2f);
-		if(dist > 90.0f) {
-			// Likely entrance or exit, use last distance
+		if(dist > 110.0f) {
+			std::cout << "Likely entrance or exit, using last distance" << std::endl;
 			dist = last_dist;
 		}
+		std::cout << dist << "," << std::endl;
 		float a_x = dist * std::cos(i * step);
 		float a_y = dist * std::sin(i * step);
 
@@ -231,8 +232,7 @@ void Rescue::find_center_new() {
 
 		last_dist = dist;
 	}
-	std::cout << "360" << std::endl;
-	delay(3000);
+	delay(200);
 	x /= NUM_DATA_POINTS;
 	y /= NUM_DATA_POINTS;
 
