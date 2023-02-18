@@ -81,14 +81,6 @@ Now we just need to extract the victim positions from the output using simple th
 
 # Hardware and low-level software
 
-## Rear motor speeds
-
-The speed of the rear wheels is given by:
-
-![equation](/docs/eq_rear_wheel_speeds.jpg)
-
-Where k is a factor less than one which reduces power to the rear wheels to account for inaccuracies.
-
 ## RasPi <-> Teensy protocol
 
 Communication is via I2C. The Teensy is the secondary device (Address 0x2a) and acts as a motor controller.
