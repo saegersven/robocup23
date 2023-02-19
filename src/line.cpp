@@ -160,13 +160,36 @@ bool Line::obstacle_straight_line(int duration) {
 }
 
 float Line::difference_weight(float x) {
-	return 0.25f + 0.75f * std::pow(2, -std::pow(x * 5, 2));
+	/*
+	// Exponential
+	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
+	*/
+
+	// Rectified Linear (should be fastest)
+	if(x < 0.0f) x = -x;
+	if(x > 0.4f) return 0.25f;
+	return -1.875f * x;
+
+	/*
+	// Rectified Quartic Polynomial (probably slowest)
+	if(x < 0.0f) x = -x;
+	if(x > 0.387298332f) return 0.25f;
+	float xx = x*x;
+	return 33.333333f * xx*xx - 10.0f * xx + 1.0f;
+	*/
 }
 
 float Line::distance_weight(float x) {
+	// Precalculated, performance does not matter
+	/* // Old Function
 	float f = std::pow(2, -std::pow(4.2f * x - 2.6, 2)) - 0.1f;
 	if(f < 0.0f) f = 0.0f;
 	return f;
+	*/
+
+	float e = (3.25f * x - 2.0f);
+	float f = std::exp(-e*e) - 0.1f;
+	return f > 0.0f ? f : 0.0f;
 }
 
 void Line::create_maps() {
