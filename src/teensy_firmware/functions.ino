@@ -87,8 +87,8 @@ void m(int left_speed, int right_speed, int duration) {
 
   int s = (left_speed + right_speed) / 2;
   int d = right_speed - left_speed;
-  single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, (s - d) * BACKWHEEL_FACTOR);
-  single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, (s + d) * BACKWHEEL_FACTOR);
+  single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, left_speed * BACKWHEEL_FACTOR);
+  single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, right_speed * BACKWHEEL_FACTOR);
 
   delay(duration);
 
