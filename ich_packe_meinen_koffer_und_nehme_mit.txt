@@ -1,4 +1,4 @@
-- robot
+- Roboter
 - RasPi
 - Teensy
 - L293D
@@ -65,3 +65,17 @@
 - Servo
 - Powerbank
 - USB C Kabel
+- Schrumpfschlauch
+- Isolierband
+- TP4056
+- 18650 Halter
+- DRK Lampe
+- Tesa
+- Servohörner
+- VL53L0X
+- USB Sticks
+- Silikon Schlauch
+- Loombands
+- Debris
+- Messschieber
+- Lineal/Geodreieck

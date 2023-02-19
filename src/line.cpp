@@ -161,11 +161,11 @@ bool Line::obstacle_straight_line(int duration) {
 }
 
 float Line::difference_weight(float x) {
-	/* // Uncomment for everything other than linear
+	/*// Uncomment for everything other than linear
 	x = x / PI * 2.0f;
-	*/
-	/*
-	// Exponential (Does not work anymore)
+	
+	
+	// Exponential
 	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
 	*/
 
@@ -185,12 +185,13 @@ float Line::difference_weight(float x) {
 
 float Line::distance_weight(float x) {
 	// Precalculated, performance does not matter
-	/* // Old Function
+	/*// Old Function
 	float f = std::pow(2, -std::pow(4.2f * x - 2.6, 2)) - 0.1f;
 	if(f < 0.0f) f = 0.0f;
 	return f;
 	*/
 
+	
 	float e = (3.25f * x - 2.0f);
 	float f = std::exp(-e*e) - 0.1f;
 	return f > 0.0f ? f : 0.0f;

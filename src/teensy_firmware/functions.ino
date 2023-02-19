@@ -248,11 +248,11 @@ void arm_up() {
   delay(900);
 
   // open arm (only one side)
-  servo_gripper1.write(GRIPPER1_OPEN);
+  servo_gripper2.write(GRIPPER2_OPEN);
   delay(500);
 
   // close arm
-  servo_gripper1.write(GRIPPER1_CLOSED);
+  servo_gripper2.write(GRIPPER2_CLOSED);
   delay(500);
   
   // detach servos

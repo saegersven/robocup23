@@ -30,6 +30,7 @@
  * Milliseconds since January 1st, 1970 at 00:00:00
  */
 #define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
+#define micros() std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
 
 /**
  * Performs a binary operation on an image. Applies the specified function on every pixel

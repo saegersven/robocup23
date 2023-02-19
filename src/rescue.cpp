@@ -337,7 +337,7 @@ void Rescue::find_center_new_new() {
 		float dist = robot->distance_avg(5, 0.2f);
 		if(dist > 80.0f && dist < 110.0f) {
 			robot->m(127, 50);
-		} else (dist < 50.0f) {
+		} else if (dist < 50.0f) {
 			robot->m(-50, -127);
 		} else {
 			robot->m(50, -50);

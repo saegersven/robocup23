@@ -50,16 +50,19 @@ extern "C" {
 #define SERVO_GATE 4
 
 // servo position (UPDATE IN BOTH FILES!!!)
-#define CAM_LOWER_POS 71
-#define CAM_HIGHER_POS 135
+#define CAM_LOWER_POS 73
+#define CAM_HIGHER_POS 120
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
-#define GRIPPER1_OPEN 60
-#define GRIPPER1_CLOSED 125
-#define GRIPPER2_OPEN 95
-#define GRIPPER2_CLOSED 15
-#define GATE_OPEN 100
-#define GATE_CLOSED 12
+
+#define GRIPPER1_OPEN 160
+#define GRIPPER1_CLOSED 60
+
+#define GRIPPER2_OPEN 70
+#define GRIPPER2_CLOSED 160
+
+#define GATE_OPEN 110
+#define GATE_CLOSED 17
 
 #define BTN_RESTART 4
 

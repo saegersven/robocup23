@@ -260,6 +260,10 @@ void Robot::stop() {
 	digitalWrite(STOP_PIN, HIGH);
 	delayMicroseconds(100);
 	digitalWrite(STOP_PIN, LOW);
+	delayMicroseconds(100);
+	digitalWrite(STOP_PIN, HIGH);
+	delayMicroseconds(100);
+	digitalWrite(STOP_PIN, LOW);
 }
 
 // turns given angle in radians
@@ -317,16 +321,24 @@ int Robot::distance() {
     delayMicroseconds(10);
     digitalWrite(HCSR04_TRIGGER, LOW);
 
-	auto starttime = std::chrono::high_resolution_clock::now();
-	auto endtime = std::chrono::high_resolution_clock::now();
+    uint64_t real_starttime = micros();
+	uint64_t starttime = micros();
+	uint64_t endtime = micros();
+	const uint64_t max_time = 8000;
 
-	while (digitalRead(HCSR04_ECHO) == LOW) starttime = std::chrono::high_resolution_clock::now();
-	while (digitalRead(HCSR04_ECHO) == HIGH) endtime = std::chrono::high_resolution_clock::now();
+	while (digitalRead(HCSR04_ECHO) == LOW) {
+		starttime = micros();
+		if(starttime - real_starttime > max_time) return 300;
+	}
+	while (digitalRead(HCSR04_ECHO) == HIGH) {
+		endtime = micros();
+		if(endtime - real_starttime > max_time) return 300;
+	}
 
-	auto travel_time = endtime - starttime;
+	uint64_t travel_time = endtime - starttime;
 
 	// convert travel time of sound signal to cm (TODO: check for overflow)
-	return (int)(0.000000001 * 0.5 * travel_time.count() * 34300);
+	return (int)(0.5 * travel_time * 0.000001 * 34300);
 }
 
 int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
