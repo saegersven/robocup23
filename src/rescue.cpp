@@ -328,6 +328,21 @@ void Rescue::find_center_new() {
 	robot->m(127, 127, CM_TO_MS_FULL_SPEED * mag);
 }
 
+void Rescue::find_center_new_new() {
+	const int MAX_TIME = 5000;
+
+	uint64_t start_time = millis();
+
+	while(millis() - start_time < MAX_TIME) {
+		float dist = robot->distance_avg(5, 0.2f);
+		if(dist > 50.0f) {
+			robot->m(50, -50);
+		} else {
+			robot->m(-50, -127);
+		}
+	}
+}
+
 #define BLACK_CORNER_RES 480, 270
 
 // finds black corner and unloads victims

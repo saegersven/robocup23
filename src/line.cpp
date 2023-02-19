@@ -160,18 +160,21 @@ bool Line::obstacle_straight_line(int duration) {
 }
 
 float Line::difference_weight(float x) {
+	/* // Uncomment for everything other than linear
+	x = x / PI * 2.0f;
+	*/
 	/*
-	// Exponential
+	// Exponential (Does not work anymore)
 	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
 	*/
 
 	// Rectified Linear (should be fastest)
 	if(x < 0.0f) x = -x;
-	if(x > 0.4f) return 0.25f;
-	return -1.875f * x;
+	if(x > 0.6283185307f) return 0.25f;
+	return -1.1936620731892f * x;
 
 	/*
-	// Rectified Quartic Polynomial (probably slowest)
+	// Rectified Quartic Polynomial (probably slowest, does not work anymore)
 	if(x < 0.0f) x = -x;
 	if(x > 0.387298332f) return 0.25f;
 	float xx = x*x;
@@ -207,7 +210,7 @@ void Line::create_maps() {
 			float ydif = y - center_y;
 			float dist = std::sqrt(xdif*xdif + ydif*ydif);
 			p_dwm[x] = clamp(distance_weight(dist / LINE_FRAME_HEIGHT), 0.0f, 1.0f);
-			p_pam[x] = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
+			p_pam[x] = std::atan2(y - center_y, x - center_x) + PI05;
 		}
 	}
 }
@@ -220,8 +223,9 @@ float Line::get_line_angle(cv::Mat in) {
 	float total_weight = 0.0f;
 
 	uint32_t num_angles = 0;
+	// Bottom center coordinates (point close to center of rotation of the robot)
 	float center_x = in.cols / 2.0f;
-	float center_y = in.rows; // Why not devided by 2 @Sven?
+	float center_y = in.rows;
 
 	for(int y = 0; y < in.rows; ++y) {
 		uint8_t* p = in.ptr<uint8_t>(y);
@@ -229,6 +233,7 @@ float Line::get_line_angle(cv::Mat in) {
 		float* p_pam = this->pixel_angles_map.ptr<float>(y);
 
 		for(int x = 0; x < in.cols; ++x) {
+			// Low-quality servos make the camera see part of the wheels, ignore that part of the image
 			if((x < LINE_CORNER_WIDTH || x > (LINE_FRAME_WIDTH - LINE_CORNER_WIDTH))
 				&& y > (LINE_FRAME_HEIGHT - LINE_CORNER_HEIGHT)) continue;
 
@@ -237,9 +242,9 @@ float Line::get_line_angle(cv::Mat in) {
 				if(distance_weight > 0.0f) {
 					++num_angles;
 
-					float angle = std::atan2(y - center_y, x - center_x) + (PI / 2.0f);
-					//float angle = p_pam[x];
-					float angle_difference_weight = difference_weight((angle - last_line_angle) / PI * 2.0f);
+					//float angle = std::atan2(y - center_y, x - center_x) + PI05;
+					float angle = p_pam[x];
+					float angle_difference_weight = difference_weight(angle - last_line_angle);
 
 					float weight = angle_difference_weight * distance_weight;
 					weighted_line_angle += weight * angle;

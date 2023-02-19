@@ -57,6 +57,7 @@ private:
 	cv::Mat grab_frame(int width, int height);
 	void find_center();
 	void find_center_new();
+	void find_center_new_new();
 	void find_black_corner();
 	void find_victims(float& x, float& y, bool ignore_dead);
 
