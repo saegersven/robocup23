@@ -335,12 +335,15 @@ void Rescue::find_center_new_new() {
 
 	while(millis() - start_time < MAX_TIME) {
 		float dist = robot->distance_avg(5, 0.2f);
-		if(dist > 50.0f) {
-			robot->m(50, -50);
-		} else {
+		if(dist > 80.0f && dist < 110.0f) {
+			robot->m(127, 50);
+		} else (dist < 50.0f) {
 			robot->m(-50, -127);
+		} else {
+			robot->m(50, -50);
 		}
 	}
+	robot->stop();
 }
 
 #define BLACK_CORNER_RES 480, 270
@@ -376,12 +379,12 @@ void Rescue::find_black_corner() {
 				robot->m(35, -35);
 				deg_per_iteration = 5;
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
+				std::cout << x_corner << std::endl;
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
 					robot->turn(x_corner / CORNER_IN_WIDTH * DTOR(65.0f));
 					found_corner = true;
 					break;
 				}
-				std::cout << x_corner << std::endl;
 			} else {
 				robot->m(45, -45);
 			}

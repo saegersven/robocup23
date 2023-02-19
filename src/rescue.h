@@ -52,14 +52,6 @@ private:
 	// Camera control
 	cv::VideoCapture cap;
 	bool camera_opened = false;
-	void open_camera(int width, int height);
-	void close_camera();
-	cv::Mat grab_frame(int width, int height);
-	void find_center();
-	void find_center_new();
-	void find_center_new_new();
-	void find_black_corner();
-	void find_victims(float& x, float& y, bool ignore_dead);
 
 	// Current frame from camera
 	cv::Mat frame;
@@ -67,11 +59,55 @@ private:
 	cv::Mat debug_frame;
 
 
+	/**
+	 * Open and close camera. Parameters are the resolution send to the camera.
+	 */
+	void open_camera(int width, int height);
+	void close_camera();
+
+	/**
+	 * Grab a frame from the camera and resize it to the specified resolution.
+	 */
+	cv::Mat grab_frame(int width, int height);
+
+	/**
+	 * Drive to the center of the evacuation zone.
+	 * Three different methods:
+	 * 1. Turn and check distance in discrete steps
+	 * 2. Turn and check distance, create vector out of average and move accordingly
+	 * 3. Turn and check distance continuously
+	 */
+	void find_center();
+	void find_center_new();
+	void find_center_new_new();
+
+	/**
+	 * Use the corner neural network to find the corner.
+	 */
+	void find_black_corner();
+
+	/**
+	 * Use the victim neural network to find the closest victim.
+	 */
+	void find_victims(float& x, float& y, bool ignore_dead);
+
 public:
 	std::atomic<bool> finished;
 
 	Rescue(std::shared_ptr<Robot> robot);
+
+	/**
+	 * Start rescue and all relevant threads.
+	 */
 	void start();
+
+	/**
+	 * Stop and reset rescue.
+	 */
 	void stop();
+
+	/**
+	 * Main rescue method, runs once from start to exit.
+	 */
 	void rescue();
 };

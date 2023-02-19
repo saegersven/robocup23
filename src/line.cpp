@@ -5,6 +5,7 @@
 
 #include "utils.h"
 #include "defines.h"
+
 bool is_black(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
 }
@@ -255,6 +256,7 @@ float Line::get_line_angle(cv::Mat in) {
 	}
 
 	if(num_angles < 40) return 0.0f;
+	if(total_weight == 0.0f) return 0.0f;
 	weighted_line_angle /= total_weight;
 
 	return weighted_line_angle;
@@ -629,8 +631,8 @@ void Line::line() {
 		// while delaying for servo movement reopen camera prophylactically to clear frame buffer
 		close_camera();
 		delay(200);
-		open_camera();
 		robot->m(80, 80, 50);
+		open_camera();
 		obstacle_enabled = true;
 	}
 
@@ -673,7 +675,7 @@ void Line::line() {
 #ifdef DRAW_FPS
 	auto now_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
-	int fps = std::round(1.0f / ((float)us / 1000000));
+	int fps = std::round(1.0f / ((float)us / 1000000.0f));
 	cv::putText(debug_frame, std::to_string(fps),
 		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 255, 0));

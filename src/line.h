@@ -45,17 +45,11 @@
 #define ARM_ANGLE_OFFSET DTOR(25.0f)
 
 /**
- * Single-pixel thresholding operation for line.
+ * Single-pixel thresholding operations
  */
 bool is_black(uint8_t b, uint8_t g, uint8_t r);
-
-/**
- * Thresholding operation for green dots.
- */
 bool is_green(uint8_t b, uint8_t g, uint8_t r);
-
 bool is_blue(uint8_t b, uint8_t g, uint8_t r);
-
 bool is_red(uint8_t b, uint8_t g, uint8_t r);
 
 /**
@@ -106,6 +100,10 @@ private:
 	 * Async method, checks distance
 	 */
 	void obstacle();
+
+	/**
+	 * Goes in a straight line for a maximum duration and stops if the robot hits a black line.
+	 */
 	bool obstacle_straight_line(int duration);
 
 	/*########################
@@ -114,7 +112,7 @@ private:
 
 	/**
 	 * Function for determining difference weights.
-	 * Input range -0.5 to 0.5
+	 * Input range -PI/2 to +PI/2  | TODO: Check
 	 * Output range 0 to 1
 	 */
 	float difference_weight(float x);
@@ -128,8 +126,8 @@ private:
 
 	/**
 	 * Creates maps to speed up line following.
-	 * The distance_weight_map contains the distance weights from 0 to 255.
-	 * The pixel_angles_map contains the angle of every pixel from 0 (-90°) to 255 (90°)
+	 * The distance_weight_map contains the distance weights from 0 to 1
+	 * The pixel_angles_map contains the angle of every pixel from -PI/2 to +PI/2
 	 */
 	void create_maps();
 
@@ -173,6 +171,13 @@ private:
 	 */
 	void green();
 
+	/*###########
+	OTHER METHODS
+	###########*/
+
+	/**
+	 * Detects rescue kit if there is one, picks it up and returns to initial position.
+	 */
 	void rescue_kit();
 
 public:

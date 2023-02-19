@@ -33,7 +33,7 @@
 
 /**
  * Performs a binary operation on an image. Applies the specified function on every pixel
- * and colors pixels white (0xFF) or black (0x00) depending on function return value.
+ * and colors pixels white (0xFF) or black (0x00) accordingly.
  */
 cv::Mat in_range(cv::Mat in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, uint32_t* num_pixels = nullptr);
 
@@ -42,6 +42,12 @@ cv::Mat in_range(cv::Mat in, std::function<bool (uint8_t, uint8_t, uint8_t)> f, 
  */
 float clamp(float n, float min, float max);
 
+/**
+ * Save iamge to Desktop/iamges/subfolder.
+ */
 void save_img(cv::Mat& img, const std::string& subfolder);
 
+/**
+ * Convert two channel image returned by victim neural net to three channel image for debugging.
+ */
 cv::Mat two_channel_to_three_channel(cv::Mat in);
