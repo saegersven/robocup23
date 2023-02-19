@@ -168,8 +168,11 @@ void pick_up_victim() {
   delay(200);
   servo_gripper1.detach();
   servo_gripper2.detach();
+  
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
+  m(50, 50, 80);
+  
   delay(500);
   servo_gripper1.attach(SERVO_GRIPPER1_PIN);
   servo_gripper2.attach(SERVO_GRIPPER2_PIN);
@@ -191,7 +194,7 @@ void pick_up_victim() {
   servo_gripper2.attach(SERVO_GRIPPER2_PIN);
   servo_gripper1.write(GRIPPER1_CLOSED);
   servo_gripper2.write(GRIPPER2_CLOSED);
-  delay(420);
+  delay(540);
   stop();
   
   // move arm up
@@ -202,7 +205,7 @@ void pick_up_victim() {
 
   // open arm (only one side)
   servo_gripper2.write(GRIPPER2_OPEN);
-  delay(400);
+  delay(100);
 
   // close arm
   servo_gripper2.write(GRIPPER2_CLOSED);

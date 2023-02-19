@@ -132,7 +132,7 @@ public:
 	 * Sends left and right motor speeds to the motor controller.
 	 * Sends stop command after specified duration if not zero.
 	 */
-	void m(int8_t left, int8_t right, uint16_t duration = 0);
+	void m(int8_t left, int8_t right, int32_t duration = 0);
 
 	/**
 	 * Stop all four drive motors

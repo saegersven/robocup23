@@ -232,9 +232,13 @@ bool Robot::button(uint8_t pin) {
 	return digitalRead(pin) == HIGH;
 }
 
-void Robot::m(int8_t left, int8_t right, uint16_t duration) {
+void Robot::m(int8_t left, int8_t right, int32_t duration) {
 	if(blocked) return;
-
+	if(duration < 0) {
+		duration = -duration;
+		left = -left;
+		right = -right;
+	}
 	uint8_t msg[3] = {CMD_MOTOR, *(uint8_t*)(&left), *(uint8_t*)(&right)};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
 	

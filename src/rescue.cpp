@@ -34,7 +34,7 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
-	std::cout << "Rescue start." << std::endl;
+	std::cout << "Rescue start!" << std::endl;
 	robot->m(127, 127, 500);
 	// turn towards the (potential) wall with as little space as possible
 	robot->turn(DTOR(22));
@@ -76,6 +76,9 @@ void Rescue::rescue() {
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(100);
 
+	const int MAX_TURNS = 15;
+	int turn_counter = 0;
+
 	while(1) {
 		open_camera(VICTIM_CAP_RES);
 		find_victims(x_victim, y_victim, dead);
@@ -108,8 +111,11 @@ void Rescue::rescue() {
 				cam_angle = new_cam_angle;
 				robot->servo(SERVO_CAM, new_cam_angle, 200);
 
-				if(enable_pickup && y_victim > 40.0f) {
+				if(enable_pickup && y_victim > 35.0f) {
 					close_camera();
+					int dur = (int)(7.0f * (67.0f - y_victim));
+					std::cout << "Duration: " << dur << std::endl;
+					robot->m(60, 60, dur);
 					robot->turn(-DTOR(25.0f));
 					robot->send_byte(CMD_PICK_UP_VICTIM);
 
@@ -119,7 +125,7 @@ void Rescue::rescue() {
 					find_black_corner();
 
 					robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-
+					turn_counter = 0;
 					break;
 				}
 				/*if(x_victim == -1.0f) {
@@ -145,6 +151,13 @@ void Rescue::rescue() {
 		}
 
 		robot->turn(DTOR(30.0f));
+		++turn_counter;
+
+		if(turn_counter == MAX_TURNS) {
+			turn_counter = 0;
+			find_center_new_new();
+		}
+
 		delay(50);
 	}
 
@@ -338,9 +351,9 @@ void Rescue::find_center_new_new() {
 	while(millis() - start_time < MAX_TIME) {
 		float dist = robot->distance_avg(5, 0.2f);
 		if(dist > 80.0f && dist < 110.0f) {
-			robot->m(127, 50);
+			robot->m(127, 35);
 		} else if (dist < 50.0f) {
-			robot->m(-50, -127);
+			robot->m(-35, -127);
 		} else {
 			robot->m(50, -50);
 		}
@@ -357,7 +370,7 @@ void Rescue::find_black_corner() {
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 
 	long total_time = 8000;
-	long max_time = 16000;
+	long max_time = 10000;
 
 	float x_corner = 0.0f;
 	float last_x_corner = 0.0f;
@@ -400,7 +413,7 @@ void Rescue::find_black_corner() {
 		// robot turned full 360 deg and did not find corner
 		// recentre and increase cam angle a bit
 		if(!found_corner) {
-			find_center_new();
+			find_center_new_new();
 			robot->servo(0, CAM_HIGHER_POS + 5);
 		}
 	}
@@ -417,10 +430,11 @@ void Rescue::find_black_corner() {
 
 		if(num_black_pixels > 20000) break;
 	}
+	robot->m(37, 37, 200);
 	robot->stop();
 	delay(42);
 	robot->m(-127, -127, 550);
-	robot->turn(R180 + T180_ERR);
+	robot->turn(DTOR(190.0f));
 	delay(80);
 	robot->m(-50, -50, 1500);
 	robot->send_byte(CMD_UNLOAD);

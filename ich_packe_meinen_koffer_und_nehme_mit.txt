@@ -83,3 +83,14 @@
 - IC Sockel
 - Sekundenkleber
 - Kettengummis
+- EvShield
+- Arduino UNO
+- Hochladekabel Arduino UNO
+- iphone Ladekabel
+- Essen
+- Trinken
+- Kamera
+- Kamera Ladegerät
+- Kamera Ersatzakku
+- Lipo
+- Lipo Ladegerät
