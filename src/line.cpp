@@ -466,14 +466,13 @@ void Line::green() {
 		robot->turn(angle);
 		delay(50);
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 50));
-		delay(50);
+
 		// Take another frame and reevaluate
 		open_camera();
 		grab_frame(80, 48);
 		save_img(frame, "green");
 		close_camera();
 		black = in_range(frame, &is_black);
-		delay(1000);
 		uint8_t new_green_result = green_direction(global_average_x, global_average_y);
 		//uint8_t new_green_result = green_result;
 		robot->m(60, 60, 250);
@@ -508,7 +507,6 @@ void Line::green() {
 			close_camera();
 
 			robot->turn(DTOR(50.0f));
-			delay(50);
 			open_camera();
 			grab_frame(80, 48);
 			close_camera();
@@ -516,7 +514,6 @@ void Line::green() {
 			black = in_range(frame, &is_black, &num_black_pixels_right);
 
 			robot->turn(DTOR(-50.0f));
-			delay(50);
 			open_camera();
 			grab_frame(80, 48);
 			close_camera();
@@ -525,7 +522,6 @@ void Line::green() {
 
 			std::cout << num_black_pixels_left << " | " << num_black_pixels_right << "\n";
 			if(num_black_pixels_right > num_black_pixels_left) {
-				delay(50);
 				robot->turn(DTOR(60.0f));
 			}
 			open_camera();
@@ -565,7 +561,7 @@ void Line::rescue_kit() {
 		robot->send_byte(CMD_ARM_DOWN);
 		delay(1000);
 		robot->m(50, 50, 420);
-		delay(430);
+		delay(300);
 		robot->send_byte(CMD_ARM_UP);
 		delay(2600);
 		robot->m(-80, -80, 200);

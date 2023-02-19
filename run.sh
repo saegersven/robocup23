@@ -1,7 +1,7 @@
-python3 stop.py # stops motors from simple python script
-cd build
+python3 /home/pi/robocup23/stop.py # stops motors from simple python script
+cd /home/pi/robocup23/build
 if ninja -j2 ;
 then
-  ./robocup ;
+  /home/pi/robocup23/build/robocup ;
 fi
 cd ..

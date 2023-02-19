@@ -57,7 +57,7 @@ void Rescue::rescue() {
 
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 
-	find_center_new();
+	find_center_new_new();
 	find_black_corner();
 	
 	float last_x_victim = -1.0f;
@@ -115,8 +115,10 @@ void Rescue::rescue() {
 
 					robot->m(-70, -70, 400);
 
-					find_center_new();
+					find_center_new_new();
 					find_black_corner();
+
+					robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 
 					break;
 				}
@@ -351,7 +353,7 @@ void Rescue::find_center_new_new() {
 // finds black corner and unloads victims
 void Rescue::find_black_corner() {
 	open_camera(VICTIM_CAP_RES);
-	robot->servo(0, CAM_HIGHER_POS);
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 
 	long total_time = 8000;
@@ -371,7 +373,11 @@ void Rescue::find_black_corner() {
 			deg_per_iteration = 10;
 			cv::Mat frame = grab_frame(160, 120);
 			cv::Mat res = corner_ml.invoke(frame);
-			cv::imshow("Black corner", res);
+			cv::Mat res_resized;
+			cv::resize(res, res_resized, cv::Size(160, 120));
+			cv::imshow("Black corner", res_resized);
+			cv::imshow("frame", frame);
+			cv::waitKey(1);
 
 			if(corner_ml.extract_corner(res, x_corner, y_corner)) {
 				uint64_t new_start_time = millis() - 2000;
@@ -418,7 +424,7 @@ void Rescue::find_black_corner() {
 	delay(80);
 	robot->m(-50, -50, 1500);
 	robot->send_byte(CMD_UNLOAD);
-	delay(7000);
+	delay(4000);
 	robot->m(127, 127, 1000);
 }
 

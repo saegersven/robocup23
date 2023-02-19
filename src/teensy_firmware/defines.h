@@ -32,7 +32,7 @@
 
 // servo position (UPDATE IN BOTH FILES!!!)
 #define CAM_LOWER_POS 73
-#define CAM_HIGHER_POS 120
+#define CAM_HIGHER_POS 140
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
 

@@ -245,6 +245,9 @@ void Robot::m(int8_t left, int8_t right, uint16_t duration) {
 		// stop a few times in case Teensy misses first stop signal
 		stop();
 		stop();
+		delay(10);
+		stop();
+		delay(10);
 		stop();
 	}
 }
