@@ -63,7 +63,6 @@ void Rescue::rescue() {
 	float last_x_victim = -1.0f;
 	float x_victim = 0.0f;
 	float y_victim = 0.0f;
-	bool dead = false;
 
 	const float sensitivity = 0.5f;
 	const int base_speed = 40;
@@ -78,10 +77,13 @@ void Rescue::rescue() {
 
 	const int MAX_TURNS = 15;
 	int turn_counter = 0;
+	int victim_counter = 0;
 
 	while(1) {
+		bool ignore_dead = victim_counter <= 2;
+		
 		open_camera(VICTIM_CAP_RES);
-		find_victims(x_victim, y_victim, dead);
+		find_victims(x_victim, y_victim, ignore_dead);
 		close_camera();
 		delay(50);
 
@@ -95,7 +97,7 @@ void Rescue::rescue() {
 				bool enable_pickup = false;
 
 				open_camera(VICTIM_CAP_RES);
-				find_victims(x_victim, y_victim, dead);
+				find_victims(x_victim, y_victim, ignore_dead);
 				close_camera();
 
 				float cam_angle_error = 20.0f * (30.0f - y_victim) / (cam_angle - CAM_LOWER_POS);
@@ -126,6 +128,7 @@ void Rescue::rescue() {
 
 					robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 					turn_counter = 0;
+					++victim_counter;
 					break;
 				}
 				/*if(x_victim == -1.0f) {
