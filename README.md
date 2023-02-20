@@ -10,11 +10,9 @@
 
 #### Software
 
-- [ ] silver redundance (count black pxls)
 - [ ] checking for silver when starting (without NN in case it does not work)
-- [ ] improve obstacle
-- [ ] dont't stall servos when picking up victim
 - [ ] rescue kit: sometimes arm won't move up/down (maybe send servo CMD twice?)
+- [ ] use camera to check when unloading victim
 
 #### CAD
 
