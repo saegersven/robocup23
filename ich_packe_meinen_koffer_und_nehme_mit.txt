@@ -1,19 +1,19 @@
 - Roboter
-- RasPi
-- Teensy
-- L293D
+- RasPi ✓
+- Teensy ✓
+- L293D ✓
 - 18650
 - Ladegerät
-- 2. PCB
-- Step up Module
-- Step down Module
-- kleine und große Servos
-- Pololu 20d
-- RasPi Kamera
-- Raspi Kamera Kabel
-- Reifen
-- Omni Wheels
-- HC-SR04
+- 2. PCB ✓
+- Step up Module ✓
+- Step down Module ✓
+- kleine und große Servos ✓
+- Pololu 20d ✓
+- RasPi Kamera ✓
+- Raspi Kamera Kabel ✓
+- Reifen ✓
+- Omni Wheels ✓
+- HC-SR04 ✓
 - 3d printed chassis
 - ... handle
 - ... gate
@@ -22,24 +22,28 @@
 - ... gripper
 - ... cam_mount
 - ... motor mount
-- copper wire
-- caps
-- M2, M2.5, M3, M4 Schrauben und Muttern
-- Schraubensicherung
-- Kabelbinder
-- Inbus
-- Zange
-- Abisolierzange
+- copper wire ✓
+- caps ✓
+- M2, M2.5, M3, M4 Schrauben und Muttern ✓
+- Schraubensicherung ✓
+- Kabelbinder ✓
+- Inbus ✓
+- Torx ✓
+- Zange ✓
+- Abisolierzange ✓
+- Seitenschneider ✓
 - Lötstation
+- Krokoklemmen ✓
+- Multimeter ✓
 - Lötzinn
-- Pinzette
+- Pinzette ✓
 - Holzkeil für Akkuwechsel
-- Schlitzschraubendreher
+- Schlitzschraubendreher ✓
 - Laptop
 - Ladegerät für Laptop
-- Heißkleber
-- Ersatzstäbe
-- Tape
+- Heißkleber ✓
+- Ersatzstäbe ✓
+- Tape ✓
 - Rescue bereich
 - Platten (drei große Testplatten)
 - Silber
@@ -49,7 +53,7 @@
 - Handy
 - Lankabel
 - Micro USB Kabel
-- Nüsse (oder Maulschlüssel)
+- Nüsse (oder Maulschlüssel) ✓
 - Widerstände
 - Taster
 - LEDs
@@ -62,27 +66,30 @@
 - Schwarze Ecke
 - Grünen Streifen
 - Roten Streifer
-- Servo
+- Servo ✓
 - Powerbank
 - USB C Kabel
-- Schrumpfschlauch
-- Isolierband
+- Schrumpfschlauch ✓
+- Isolierband ✓
 - TP4056
 - 18650 Halter
 - DRK Lampe
 - Tesa
-- Servohörner
-- VL53L0X
+- Servohörner ✓
+- VL53L0X ✓
 - USB Sticks
 - Silikon Schlauch
-- Loombands
+- Bohrer ✓
+- Akkuschrauber ✓
+- Loombands ✓
 - Debris
-- Messschieber
-- Lineal/Geodreieck
+- Messschieber ✓
+- Cuttermesser ✓
+- Lineal/Geodreieck/Zollstock ✓
 - Tücher zum Putzen
 - IC Sockel
-- Sekundenkleber
-- Kettengummis
+- Sekundenkleber ✓
+- Kettengummis ✓
 - EvShield
 - Arduino UNO
 - Hochladekabel Arduino UNO
@@ -94,6 +101,11 @@
 - Kamera Ersatzakku
 - Lipo
 - Lipo Ladegerät
-- Feilen
-- Dremel mit Werkzeug
+- Feilen ✓
+- Dremel mit Werkzeug ✓
 - Farbsensoren
+- kleine Schraubendreher ✓
+- alter Roboter als Backup
+- Labornetzteil ✓
+- Mehrfachsteckdose ✓
+- Verlängerungskabel ✓
