@@ -94,3 +94,6 @@
 - Kamera Ersatzakku
 - Lipo
 - Lipo Ladegerät
+- Feilen
+- Dremel mit Werkzeug
+- Farbsensoren
