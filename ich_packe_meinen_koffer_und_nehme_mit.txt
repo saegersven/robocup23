@@ -1,9 +1,41 @@
 - Roboter
+- 18650
+- Ladegerät
+- Lötstation
+- Lötzinn
+- Rescue bereich
+- Platten (drei große Testplatten)
+- Silber
+- Silvertape
+- Handy
+- Bumper
+- Kugeln
+- Rescue kit
+- Schwarze Ecke
+- Grünen Streifen
+- Roten Streifer
+- Tesa
+- Debris
+- Tücher zum Putzen
+- EvShield
+- iphone Ladekabel
+- Essen
+- Trinken
+- Kamera
+- Kamera Ladegerät
+- Kamera Ersatzakku
+- Lipo
+- Lipo Ladegerät
+- Farbsensoren
+- Holzkeil für Akkuwechsel
+- Laptop
+- Ladegerät für Laptop
+- Powerbank
+- alter Roboter als Backup
+
 - RasPi ✓
 - Teensy ✓
 - L293D ✓
-- 18650
-- Ladegerät
 - 2. PCB ✓
 - Step up Module ✓
 - Step down Module ✓
@@ -14,7 +46,7 @@
 - Reifen ✓
 - Omni Wheels ✓
 - HC-SR04 ✓
-- 3d printed chassis
+- 3d printed chassis ✓
 - ... handle
 - ... gate
 - ... container
@@ -32,80 +64,49 @@
 - Zange ✓
 - Abisolierzange ✓
 - Seitenschneider ✓
-- Lötstation
 - Krokoklemmen ✓
 - Multimeter ✓
-- Lötzinn
 - Pinzette ✓
-- Holzkeil für Akkuwechsel
 - Schlitzschraubendreher ✓
-- Laptop
-- Ladegerät für Laptop
 - Heißkleber ✓
 - Ersatzstäbe ✓
 - Tape ✓
-- Rescue bereich
-- Platten (drei große Testplatten)
-- Silber
-- Silvertape
-- Bumper
-- Micro Sd Karte(n)
-- Handy
-- Lankabel
-- Micro USB Kabel
+- Micro Sd Karte(n) ✓
+- USB Hub/Reader ✓
+- Lankabel ✓
+- Micro USB Kabel ✓
 - Nüsse (oder Maulschlüssel) ✓
-- Widerstände
-- Taster
-- LEDs
-- Schalter
-- Header
-- Lipo safe bag
-- Micro SD Karten Leser
-- Kugeln
-- Rescue kit
-- Schwarze Ecke
-- Grünen Streifen
-- Roten Streifer
+- Widerstände ✓
+- Taster ✓
+- LEDs ✓
+- Schalter ✓
+- Header ✓
+- Lipo safe bag ✓
 - Servo ✓
-- Powerbank
-- USB C Kabel
+- USB C Kabel ✓
 - Schrumpfschlauch ✓
 - Isolierband ✓
-- TP4056
-- 18650 Halter
-- DRK Lampe
-- Tesa
+- TP4056 ✓
+- 18650 Halter ✓
+- DRK Lampe ✓
 - Servohörner ✓
 - VL53L0X ✓
-- USB Sticks
-- Silikon Schlauch
+- USB Sticks ✓
+- Silikon Schlauch ✓
 - Bohrer ✓
 - Akkuschrauber ✓
 - Loombands ✓
-- Debris
 - Messschieber ✓
 - Cuttermesser ✓
 - Lineal/Geodreieck/Zollstock ✓
-- Tücher zum Putzen
-- IC Sockel
+- IC Sockel ✓
 - Sekundenkleber ✓
 - Kettengummis ✓
-- EvShield
-- Arduino UNO
-- Hochladekabel Arduino UNO
-- iphone Ladekabel
-- Essen
-- Trinken
-- Kamera
-- Kamera Ladegerät
-- Kamera Ersatzakku
-- Lipo
-- Lipo Ladegerät
+- Arduino UNO ✓
+- Hochladekabel Arduino UNO ✓
 - Feilen ✓
 - Dremel mit Werkzeug ✓
-- Farbsensoren
 - kleine Schraubendreher ✓
-- alter Roboter als Backup
 - Labornetzteil ✓
 - Mehrfachsteckdose ✓
 - Verlängerungskabel ✓
