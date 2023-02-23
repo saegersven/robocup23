@@ -32,6 +32,7 @@
 - Ladegerät für Laptop
 - Powerbank
 - alter Roboter als Backup
+- Kabeltasche
 
 - RasPi ✓
 - Teensy ✓
