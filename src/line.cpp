@@ -44,6 +44,40 @@ void Line::start() {
 	t.detach();
 }
 
+void Line::check_silver() {
+	obstacle_enabled = false;
+	delay(20);
+	std::cout << "Checking silver before line..." << std::endl;
+	grab_frame(80, 48);
+	std::cout << "Grabbed frame" << std::endl;
+	int dist = robot->distance_avg(10, 0.2f);
+	std::cout << "Distance: " << dist << std::endl;
+	if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
+		std::cout << "Distance within range, counting black pixels..." << std::endl;
+		close_camera();
+
+		robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 100);
+		robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 100);
+		delay(200);
+
+		open_camera();
+		grab_frame(80, 48);
+
+		uint32_t num_black_pixels = 0;
+		black = in_range(frame, &is_black, &num_black_pixels);
+		std::cout << "Black pixels: " << num_black_pixels << std::endl;
+		if(num_black_pixels < 200) {
+			std::cout << "Few black pixels, should be rescue" << std::endl;
+			close_camera();
+			found_silver = true;
+			return;
+		}
+	}
+	obstacle_enabled = true;
+	robot->servo(SERVO_CAM, CAM_LOWER_POS);
+	delay(20);
+}
+
 void Line::stop() {
 	robot->stop();
 	close_camera();

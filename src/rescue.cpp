@@ -75,17 +75,21 @@ void Rescue::rescue() {
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(100);
 
-	const int MAX_TURNS = 15;
+	const int MAX_TURNS = 20;
 	int turn_counter = 0;
 	int victim_counter = 0;
 
 	while(1) {
-		bool ignore_dead = victim_counter <= 2;
+		bool ignore_dead = victim_counter < 2;
+		std::cout << "Ignore dead: " << ignore_dead << std::endl;
+		std::cout << "Victim counter: " << victim_counter << std::endl;
 		
 		open_camera(VICTIM_CAP_RES);
 		find_victims(x_victim, y_victim, ignore_dead);
 		close_camera();
 		delay(50);
+
+		bool skip_turn = false;
 
 		if(x_victim != -1.0f) {
 			int cam_angle = CAM_HIGHER_POS;
@@ -99,6 +103,15 @@ void Rescue::rescue() {
 				open_camera(VICTIM_CAP_RES);
 				find_victims(x_victim, y_victim, ignore_dead);
 				close_camera();
+
+				if(x_victim == -1.0f) {
+					robot->m(70, 70, 400);
+					delay(30);
+					robot->turn(DTOR(-15.0f));
+					skip_turn = true;
+					robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+					break;
+				}
 
 				float cam_angle_error = 20.0f * (30.0f - y_victim) / (cam_angle - CAM_LOWER_POS);
 				int new_cam_angle = (int)(cam_angle + cam_angle_error);
@@ -149,16 +162,18 @@ void Rescue::rescue() {
 				float x_error = X_TO_ANGLE(X_RES, (x_victim - 80.0f));
 				robot->turn(x_error);
 				robot->m(base_speed, base_speed, 300);
-				delay(300);
+				delay(50);
 			}
 		}
 
-		robot->turn(DTOR(30.0f));
-		++turn_counter;
+		if(!skip_turn) robot->turn(DTOR(30.0f));
+		if(!skip_turn) ++turn_counter;
 
 		if(turn_counter == MAX_TURNS) {
 			turn_counter = 0;
+			robot->m(127, 127, 300);
 			find_center_new_new();
+			robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 		}
 
 		delay(50);
@@ -405,6 +420,7 @@ void Rescue::find_black_corner() {
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
 					robot->turn(x_corner / CORNER_IN_WIDTH * DTOR(65.0f));
 					found_corner = true;
+					save_img(frame, "possible_corner");
 					break;
 				}
 			} else {

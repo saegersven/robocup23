@@ -186,6 +186,7 @@ public:
 	Line(std::shared_ptr<Robot> robot);
 
 	void start();
+	void check_silver();
 	void stop();
 
 	/**

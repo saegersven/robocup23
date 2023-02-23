@@ -12,7 +12,7 @@ extern "C" {
 //#include "vl53l0x-linux/VL53L0X.hpp"
 
 #define SPI_MODE 0
-#define SPI_SPEED 1000000 // Hz
+#define SPI_SPEED 500'000 // Hz
 #define SPI_BITS_PER_WORD 8
 
 #define TEENSY_I2C_ADDR 0x2a
