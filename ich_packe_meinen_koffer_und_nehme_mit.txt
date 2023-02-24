@@ -1,39 +1,39 @@
-- Roboter
-- 18650
-- Ladegerät
-- Lötstation
-- Lötzinn
-- Rescue bereich
-- Platten (drei große Testplatten)
-- Silber
-- Silvertape
-- Handy
-- Bumper
-- Kugeln
-- Rescue kit
-- Schwarze Ecke
-- Grünen Streifen
-- Roten Streifer
-- Tesa
-- Debris
-- Tücher zum Putzen
-- EvShield
-- iphone Ladekabel
-- Essen
-- Trinken
-- Kamera
-- Kamera Ladegerät
-- Kamera Ersatzakku
-- Lipo
-- Lipo Ladegerät
-- Farbsensoren
-- Holzkeil für Akkuwechsel
-- Laptop
-- Ladegerät für Laptop
-- Powerbank
-- alter Roboter als Backup
-- Kabeltasche
-
+- Laptop ✓
+- Ladegerät für Laptop ✓
+- Handys ✓
+- 18650 ✓
+- Lipo Ladegerät ✓
+- Lipo ✓
+- Tücher zum Putzen ✓
+- Kamera ✓
+- Kamera Ladegerät ✓
+- Kamera Ersatzakku ✓
+- Essen ✓
+- Trinken ✓
+- Debris ✓
+- Ladegerät Handy ✓
+- Grünen Streifen ✓
+- Roten Streifer ✓
+- Holzkeil für Akkuwechsel ✓
+- Tesa ✓
+- EvShield ✓
+- Powerbank ✓
+- Doppelseitiges Klebeband ✓
+- Lötstation ✓
+- Lötzinn ✓
+- Silvertape ✓
+- Rescue bereich ✓
+- Platten (drei große Testplatten) ✓
+- Silber ✓
+- Bumper ✓
+- Kugeln ✓
+- Rescue kit ✓
+- Schwarze Ecke ✓
+- alter Roboter als Backup ✓
+- iphone Ladekabel ✓
+- Farbsensoren ✓
+- Kabeltasche ✓
+- Roboter ✓
 - RasPi ✓
 - Teensy ✓
 - L293D ✓
