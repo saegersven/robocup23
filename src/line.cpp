@@ -74,7 +74,7 @@ void Line::check_silver() {
 		}
 	}
 	obstacle_enabled = true;
-	robot->servo(SERVO_CAM, CAM_LOWER_POS);
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
 	delay(20);
 }
 
@@ -142,9 +142,10 @@ void Line::obstacle() {
 			delay(10);
 
 			if(robot->distance_avg(10, 0.2f) < 12) {
+				delay(50);
 				if(robot->distance_avg(10, 0.2f) < 12) {
 					robot->set_blocked(false);
-					delay(50);
+					delay(20);
 					obstacle_active = true;
 
 					/*std::cout << "OBSTACLE!" << std::endl;
@@ -591,15 +592,15 @@ void Line::rescue_kit() {
 		close_camera();
 		robot->turn(angle - ARM_ANGLE_OFFSET);
 		robot->m(-80, -80, 200);
-		delay(210);
+		delay(100);
 		robot->send_byte(CMD_ARM_DOWN);
 		delay(1000);
 		robot->m(50, 50, 420);
-		delay(300);
+		delay(150);
 		robot->send_byte(CMD_ARM_UP);
 		delay(2600);
 		robot->m(-80, -80, 200);
-		delay(210);
+		delay(100);
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
 		open_camera();
 	}
@@ -635,14 +636,14 @@ void Line::line() {
 		save_img(frame, "potential_silver");
 		robot->turn(last_line_angle / 1.5f);
 		robot->stop();
-		delay(1000);
+		delay(200);
 		int dist = robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
 		if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 			std::cout << "Distance within range, counting black pixels..." << std::endl;
 			close_camera();
 
-			robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2));
+			robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 150);
 			delay(200);
 
 			open_camera();
@@ -658,7 +659,7 @@ void Line::line() {
 				return;
 			}
 		}
-		robot->servo(SERVO_CAM, CAM_LOWER_POS);
+		robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
 		// while delaying for servo movement reopen camera prophylactically to clear frame buffer
 		close_camera();
 		delay(200);
