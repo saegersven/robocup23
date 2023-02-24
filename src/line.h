@@ -144,9 +144,9 @@ private:
 	 */
 	void follow();
 
-	/*#######################
-	METHODS FOR INTERSECTIONS
-	#######################*/
+	/*####################################
+	METHODS FOR INTERSECTIONS & RESCUE KIT
+	####################################*/
 
 	/**
 	 * Methods to find groups/contours of a single color recursively.
@@ -170,10 +170,6 @@ private:
 	 * calls green_direction again, then makes final decision and turns.
 	 */
 	void green();
-
-	/*###########
-	OTHER METHODS
-	###########*/
 
 	/**
 	 * Detects rescue kit if there is one, picks it up and returns to initial position.
