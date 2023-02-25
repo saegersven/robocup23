@@ -32,6 +32,7 @@ void save_img(cv::Mat& img, const std::string& subfolder) {
 }
 
 int main(int, char**) {
+    std::cout << WIDTH << " " << HEIGHT << std::endl;
     cv::VideoCapture cap;
     cap.open(0, cv::CAP_ANY);
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, WIDTH * 4);
@@ -58,6 +59,7 @@ int main(int, char**) {
         
         if(cv::waitKey(1) == 'c') {
             save_img(frame, "captured");
+            std::cout << "Saved img" << std::endl;
         }
         
         //save_img(frame, "captured");

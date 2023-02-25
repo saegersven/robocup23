@@ -50,7 +50,7 @@ void Line::check_silver() {
 	std::cout << "Checking silver before line..." << std::endl;
 	grab_frame(80, 48);
 	std::cout << "Grabbed frame" << std::endl;
-	int dist = robot->distance_avg(10, 0.2f);
+	int dist = 100; //robot->distance_avg(10, 0.2f);
 	std::cout << "Distance: " << dist << std::endl;
 	if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 		std::cout << "Distance within range, counting black pixels..." << std::endl;
@@ -196,13 +196,12 @@ bool Line::obstacle_straight_line(int duration) {
 }
 
 float Line::difference_weight(float x) {
-	/*// Uncomment for everything other than linear
+	// Uncomment for everything other than linear
 	x = x / PI * 2.0f;
 	
 	
 	// Exponential
 	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
-	*/
 
 	// Rectified Linear (should be fastest)
 	if(x < 0.0f) x = -x;
@@ -634,10 +633,10 @@ void Line::line() {
 		delay(50);
 		std::cout << "NN detected silver, checking distance..." << std::endl;
 		save_img(frame, "potential_silver");
-		robot->turn(last_line_angle / 1.5f);
+		robot->turn(last_line_angle / 3.0f);
 		robot->stop();
 		delay(200);
-		int dist = robot->distance_avg(10, 0.2f);
+		int dist = 100; //robot->distance_avg(10, 0.2f);
 		std::cout << "Distance: " << dist << std::endl;
 		if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 			std::cout << "Distance within range, counting black pixels..." << std::endl;
