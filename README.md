@@ -19,7 +19,9 @@
 
 #### 3D Printing
 
-### Current Problems based on runs in St Augustin:
+### Current Problems based on runs in St Augustin (descending order of importance):
+- [ ] USB/I2C instead of SPI communication?! Maybe all three for increased redundancy
+
 - [ ] missed black line during obstacle
 - [ ] VL53L0X instead of HCSR04
 - [ ] Gyro sensor (turning, ramps up and down, adjust speed accordingly)
