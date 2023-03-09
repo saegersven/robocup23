@@ -10,9 +10,9 @@
 
 #### Software
 
-- [ ] rescue kit: sometimes arm won't move up/down (maybe send servo CMD twice?)
 - [ ] use camera to check when unloading victim
 - [ ] disable BNO055 feature in case its broken during competition
+- [ ] exit of evac zone
 
 #### CAD
 
