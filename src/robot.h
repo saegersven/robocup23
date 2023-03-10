@@ -52,6 +52,8 @@ extern "C" {
 // servo position (UPDATE IN BOTH FILES!!!)
 #define CAM_LOWER_POS 73
 #define CAM_HIGHER_POS 140
+#define CAM_MID_POS ((CAM_LOWER_POS + CAM_HIGHER_POS) / 2)
+
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
 

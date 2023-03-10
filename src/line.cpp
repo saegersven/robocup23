@@ -204,9 +204,9 @@ float Line::difference_weight(float x) {
 	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
 
 	// Rectified Linear (should be fastest)
-	if(x < 0.0f) x = -x;
+	/*if(x < 0.0f) x = -x;
 	if(x > 0.6283185307f) return 0.25f;
-	return -1.1936620731892f * x;
+	return -1.1936620731892f * x;*/
 
 	/*
 	// Rectified Quartic Polynomial (probably slowest, does not work anymore)

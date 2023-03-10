@@ -91,6 +91,12 @@ private:
 	 */
 	void find_victims(float& x, float& y, bool ignore_dead);
 
+	/**
+	 * Find exit using distance sensor and camera, starting from the center.
+	 */
+	void find_exit();
+	void turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction = BOOL_DIR_LEFT);
+
 public:
 	std::atomic<bool> finished;
 

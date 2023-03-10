@@ -14,6 +14,9 @@
 #define R180 PI
 #define R90 PI05
 
+#define BOOL_DIR_LEFT false
+#define BOOL_DIR_RIGHT true
+
 /**
  * Degrees to Radians and
  * Radians to Degrees macros

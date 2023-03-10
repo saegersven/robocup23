@@ -81,8 +81,6 @@ void Rescue::rescue() {
 
 	while(1) {
 		bool ignore_dead = victim_counter < 2;
-		std::cout << "Ignore dead: " << ignore_dead << std::endl;
-		std::cout << "Victim counter: " << victim_counter << std::endl;
 		
 		open_camera(VICTIM_CAP_RES);
 		find_victims(x_victim, y_victim, ignore_dead);
@@ -482,6 +480,101 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead) {
 			y_victim = victims[i].y;
 		}
 	}
+}
+
+#define EXIT_CAPTURE_RES 480, 270
+
+void Rescue::find_exit() {
+	const uint64_t MAX_TIME = 8000;
+	const int EXIT_MIN_DISTANCE = 130;
+	const int WALL_APPROACH_DISTANCE = 25;
+	const uint32_t MIN_NUM_GREEN_PIXELS = 80;
+
+	while(1) {
+		uint64_t start_time = millis();
+		uint64_t turn_time_on_potential_exit = 8000;
+		while(millis() - start_time < MAX_TIME) {
+			robot->m(40, -40);
+
+			int dist = robot->distance();
+			if(dist > EXIT_MIN_DISTANCE) {
+				delay(30); // Turn a few degrees more before stopping
+				robot->stop();
+
+				dist = robot->distance_avg(20, 0.2f);
+				if(dist > EXIT_MIN_DISTANCE) {
+					turn_time_on_potential_exit = millis() - start_time;
+
+					// Get distances of wall directly to the right and to the left of
+					// the presumed exit to approximate the distance we have to drive
+					int dist_left, dist_right;
+					int duration_left, duration_right;
+					// Get distance left
+					turn_until_wall(&dist_left, &duration_left, EXIT_MIN_DISTANCE, BOOL_DIR_LEFT);
+
+					const int SMALL_TURN_DURATION = 200;
+					robot->m(40, -40);
+					delay(SMALL_TURN_DURATION);
+
+					// Get distance right
+					turn_until_wall(&dist_right, &duration_right, EXIT_MIN_DISTANCE, BOOL_DIR_RIGHT);
+
+					// Turn to center of the exit
+					robot->m(-40, 40, (duration_left - SMALL_TURN_DURATION - duration_right) / 2);
+
+					int dist_to_drive = (dist_left + dist_right) / 2;
+					int duration_to_drive = dist_to_drive * CM_TO_MS_FULL_SPEED - 500;
+					robot->m(127, 127, duration_to_drive);
+
+					robot->servo(SERVO_CAM, CAM_MID_POS);
+
+					open_camera(EXIT_CAPTURE_RES);
+					cv::Mat frame = grab_frame(EXIT_CAPTURE_RES);
+					close_camera();
+
+					uint32_t num_green_pixels = 0;
+					in_range(frame, &is_green, &num_green_pixels);
+
+					if(num_green_pixels > MIN_NUM_GREEN_PIXELS) {
+						int dummy_dist, dummy_duration;
+						// Reorient the robot based on the wall to the right
+						turn_until_wall(&dummy_dist, &dummy_duration, 30, BOOL_DIR_RIGHT);
+						robot->turn(DTOR(-8.0f));
+						delay(30);
+						robot->m(70, 70, 500);
+						return;
+					}
+
+					// This is likely an entrance, back off again
+					robot->m(-127, -127, duration_to_drive);
+					robot->turn(DTOR(20.0f));
+					start_time = millis() - turn_time_on_potential_exit; // Reset timer
+				}
+			}
+		}
+		find_center_new_new();
+	}
+}
+
+int turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction) {
+	const int turn_speed_left = direction == BOOL_DIR_LEFT ? 40 : -40;
+	const int turn_speed_right = -turn_speed_left;
+	*duration = millis();
+	robot->m(turn_speed_left, turn_speed_right);
+	while(1) {
+		dist = robot->distance();
+		if(dist < max_dist) {
+			robot->stop();
+			dist = robot->distance_avg(10, 0.2f);
+			if(dist < max_dist) break;
+			robot->m(turn_speed_left, turn_speed_right);
+		}
+	}
+	robot->m(turn_speed_left, turn_speed_right, 50);
+	delay(20);
+	robot->stop();
+	*wall_dist = robot->distance_avg(20, 0.2f);
+	*duration = millis() - *duration;
 }
 
 bool is_black2(uint8_t b, uint8_t g, uint8_t r) {
