@@ -21,29 +21,30 @@
 #define RB2_PIN 5
 #define RB_PWM_PIN 7
 
+#define GRIPPER_MOTOR_PIN1 25
+#define GRIPPER_MOTOR_PIN2 26
+
 #define BACKWHEEL_FACTOR 1.1 // diameter of front wheels is roughtly 10% greater than diameter of back wheels
 
 // servo pins
 #define SERVO_CAM_PIN 21 // servo to change cam position
+#define SERVO_GRIPPER1_PIN 0
+#define SERVO_GRIPPER2_PIN 0
 #define SERVO_ARM_PIN 22 // servo to lift up gripper
-#define SERVO_GRIPPER1_PIN 20 // servo to grab victims
-#define SERVO_GRIPPER2_PIN 36 // 2th servo to grab victims
 #define SERVO_GATE_PIN 23 // servo to empty victim container
 
 // servo position (UPDATE IN BOTH FILES!!!)
 #define CAM_LOWER_POS 73
 #define CAM_HIGHER_POS 140
-#define ARM_LOWER_POS 3
+#define ARM_LOWER_POS 7
 #define ARM_HIGHER_POS 180
-
-#define GRIPPER1_OPEN 160
-#define GRIPPER1_CLOSED 60
-
-#define GRIPPER2_OPEN 70
-#define GRIPPER2_CLOSED 160
 
 #define GATE_OPEN 110
 #define GATE_CLOSED 17
+#define GRIPPER1_CLOSED 0
+#define GRIPPER1_OPEN 0
+#define GRIPPER2_CLOSED 0
+#define GRIPPER2_OPEN 0
 
 // SPI Pins
 #define MISO_PIN 12

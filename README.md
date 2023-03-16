@@ -16,8 +16,6 @@
 
 #### CAD
 
-- [ ] redesign gripper with DC motor
-
 #### 3D Printing
 
 ### Current Problems based on runs in St Augustin (descending order of importance):
@@ -38,7 +36,8 @@
 - [ ] beginning of victim search: why frame lost?
 - [ ] ignore upper frame area when looking for victims
 - [ ] find corner more precise (more ml data of corners far away)
-- [ ] readjust robot position relative to corner when driving towards it- [ ] investigate: vid 4, 3:05 random thread crash
+- [ ] reajust robot position relative to corner when driving towards it
+- [ ] investigate: vid 4, 3:05 random thread crash
 - [ ] turn line angle before obstacle
 - [ ] check if victim has been rescued successfully (look at black corner)
 - [ ] rescue kit: close gripper while driving forward 
