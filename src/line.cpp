@@ -321,10 +321,12 @@ void Line::follow() {
 		cv::Point(20, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 100, 100));
 #endif
+	int base_speed = LINE_FOLLOW_BASE_SPEED;
+	//if(std::abs(line_angle) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
 	robot->m(
-		clamp(LINE_FOLLOW_BASE_SPEED + line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127),
-		clamp(LINE_FOLLOW_BASE_SPEED - line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127)
+		clamp(base_speed + line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127),
+		clamp(base_speed - line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127)
 		);
 }
 
@@ -540,14 +542,14 @@ void Line::green() {
 			grab_frame(80, 48);
 			close_camera();
 
-			robot->turn(DTOR(50.0f));
+			robot->turn(DTOR(40.0f));
 			open_camera();
 			grab_frame(80, 48);
 			close_camera();
 
 			black = in_range(frame, &is_black, &num_black_pixels_right);
 
-			robot->turn(DTOR(-50.0f));
+			robot->turn(DTOR(-80.0f));
 			open_camera();
 			grab_frame(80, 48);
 			close_camera();
@@ -556,7 +558,7 @@ void Line::green() {
 
 			std::cout << num_black_pixels_left << " | " << num_black_pixels_right << "\n";
 			if(num_black_pixels_right > num_black_pixels_left) {
-				robot->turn(DTOR(60.0f));
+				robot->turn(DTOR(85.0f));
 			}
 			open_camera();
 		}

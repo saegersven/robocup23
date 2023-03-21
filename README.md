@@ -22,10 +22,7 @@
 - [ ] USB/I2C instead of SPI communication?! Maybe all three for increased redundancy
 
 - [ ] missed black line during obstacle
-- [ ] VL53L0X instead of HCSR04
-- [ ] Gyro sensor (turning, ramps up and down, adjust speed accordingly)
 - [ ] corner approach: check contour to avoid false positives
-- [ ] intersection: turn 60 degs with gyro and rest with camera until line angle = 0
 - [ ] intersection: confused right with left turn (vid 4, 1:45)
 - [ ] obstacle: line after obstacle pls fix
 - [ ] prefer living victims when when !ignore_dead 
@@ -41,4 +38,7 @@
 - [ ] turn line angle before obstacle
 - [ ] check if victim has been rescued successfully (look at black corner)
 - [ ] rescue kit: close gripper while driving forward 
-- [ ] rewrite find_center using VL53L0X and Gyro
+- [X] rewrite find_center using VL53L0X and Gyro
+- [X] VL53L0X instead of HCSR04
+- [X] Gyro sensor (turning, ramps up and down, adjust speed accordingly)
+- [X] intersection: turn 60 degs with gyro and rest with camera until line angle = 0

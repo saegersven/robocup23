@@ -89,7 +89,7 @@ private:
 	/**
 	 * Use the victim neural network to find the closest victim.
 	 */
-	void find_victims(float& x, float& y, bool ignore_dead);
+	void find_victims(float& x, float& y, bool ignore_dead, bool ignore_top = false);
 
 	/**
 	 * Find exit using distance sensor and camera, starting from the center.

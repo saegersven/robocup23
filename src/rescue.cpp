@@ -81,9 +81,15 @@ void Rescue::rescue() {
 
 	while(1) {
 		bool ignore_dead = victim_counter < 2;
-		
+
 		open_camera(VICTIM_CAP_RES);
-		find_victims(x_victim, y_victim, ignore_dead);
+		grab_frame(VICTIM_CAP_RES);
+		delay(50);
+		grab_frame(VICTIM_CAP_RES);
+		delay(50);
+		grab_frame(VICTIM_CAP_RES);
+		delay(50);
+		find_victims(x_victim, y_victim, ignore_dead, true);
 		close_camera();
 		delay(50);
 
@@ -99,7 +105,7 @@ void Rescue::rescue() {
 				bool enable_pickup = false;
 
 				open_camera(VICTIM_CAP_RES);
-				find_victims(x_victim, y_victim, ignore_dead);
+				find_victims(x_victim, y_victim, ignore_dead, cam_angle == CAM_HIGHER_POS);
 				close_camera();
 
 				if(x_victim == -1.0f) {
@@ -384,6 +390,10 @@ void Rescue::find_black_corner() {
 	open_camera(VICTIM_CAP_RES);
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
+	const int SLOW_TURN_SPEED = 35;
+	const int FAST_TURN_SPEED = 45;
+
+	int8_t turn_speed = FAST_TURN_SPEED;
 
 	long total_time = 8000;
 	long max_time = 10000;
@@ -411,7 +421,7 @@ void Rescue::find_black_corner() {
 			if(corner_ml.extract_corner(res, x_corner, y_corner)) {
 				uint64_t new_start_time = millis() - 2000;
 				start_time = start_time > new_start_time ? start_time : new_start_time;
-				robot->m(35, -35);
+				robot->m(22, -22);
 				deg_per_iteration = 5;
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
 				std::cout << x_corner << std::endl;
@@ -422,10 +432,11 @@ void Rescue::find_black_corner() {
 					break;
 				}
 			} else {
-				robot->m(45, -45);
+				robot->m(28, -28);
 			}
 			last_x_corner = x_corner;
-			robot->turn(DTOR(deg_per_iteration));
+			//robot->turn(DTOR(deg_per_iteration));
+			//robot->m(35, -35);
 		}
 		// robot turned full 360 deg and did not find corner
 		// recentre and increase cam angle a bit
@@ -459,14 +470,14 @@ void Rescue::find_black_corner() {
 	robot->m(127, 127, 1000);
 }
 
-void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead) {
+void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bool ignore_top) {
 	x_victim = -1.0f;
 	y_victim = -1.0f;
 	cv::Mat frame = grab_frame(160, 120);
 	cv::Mat res = victim_ml.invoke(frame);
 	//cv::resize(res, res, cv::Size(160, 120));
 	cv::imshow("Victim result", two_channel_to_three_channel(res));
-	std::vector<Victim> victims = victim_ml.extract_victims(res);
+	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
@@ -556,13 +567,13 @@ void Rescue::find_exit() {
 	}
 }
 
-int turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction) {
+void Rescue::turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction) {
 	const int turn_speed_left = direction == BOOL_DIR_LEFT ? 40 : -40;
 	const int turn_speed_right = -turn_speed_left;
 	*duration = millis();
 	robot->m(turn_speed_left, turn_speed_right);
 	while(1) {
-		dist = robot->distance();
+		int dist = robot->distance();
 		if(dist < max_dist) {
 			robot->stop();
 			dist = robot->distance_avg(10, 0.2f);

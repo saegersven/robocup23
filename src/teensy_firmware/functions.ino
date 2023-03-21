@@ -28,8 +28,6 @@ void init() {
 
   displayBatVoltage();
   debugln("Setup completed");
-  pick_up_victim();
-  exit(0);
 }
 
 // returns current battery voltage in Volts
