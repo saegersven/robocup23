@@ -40,6 +40,7 @@ cv::Mat CornerML::invoke(cv::Mat image) {
                 float val = output_layer[i * CORNER_OUT_WIDTH * CORNER_OUT_CHANNELS + j * CORNER_OUT_CHANNELS + k];
                 if(val > 1.0f) val = 1.0f;
                 else if(val < 0.0f) val = 0.0f;
+                if(i == 0) val = 0.0f;
                 p[j * CORNER_OUT_CHANNELS + k] = val;
             }
         }

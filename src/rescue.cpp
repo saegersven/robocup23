@@ -79,19 +79,21 @@ void Rescue::rescue() {
 	int turn_counter = 0;
 	int victim_counter = 0;
 
+	int full_rotation_no_victims_count = 0;
+
 	while(1) {
 		bool ignore_dead = victim_counter < 2;
 
 		open_camera(VICTIM_CAP_RES);
 		grab_frame(VICTIM_CAP_RES);
-		delay(50);
+		delay(5);
 		grab_frame(VICTIM_CAP_RES);
-		delay(50);
+		delay(5);
 		grab_frame(VICTIM_CAP_RES);
-		delay(50);
+		delay(5);
 		find_victims(x_victim, y_victim, ignore_dead, true);
 		close_camera();
-		delay(50);
+		delay(5);
 
 		bool skip_turn = false;
 
@@ -132,7 +134,7 @@ void Rescue::rescue() {
 
 				if(enable_pickup && y_victim > 35.0f) {
 					close_camera();
-					int dur = (int)(7.0f * (67.0f - y_victim));
+					int dur = (int)(7.0f * (67.0f - y_victim)) - 42*PI;
 					std::cout << "Duration: " << dur << std::endl;
 					robot->m(60, 60, dur);
 					robot->turn(-DTOR(25.0f));
@@ -178,77 +180,19 @@ void Rescue::rescue() {
 			robot->m(127, 127, 300);
 			find_center_new_new();
 			robot->servo(SERVO_CAM, CAM_HIGHER_POS);
+
+			++full_rotation_no_victims_count;
+
+			if(full_rotation_no_victims_count == 0) {
+				break;
+			}
 		}
 
 		delay(50);
 	}
 
-	/*
-	bool camera_not_up = false;
-	while(1) {
-		find_victims(x_victim, y_victim, dead);
-		float angle_victim = DTOR(60.0f) * ((x_victim - 80.0f) / 160.0f);
-		if(x_victim != -1.0f) {
-			if(last_x_victim == -1.0f) {
-				robot->turn(angle_victim);
-				close_camera();
-				robot->servo(SERVO_CAM, CAM_HIGHER_POS - 25);
-				open_camera(VICTIM_CAP_RES);
-				for(find_victims(x_victim, y_victim, dead); x_victim == -1.0f; find_victims(x_victim, y_victim, dead)) {
-					robot->m(40, 40);
-				}
-				robot->m(-50, -50, 100);
-				robot->servo(SERVO_CAM, CAM_LOWER_POS + 5);
-				for(find_victims(x_victim, y_victim, dead); x_victim == -1.0f; find_victims(x_victim, y_victim, dead)) {
-					robot->m(40, 40);
-				}
-			}
-			std::cout << "Angle: " << RTOD(angle_victim) << std::endl;
-			std::cout << "Y: " << y_victim << std::endl;
-			if(y_victim > 45.0f) {
-				robot->turn(angle_victim / 2.5f);
-				if(angle_victim < DTOR(5.0f)) {
-					if(num_frames < 10) {
-						++num_frames;
-					} else {
-						num_frames = 0;
-						std::cout << "Pick UP!" << std::endl;
-						close_camera();
-						robot->turn(DTOR(-16.0f));
-						robot->send_byte(CMD_PICK_UP_VICTIM);
-						delay(4200 + 300);
-						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-
-						find_center_new();
-
-						std::cout << "Found center, finding black corner" << std::endl;
-						find_black_corner();
-						
-						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-						delay(20);
-						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-						delay(20);
-						robot->servo(SERVO_CAM, CAM_HIGHER_POS);
-						delay(100);
-
-						open_camera(VICTIM_CAP_RES);
-					}
-				}
-			} else {
-				num_frames = 0;
-				robot->m(clamp((float)base_speed + angle_victim * sensitivity, -128.0f, 127.0f),
-					clamp((float)base_speed - angle_victim * sensitivity, -128.0f, 127.0f));
-			}
-		} else if(x_victim != last_x_victim) {
-			//robot->m(-70, -70, 300);
-		} else  {
-			close_camera();
-			robot->turn(DTOR(30.0f));
-			delay(50);
-			open_camera(VICTIM_CAP_RES);
-		}
-		last_x_victim = x_victim;
-	}*/
+	std::cout << "Searching for exit" << std::endl;
+	find_exit();
 }
 
 void Rescue::open_camera(int width, int height) {
@@ -426,7 +370,11 @@ void Rescue::find_black_corner() {
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
 				std::cout << x_corner << std::endl;
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
-					robot->turn(x_corner / CORNER_IN_WIDTH * DTOR(65.0f));
+					robot->turn(-DTOR(5.0f));
+					frame = grab_frame(160, 120);
+					res = corner_ml.invoke(frame);
+					corner_ml.extract_corner(res, x_corner, y_corner);
+					robot->turn((x_corner / CORNER_IN_WIDTH - 0.5f) * DTOR(65.0f));
 					found_corner = true;
 					save_img(frame, "possible_corner");
 					break;
@@ -466,15 +414,20 @@ void Rescue::find_black_corner() {
 	delay(80);
 	robot->m(-50, -50, 1500);
 	robot->send_byte(CMD_UNLOAD);
-	delay(4000);
+	for (int i = 0; i < 370; ++i) {
+		std::cout << i << std::endl;
+		delay(10);
+	}
 	robot->m(127, 127, 1000);
 }
 
 void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bool ignore_top) {
 	x_victim = -1.0f;
 	y_victim = -1.0f;
+	bool dead = false;
 	cv::Mat frame = grab_frame(160, 120);
 	cv::Mat res = victim_ml.invoke(frame);
+	save_img(frame, "rescue");
 	//cv::resize(res, res, cv::Size(160, 120));
 	cv::imshow("Victim result", two_channel_to_three_channel(res));
 	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
@@ -486,9 +439,10 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 
 	for(int i = 0; i < victims.size(); ++i) {
 		if(ignore_dead && victims[i].dead) continue;
-		if(victims[i].y > y_victim) {
+		if((!victims[i].dead && dead) || victims[i].y > y_victim) {
 			x_victim = victims[i].x;
 			y_victim = victims[i].y;
+			dead = victims[i].dead;
 		}
 	}
 }
@@ -505,16 +459,23 @@ void Rescue::find_exit() {
 		uint64_t start_time = millis();
 		uint64_t turn_time_on_potential_exit = 8000;
 		while(millis() - start_time < MAX_TIME) {
-			robot->m(40, -40);
+			robot->m(40, -40, 50);
+			delay(20);
 
 			int dist = robot->distance();
+			delay(40);
 			if(dist > EXIT_MIN_DISTANCE) {
 				delay(30); // Turn a few degrees more before stopping
 				robot->stop();
+				std::cout << "Found possible exit" << std::endl;
 
 				dist = robot->distance_avg(20, 0.2f);
 				if(dist > EXIT_MIN_DISTANCE) {
 					turn_time_on_potential_exit = millis() - start_time;
+
+					robot->turn(DTOR(25.0f));
+					robot->m(70, 70, 500);
+					robot->turn(DTOR(-22.0f));
 
 					// Get distances of wall directly to the right and to the left of
 					// the presumed exit to approximate the distance we have to drive
@@ -523,15 +484,23 @@ void Rescue::find_exit() {
 					// Get distance left
 					turn_until_wall(&dist_left, &duration_left, EXIT_MIN_DISTANCE, BOOL_DIR_LEFT);
 
-					const int SMALL_TURN_DURATION = 200;
-					robot->m(40, -40);
+					std::cout << "LEFT POST" << std::endl;
+					delay(50);
+
+					const int SMALL_TURN_DURATION = 150;
+					robot->m(35, -35);
 					delay(SMALL_TURN_DURATION);
+					robot->stop();
 
 					// Get distance right
 					turn_until_wall(&dist_right, &duration_right, EXIT_MIN_DISTANCE, BOOL_DIR_RIGHT);
 
+					std::cout << "RIGHT POST" << std::endl;
+					delay(50);
+
 					// Turn to center of the exit
-					robot->m(-40, 40, (duration_left - SMALL_TURN_DURATION - duration_right) / 2);
+					robot->m(-35, 35, (duration_left - SMALL_TURN_DURATION - duration_right) / 2);
+					robot->turn(DTOR(8.0f));
 
 					int dist_to_drive = (dist_left + dist_right) / 2;
 					int duration_to_drive = dist_to_drive * CM_TO_MS_FULL_SPEED - 500;
@@ -568,24 +537,27 @@ void Rescue::find_exit() {
 }
 
 void Rescue::turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction) {
-	const int turn_speed_left = direction == BOOL_DIR_LEFT ? 40 : -40;
+	const int turn_speed_left = direction == BOOL_DIR_LEFT ? -35 : 35;
 	const int turn_speed_right = -turn_speed_left;
+	uint64_t offset = 0;
 	*duration = millis();
 	robot->m(turn_speed_left, turn_speed_right);
 	while(1) {
 		int dist = robot->distance();
 		if(dist < max_dist) {
+			uint64_t start_time_stop = millis();
 			robot->stop();
-			dist = robot->distance_avg(10, 0.2f);
+			dist = robot->distance_avg(4, 0.2f);
 			if(dist < max_dist) break;
 			robot->m(turn_speed_left, turn_speed_right);
+			offset += millis() - start_time_stop;
 		}
 	}
 	robot->m(turn_speed_left, turn_speed_right, 50);
 	delay(20);
 	robot->stop();
 	*wall_dist = robot->distance_avg(20, 0.2f);
-	*duration = millis() - *duration;
+	*duration = millis() - *duration - offset;
 }
 
 bool is_black2(uint8_t b, uint8_t g, uint8_t r) {

@@ -130,6 +130,7 @@ void Line::grab_frame(int width, int height) {
 
 void Line::obstacle() {
 	while(running) {
+		continue;
 		if((obstacle_enabled == false) || (obstacle_active == true)) continue;
 
 		int dist = robot->distance();
@@ -180,7 +181,7 @@ bool Line::obstacle_straight_line(int duration) {
 		float p = (float)num_black / roi_size;
 		std::cout << p << std::endl;
 
-		if(p > 0.1f) {
+		if(p > 0.08f) {
 			// Abort
 			save_img(roi, "obstacle_roi");
 			save_img(frame, "obstacle_frame");
@@ -321,12 +322,18 @@ void Line::follow() {
 		cv::Point(20, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 100, 100));
 #endif
-	int base_speed = LINE_FOLLOW_BASE_SPEED;
+	float base_speed = LINE_FOLLOW_BASE_SPEED;
 	//if(std::abs(line_angle) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
+	float ll = line_angle * line_angle;
+	float extra_sensitivity = std::abs(line_angle * (0.4f * ll*ll - 0.1*ll + 1));
+
+	float ees_l = line_angle < 0.0f ? 1.5f : 0.0f;
+	float ees_r = line_angle > 0.0f ? 1.5f : 0.0f;
+
 	robot->m(
-		clamp(base_speed + line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127),
-		clamp(base_speed - line_angle * LINE_FOLLOW_SENSITIVITY, -128, 127)
+		clamp(base_speed + line_angle * extra_sensitivity * ees_l * LINE_FOLLOW_SENSITIVITY, -128, 127),
+		clamp(base_speed - line_angle * extra_sensitivity * ees_r * LINE_FOLLOW_SENSITIVITY, -128, 127)
 		);
 }
 
@@ -676,7 +683,7 @@ void Line::line() {
 		robot->m(-100, -100, 120);
 		delay(20);
 		robot->turn(-R90);
-		robot->m(100, 100, 450);
+		robot->m(100, 100, 500);
 		delay(20);
 		robot->turn(R90);
 		open_camera();

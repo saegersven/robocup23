@@ -28,6 +28,7 @@
  * Millisecond delay
  */
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
+#define delayMicros(ms) std::this_thread::sleep_for(std::chrono::microseconds(ms))
 
 /**
  * Milliseconds since January 1st, 1970 at 00:00:00

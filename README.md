@@ -19,13 +19,13 @@
 #### 3D Printing
 
 ### Current Problems based on runs in St Augustin (descending order of importance):
-- [ ] USB/I2C instead of SPI communication?! Maybe all three for increased redundancy
 
 - [ ] missed black line during obstacle
 - [ ] corner approach: check contour to avoid false positives
 - [ ] intersection: confused right with left turn (vid 4, 1:45)
 - [ ] obstacle: line after obstacle pls fix
 - [ ] prefer living victims when when !ignore_dead 
+- [ ] find exit
 - [ ] oscillating during linefollowing (even when following straight lines)
 - [ ] random thread(?) stop during rescue. Maybe add pull down resistor or check for press  duration
 - [ ] more labeled victim data to avoid losing victim during search

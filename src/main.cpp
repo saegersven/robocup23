@@ -56,7 +56,10 @@ int main() {
 	
 	// MAIN LOOP
 	while(1) {
-		if(robot->button(BTN_RESTART) && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
+		uint64_t duration = millis();
+		while(robot->button(BTN_RESTART)) delayMicros(100);
+		duration = millis() - duration;
+		if(duration > 20 && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
 			while(robot->button(BTN_RESTART));
 			robot->stop();
 			switch(state) {

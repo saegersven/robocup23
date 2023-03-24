@@ -87,8 +87,6 @@ void m(int left_speed, int right_speed, int duration) {
   single_m(LF1_PIN, LF2_PIN, LF_PWM_PIN, left_speed);
   single_m(RF2_PIN, RF1_PIN, RF_PWM_PIN, right_speed);
 
-  int s = (left_speed + right_speed) / 2;
-  int d = right_speed - left_speed;
   single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, left_speed * BACKWHEEL_FACTOR);
   single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, right_speed * BACKWHEEL_FACTOR);
 
@@ -190,23 +188,24 @@ void pick_up_victim() {
   open_gripper(0);
   delay(500);
   m(50, 50, 0);
-  delay(80);
+  delay(150);
   close_gripper(0);
   delay(350);
-  m(-70, -70, 300);
+  m(-42, -42, 420);
+  delay(100);
 
   // move arm up
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_HIGHER_POS);
   delay(900);
+  // detach servos
+  servo_arm.detach();
+  
   m(70, 70, 200);
 
   open_gripper(110);
-  delay(5);
+  delay(20);
   close_gripper(125);
-
-  // detach servos
-  servo_arm.detach();
 }
 // opens gripper and moves arm down
 void arm_down() {
