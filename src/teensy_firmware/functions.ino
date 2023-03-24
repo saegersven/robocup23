@@ -189,13 +189,11 @@ void pick_up_victim() {
   delay(350);
   open_gripper(0);
   delay(500);
-  m(50, 50, 300);
-  // close arm
+  m(50, 50, 0);
+  delay(80);
   close_gripper(0);
-  delay(500);
-  m(-70, -70, 0);
-  delay(300);
-  stop();
+  delay(350);
+  m(-70, -70, 300);
 
   // move arm up
   servo_arm.attach(SERVO_ARM_PIN);
