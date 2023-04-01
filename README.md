@@ -20,6 +20,8 @@
 ...
 ### Current Problems based on runs in St Augustin (descending order of importance):
 
+- [ ] drive a bit backwards when lineangle > threshold
+
 - [ ] missed black line during obstacle
 - [ ] corner approach: check contour to avoid false positives
 - [ ] intersection: confused right with left turn (vid 4, 1:45)
