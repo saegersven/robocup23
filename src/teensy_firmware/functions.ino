@@ -90,7 +90,7 @@ void m(int left_speed, int right_speed, int duration) {
   single_m(LB1_PIN, LB2_PIN, LB_PWM_PIN, left_speed * BACKWHEEL_FACTOR);
   single_m(RB1_PIN, RB2_PIN, RB_PWM_PIN, right_speed * BACKWHEEL_FACTOR);
 
-  delay(duration);
+  delay(abs(duration));
 
   // stop all motors after movement
   if (duration != 0) stop();
@@ -119,26 +119,20 @@ void m(int speed) {
 
 // is never used, but who cares
 void pick_up_rescue_kit() {
+  long start_time = millis();  
+  close_gripper(150);
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
-  delay(500);
-  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
-  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
-  servo_gripper1.write(GRIPPER1_OPEN);
-  servo_gripper2.write(GRIPPER2_OPEN);
-  delay(450);
-  servo_gripper1.detach();
-  servo_gripper2.detach();
-  m(70, 70, 200);
-  m(70, 70, 0);
+  m(-80, -80, 200);
+  open_gripper(250);
 
-  // close arm
-  servo_gripper1.attach(SERVO_GRIPPER1_PIN);
-  servo_gripper2.attach(SERVO_GRIPPER2_PIN);
-  servo_gripper1.write(GRIPPER1_CLOSED);
-  servo_gripper2.write(GRIPPER2_CLOSED);
-  delay(250);
+  delay(42*2);
+  // drive forward and close arm
+  m(80, 80, 0);  
+  close_gripper(0);
+  delay(400);
   stop();
+  delay(100);
 
   // move arm up
   servo_arm.attach(SERVO_ARM_PIN);
@@ -146,18 +140,14 @@ void pick_up_rescue_kit() {
   delay(900);
 
   // open arm (only one side)
-  servo_gripper1.write(GRIPPER1_OPEN);
-  delay(300);
-
-  // close arm
-  servo_gripper1.write(GRIPPER1_CLOSED);
-
-  m(-70, -70, 400);
+  m(-80, -80, 0);
+  open_gripper(100);
+  close_gripper(170);
+  stop();
 
   // detach servos
   servo_arm.detach();
-  servo_gripper1.detach();
-  servo_gripper2.detach();
+  Serial.println(millis() - start_time);
 }
 
 void open_gripper(int duration) {

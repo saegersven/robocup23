@@ -39,9 +39,9 @@
 #define LINE_CORNER_WIDTH 7
 #define LINE_CORNER_HEIGHT 8
 
-#define LINE_FOLLOW_BASE_SPEED 37
+#define LINE_FOLLOW_BASE_SPEED 45
 #define LINE_FOLLOW_STRAIGHT_LINE_SPEED 50
-#define LINE_FOLLOW_SENSITIVITY 38.0f
+#define LINE_FOLLOW_SENSITIVITY 45.0f
 
 #define ARM_ANGLE_OFFSET DTOR(25.0f)
 
@@ -80,6 +80,8 @@ private:
 
 	// used for silver testing
 	bool test = false;
+
+	bool correct_gap_line_angle = true;
 
 	std::atomic<bool> running;
 	std::atomic<bool> obstacle_enabled;

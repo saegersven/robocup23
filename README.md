@@ -19,16 +19,12 @@
 #### 3D Printing
 ...
 ### Current Problems based on runs in St Augustin (descending order of importance):
-
-- [ ] drive a bit backwards when lineangle > threshold
-
 - [ ] missed black line during obstacle
 - [ ] corner approach: check contour to avoid false positives
 - [ ] intersection: confused right with left turn (vid 4, 1:45)
 - [ ] obstacle: line after obstacle pls fix
 - [ ] prefer living victims when when !ignore_dead 
 - [ ] find exit
-- [ ] oscillating during linefollowing (even when following straight lines)
 - [ ] random thread(?) stop during rescue. Maybe add pull down resistor or check for press  duration
 - [ ] more labeled victim data to avoid losing victim during search
 - [ ] more ml data with multiple victim overlapping (and far away)
@@ -44,3 +40,4 @@
 - [X] VL53L0X instead of HCSR04
 - [X] Gyro sensor (turning, ramps up and down, adjust speed accordingly)
 - [X] intersection: turn 60 degs with gyro and rest with camera until line angle = 0
+- [X] oscillating during linefollowing (even when following straight lines)

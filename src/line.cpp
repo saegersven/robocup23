@@ -204,6 +204,7 @@ float Line::difference_weight(float x) {
 	// Exponential
 	return 0.25f + 0.75f * std::exp(-16.0f * x*x);
 
+
 	// Rectified Linear (should be fastest)
 	/*if(x < 0.0f) x = -x;
 	if(x > 0.6283185307f) return 0.25f;
@@ -305,6 +306,15 @@ void Line::follow() {
 	float line_angle = get_line_angle(black);
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
+	
+	if(num_black_pixels < 40) {
+		if(correct_gap_line_angle) {
+			robot->turn(-last_line_angle / 2);
+		}
+	} else {
+		correct_gap_line_angle = true;
+	}
+
 	last_line_angle = line_angle;
 
 #ifdef DEBUG
@@ -326,10 +336,10 @@ void Line::follow() {
 	//if(std::abs(line_angle) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
 	float ll = line_angle * line_angle;
-	float extra_sensitivity = std::abs(line_angle * (0.4f * ll*ll - 0.1*ll + 1));
+	float extra_sensitivity = std::abs(line_angle) * (0.3f*ll + 1.0f); //(0.1f * ll*ll - 0.02f*ll + 1.0f));
 
-	float ees_l = line_angle < 0.0f ? 1.5f : 0.0f;
-	float ees_r = line_angle > 0.0f ? 1.5f : 0.0f;
+	float ees_l = line_angle < 0.0f ? 1.5f : 0.2f;
+	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
 
 	robot->m(
 		clamp(base_speed + line_angle * extra_sensitivity * ees_l * LINE_FOLLOW_SENSITIVITY, -128, 127),
@@ -599,17 +609,8 @@ void Line::rescue_kit() {
 		save_img(frame, "rescue_kit");
 		close_camera();
 		robot->turn(angle - ARM_ANGLE_OFFSET);
-		robot->m(-80, -80, 200);
-		delay(100);
-		robot->send_byte(CMD_ARM_DOWN);
-		delay(1000);
-		robot->m(50, 50, 420);
-		delay(150);
-		robot->send_byte(CMD_ARM_UP);
-		delay(2600);
-		robot->m(-80, -80, 200);
-		delay(100);
-		robot->turn(-angle + ARM_ANGLE_OFFSET);
+		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
+		delay(2400);
 		open_camera();
 	}
 }

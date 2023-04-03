@@ -131,7 +131,8 @@ void loop() {
     arm_half_up();
   } else if (cmd == CMD_UNLOAD) {
     unload_victims();
-  } else if (cmd == CMD_PICK_UP_RESCUE_KIT) { // is never used, but who cares
+  } else if (cmd == CMD_PICK_UP_RESCUE_KIT) {
+    Serial.println("Received byte CMD_PICK_UP_RESCUE_KIT");
     pick_up_rescue_kit();
   } else if (cmd == CMD_PICK_UP_VICTIM) {
     pick_up_victim();
