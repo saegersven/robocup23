@@ -611,6 +611,7 @@ void Line::rescue_kit() {
 		robot->turn(angle - ARM_ANGLE_OFFSET);
 		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
 		delay(2400);
+		robot->turn(-angle + ARM_ANGLE_OFFSET);
 		open_camera();
 	}
 }
