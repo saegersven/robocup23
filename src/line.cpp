@@ -300,6 +300,8 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
+	float base_speed = LINE_FOLLOW_BASE_SPEED;
+	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
 
@@ -307,15 +309,19 @@ void Line::follow() {
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
 	
-	/*
-	if(num_black_pixels < 40) {
-		if(correct_gap_line_angle) {
-			robot->turn(-last_line_angle / 2);
-		}
-	} else {
-		correct_gap_line_angle = true;
+	
+	if(num_black_pixels < 40) {  
+		robot->stop();
+		close_camera();
+		delay(100);
+		robot->m(-LINE_FOLLOW_BASE_SPEED, -LINE_FOLLOW_BASE_SPEED, 200);
+		robot->stop();
+		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY / 2.0f;
+		open_camera();
+		delay(100);
+		grab_frame();
 	}
-	*/
+	
 
 	last_line_angle = line_angle;
 
@@ -334,8 +340,7 @@ void Line::follow() {
 		cv::Point(20, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 100, 100));
 #endif
-	float base_speed = LINE_FOLLOW_BASE_SPEED;
-	//if(std::abs(line_angle) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
+	//if(std::abs(RTOD(line_angle)) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
 	float ll = line_angle * line_angle;
 	//float extra_sensitivity = std::abs(line_angle) * (0.3f*ll + 1.0f); //(0.1f * ll*ll - 0.02f*ll + 1.0f));
@@ -345,8 +350,8 @@ void Line::follow() {
 	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
 
 	robot->m(
-		clamp(base_speed + line_angle * extra_sensitivity * ees_l * LINE_FOLLOW_SENSITIVITY, -128, 127),
-		clamp(base_speed - line_angle * extra_sensitivity * ees_r * LINE_FOLLOW_SENSITIVITY, -128, 127)
+		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127),
+		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127)
 		);
 }
 

@@ -18,7 +18,9 @@
 ...
 #### 3D Printing
 ...
-### Current Problems based on runs in St Augustin (descending order of importance):
+### Current Problems based on runs in St Augustin (descending order of importance)
+- [ ] drive towards rescue kit so its always in the same y position (not only x) to facilitate pickup
+- [ ] turn lineangle before gap? Maybe drive backwards a few times to allow for slight corrections
 - [ ] missed black line during obstacle
 - [ ] corner approach: check contour to avoid false positives
 - [ ] intersection: confused right with left turn (vid 4, 1:45)
