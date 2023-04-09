@@ -309,18 +309,20 @@ void Line::follow() {
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
 	
-	
-	if(num_black_pixels < 40) {  
+	/*
+	if(num_black_pixels < 40 && std::abs(RTOD(last_line_angle)) > 5.0f) { // TODO: why is second condition always false?
+		std::cout << "Last line angle: " << last_line_angle << std::endl;
 		robot->stop();
 		close_camera();
 		delay(100);
-		robot->m(-LINE_FOLLOW_BASE_SPEED, -LINE_FOLLOW_BASE_SPEED, 200);
+		robot->m(-LINE_FOLLOW_BASE_SPEED, -LINE_FOLLOW_BASE_SPEED, 250);
 		robot->stop();
 		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY / 2.0f;
 		open_camera();
 		delay(100);
 		grab_frame();
 	}
+	*/
 	
 
 	last_line_angle = line_angle;
