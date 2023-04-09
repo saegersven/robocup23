@@ -307,6 +307,7 @@ void Line::follow() {
 
 	if(std::isnan(line_angle)) line_angle = 0.0f;
 	
+	/*
 	if(num_black_pixels < 40) {
 		if(correct_gap_line_angle) {
 			robot->turn(-last_line_angle / 2);
@@ -314,6 +315,7 @@ void Line::follow() {
 	} else {
 		correct_gap_line_angle = true;
 	}
+	*/
 
 	last_line_angle = line_angle;
 
@@ -336,7 +338,8 @@ void Line::follow() {
 	//if(std::abs(line_angle) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
 	float ll = line_angle * line_angle;
-	float extra_sensitivity = std::abs(line_angle) * (0.3f*ll + 1.0f); //(0.1f * ll*ll - 0.02f*ll + 1.0f));
+	//float extra_sensitivity = std::abs(line_angle) * (0.3f*ll + 1.0f); //(0.1f * ll*ll - 0.02f*ll + 1.0f));
+	float extra_sensitivity = 0.3141f * line_angle * line_angle * line_angle * line_angle + 1.0f;
 
 	float ees_l = line_angle < 0.0f ? 1.5f : 0.2f;
 	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
