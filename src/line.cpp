@@ -639,7 +639,7 @@ void Line::rescue_kit() {
 		close_camera();
 		robot->turn(angle - ARM_ANGLE_OFFSET);
 		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
-		delay(2500);
+		delay(2900); // wait for Teensy to pick up
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
 		open_camera();
 	}

@@ -28,7 +28,6 @@ void init() {
 
   displayBatVoltage();
   debugln("Setup completed");
-  pick_up_rescue_kit();
 }
 
 // returns current battery voltage in Volts
@@ -120,6 +119,7 @@ void m(int speed) {
 
 // picks up rescue kit
 void pick_up_rescue_kit() {
+  long start = millis();
   stop();
   close_gripper(0);
   servo_arm.attach(SERVO_ARM_PIN);
@@ -133,13 +133,14 @@ void pick_up_rescue_kit() {
   close_gripper(0);
   m(30, 30, 420);
   servo_arm.write(ARM_HIGHER_POS);
-  delay(50);
+  delay(10);
   m(-50, -50, 350);
   delay(700);
   open_gripper(150);
   delay(100);
   close_gripper(250);
   servo_arm.detach();
+  Serial.println(millis() - start);
 }
 
 void open_gripper(int duration) {
