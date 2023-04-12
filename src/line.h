@@ -45,6 +45,8 @@
 
 #define ARM_ANGLE_OFFSET DTOR(25.0f)
 
+#define ENABLE_NO_DIFFERENCE true // should robot increase motor speed when frame = last_frame?
+
 /**
  * Single-pixel thresholding operations
  */
@@ -73,6 +75,8 @@ private:
 
 	// Current frame from camera
 	cv::Mat frame;
+	// Last frame from camera
+	cv::Mat last_frame;
 	// Clone of frame for drawing debug data
 	cv::Mat debug_frame;
 	// Thresholded frame
@@ -88,6 +92,9 @@ private:
 	std::atomic<bool> obstacle_active;
 
 	float last_line_angle;
+
+	uint32_t no_difference_counter = 0;
+	long long no_difference_time_stamp = 0;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 

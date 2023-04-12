@@ -28,12 +28,20 @@
  * Millisecond delay
  */
 #define delay(ms) std::this_thread::sleep_for(std::chrono::milliseconds(ms))
+
+/**
+ * Microsecond delay
+ */
 #define delayMicros(ms) std::this_thread::sleep_for(std::chrono::microseconds(ms))
 
 /**
  * Milliseconds since January 1st, 1970 at 00:00:00
  */
 #define millis() std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
+
+/**
+ * Microseconds since January 1st, 1970 at 00:00:00
+ */
 #define micros() std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now().time_since_epoch()).count()
 
 /**
@@ -56,3 +64,8 @@ void save_img(cv::Mat& img, const std::string& subfolder);
  * Convert two channel image returned by victim neural net to three channel image for debugging.
  */
 cv::Mat two_channel_to_three_channel(cv::Mat in);
+
+/**
+ * returns average difference between two given frames
+ */
+float average_difference(cv::Mat a, cv::Mat b);

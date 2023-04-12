@@ -301,6 +301,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 void Line::follow() {
 	float base_speed = LINE_FOLLOW_BASE_SPEED;
+	if (millis() - no_difference_time_stamp < 500) base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
@@ -324,8 +325,23 @@ void Line::follow() {
 	}
 	*/
 	
+	// if frame does not change (indicating that robot got stuck), increase motor speed
+	if(!last_frame.empty()) {
+			float diff = average_difference(frame, last_frame);
 
-	last_line_angle = line_angle;
+			if(diff < 4.2f) {
+				++no_difference_counter;
+				if(no_difference_counter == 100) {
+					if(ENABLE_NO_DIFFERENCE) {
+						std::cout << "No difference, increasing motor speed" << std::endl;
+						no_difference_time_stamp = millis(); // store at what time "speed mode" has been activated
+					} 
+					no_difference_counter = 0; // @saegersven does this make sense?
+				}
+			} else {
+				no_difference_counter = no_difference_counter >= 10 ? no_difference_counter - 10 : 0;
+			}
+		}
 
 #ifdef DEBUG
 	cv::Point center(debug_frame.cols / 2, debug_frame.rows);
@@ -355,6 +371,9 @@ void Line::follow() {
 		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127),
 		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127)
 		);
+
+	last_frame = frame.clone();
+	last_line_angle = line_angle;
 }
 
 void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
@@ -620,7 +639,7 @@ void Line::rescue_kit() {
 		close_camera();
 		robot->turn(angle - ARM_ANGLE_OFFSET);
 		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
-		delay(2400);
+		delay(2500);
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
 		open_camera();
 	}

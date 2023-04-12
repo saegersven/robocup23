@@ -55,3 +55,24 @@ cv::Mat two_channel_to_three_channel(cv::Mat in) {
 	}
 	return out;
 }
+
+float average_difference(cv::Mat a, cv::Mat b) {
+	CV_Assert(a.depth() == CV_8U);
+	CV_Assert(b.depth() == CV_8U);
+	CV_Assert(a.cols == b.cols);
+	CV_Assert(a.rows == b.rows);
+	CV_Assert(a.channels() == b.channels());
+
+	float difference = 0.0f;
+
+	int i, j;
+	for(i = 0; i < a.rows; ++i) {
+		uint8_t* a_ptr = a.ptr<uint8_t>(i);
+		uint8_t* b_ptr = b.ptr<uint8_t>(i);
+		for(j = 0; j < a.cols * a.channels(); j++) {
+			int16_t diff = a_ptr[j] - b_ptr[j];
+			difference += std::abs(diff);
+		}
+	}
+	return difference / (a.cols * a.rows * a.channels());
+}
