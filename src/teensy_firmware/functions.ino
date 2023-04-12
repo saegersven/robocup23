@@ -28,6 +28,7 @@ void init() {
 
   displayBatVoltage();
   debugln("Setup completed");
+  pick_up_rescue_kit();
 }
 
 // returns current battery voltage in Volts
@@ -117,41 +118,27 @@ void m(int speed) {
   m(speed, speed, 0); // does not stop after motor movement
 }
 
-// is never used, but who cares
+// picks up rescue kit
 void pick_up_rescue_kit() {
   stop();
   close_gripper(0);
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
-  m(-50, -50, 250);
-  open_gripper(0);
-  m(-50, -50, 250);
-  
+  m(-65, -65, 250);
+  close_gripper(1);
   delay(20);
-  
-  // drive forward and close arm
-  m(80, 80, 0);  
-  delay(100);
-  open_gripper(1);
-  delay(200);
+  open_gripper(0);
+  delay(420);
+  m(60, 60, 200);
   close_gripper(0);
-  delay(200);
-  stop();
-  delay(50);
-
-  // move arm up
-  servo_arm.attach(SERVO_ARM_PIN);
+  m(30, 30, 420);
   servo_arm.write(ARM_HIGHER_POS);
-  delay(900);
-
-  // open arm (only one side)
-  m(-80, -80, 0);
-  open_gripper(170);
-  stop();
-  close_gripper(200);
-  stop();
-
-  // detach servos
+  delay(50);
+  m(-50, -50, 350);
+  delay(700);
+  open_gripper(150);
+  delay(100);
+  close_gripper(250);
   servo_arm.detach();
 }
 
