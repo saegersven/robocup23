@@ -119,20 +119,25 @@ void m(int speed) {
 
 // is never used, but who cares
 void pick_up_rescue_kit() {
-  long start_time = millis();  
-  close_gripper(150);
+  stop();
+  close_gripper(0);
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
-  m(-80, -80, 200);
-  open_gripper(250);
-
-  delay(42*2);
+  m(-50, -50, 250);
+  open_gripper(0);
+  m(-50, -50, 250);
+  
+  delay(20);
+  
   // drive forward and close arm
   m(80, 80, 0);  
-  close_gripper(0);
-  delay(400);
-  stop();
   delay(100);
+  open_gripper(1);
+  delay(200);
+  close_gripper(0);
+  delay(200);
+  stop();
+  delay(50);
 
   // move arm up
   servo_arm.attach(SERVO_ARM_PIN);
@@ -141,13 +146,13 @@ void pick_up_rescue_kit() {
 
   // open arm (only one side)
   m(-80, -80, 0);
-  open_gripper(100);
-  close_gripper(170);
+  open_gripper(170);
+  stop();
+  close_gripper(200);
   stop();
 
   // detach servos
   servo_arm.detach();
-  Serial.println(millis() - start_time);
 }
 
 void open_gripper(int duration) {
