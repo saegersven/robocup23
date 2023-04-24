@@ -360,7 +360,7 @@ void Line::follow() {
 #endif
 	//if(std::abs(RTOD(line_angle)) < 20.0f) base_speed = LINE_FOLLOW_STRAIGHT_LINE_SPEED;
 
-	float ll = line_angle * line_angle;
+	//float ll = line_angle * line_angle;
 	//float extra_sensitivity = std::abs(line_angle) * (0.3f*ll + 1.0f); //(0.1f * ll*ll - 0.02f*ll + 1.0f));
 	float extra_sensitivity = 0.3141f * line_angle * line_angle * line_angle * line_angle + 1.0f;
 

@@ -1,53 +1,53 @@
-- Laptop ✓
-- Ladegerät für Laptop ✓
-- Handys ✓
-- 18650 ✓
-- Lipo Ladegerät ✓
-- Lipo ✓
-- Tücher zum Putzen ✓
-- Kamera ✓
-- Kamera Ladegerät ✓
-- Kamera Ersatzakku ✓
-- Essen ✓
-- Trinken ✓
-- Debris ✓
-- Ladegerät Handy ✓
-- Grünen Streifen ✓
-- Roten Streifer ✓
-- Holzkeil für Akkuwechsel ✓
-- Tesa ✓
-- EvShield ✓
-- Powerbank ✓
-- Doppelseitiges Klebeband ✓
-- Lötstation ✓
-- Lötzinn ✓
-- Silvertape ✓
-- Rescue bereich ✓
-- Platten (drei große Testplatten) ✓
-- Silber ✓
-- Bumper ✓
-- Kugeln ✓
-- Rescue kit ✓
-- Schwarze Ecke ✓
-- alter Roboter als Backup ✓
-- iphone Ladekabel ✓
-- Farbsensoren ✓
-- Kabeltasche ✓
-- Roboter ✓
-- RasPi ✓
-- Teensy ✓
-- L293D ✓
-- 2. PCB ✓
-- Step up Module ✓
-- Step down Module ✓
-- kleine und große Servos ✓
-- Pololu 20d ✓
-- RasPi Kamera ✓
-- Raspi Kamera Kabel ✓
-- Reifen ✓
-- Omni Wheels ✓
-- HC-SR04 ✓
-- 3d printed chassis ✓
+- Laptop
+- Ladegerät für Laptop
+- Handys
+- 18650
+- Lipo Ladegerät
+- Lipo
+- Tücher zum Putzen
+- Kamera
+- Kamera Ladegerät
+- Kamera Ersatzakku
+- Essen
+- Trinken
+- Debris
+- Ladegerät Handy
+- Grünen Streifen
+- Roten Streifer
+- Holzkeil für Akkuwechsel
+- Tesa
+- EvShield
+- Powerbank
+- Doppelseitiges Klebeband
+- Lötstation
+- Lötzinn
+- Silvertape
+- Rescue bereich
+- Platten (drei große Testplatten)
+- Silber
+- Bumper
+- Kugeln
+- Rescue kit
+- Schwarze Ecke
+- alter Roboter als Backup
+- iphone Ladekabel
+- Farbsensoren
+- Kabeltasche
+- Roboter
+- RasPi
+- Teensy
+- L293D
+- 2. PCB
+- Step up Module
+- Step down Module
+- kleine und große Servos
+- Pololu 20d
+- RasPi Kamera
+- Raspi Kamera Kabel
+- Reifen
+- Omni Wheels
+- HC-SR04
+- 3d printed chassis
 - ... handle
 - ... gate
 - ... container
@@ -55,59 +55,59 @@
 - ... gripper
 - ... cam_mount
 - ... motor mount
-- copper wire ✓
-- caps ✓
-- M2, M2.5, M3, M4 Schrauben und Muttern ✓
-- Schraubensicherung ✓
-- Kabelbinder ✓
-- Inbus ✓
-- Torx ✓
-- Zange ✓
-- Abisolierzange ✓
-- Seitenschneider ✓
-- Krokoklemmen ✓
-- Multimeter ✓
-- Pinzette ✓
-- Schlitzschraubendreher ✓
-- Heißkleber ✓
-- Ersatzstäbe ✓
-- Tape ✓
-- Micro Sd Karte(n) ✓
-- USB Hub/Reader ✓
-- Lankabel ✓
-- Micro USB Kabel ✓
-- Nüsse (oder Maulschlüssel) ✓
-- Widerstände ✓
-- Taster ✓
-- LEDs ✓
-- Schalter ✓
-- Header ✓
-- Lipo safe bag ✓
-- Servo ✓
-- USB C Kabel ✓
-- Schrumpfschlauch ✓
-- Isolierband ✓
-- TP4056 ✓
-- 18650 Halter ✓
-- DRK Lampe ✓
-- Servohörner ✓
-- VL53L0X ✓
-- USB Sticks ✓
-- Silikon Schlauch ✓
-- Bohrer ✓
-- Akkuschrauber ✓
-- Loombands ✓
-- Messschieber ✓
-- Cuttermesser ✓
-- Lineal/Geodreieck/Zollstock ✓
-- IC Sockel ✓
-- Sekundenkleber ✓
-- Kettengummis ✓
-- Arduino UNO ✓
-- Hochladekabel Arduino UNO ✓
-- Feilen ✓
-- Dremel mit Werkzeug ✓
-- kleine Schraubendreher ✓
-- Labornetzteil ✓
-- Mehrfachsteckdose ✓
-- Verlängerungskabel ✓
+- copper wire
+- caps
+- M2, M2.5, M3, M4 Schrauben und Muttern
+- Schraubensicherung
+- Kabelbinder
+- Inbus
+- Torx
+- Zange
+- Abisolierzange
+- Seitenschneider
+- Krokoklemmen
+- Multimeter
+- Pinzette
+- Schlitzschraubendreher
+- Heißkleber
+- Ersatzstäbe
+- Tape
+- Micro Sd Karte(n)
+- USB Hub/Reader
+- Lankabel
+- Micro USB Kabel
+- Nüsse (oder Maulschlüssel)
+- Widerstände
+- Taster
+- LEDs
+- Schalter
+- Header
+- Lipo safe bag
+- Servo
+- USB C Kabel
+- Schrumpfschlauch
+- Isolierband
+- TP4056
+- 18650 Halter
+- DRK Lampe
+- Servohörner
+- VL53L0X
+- USB Sticks
+- Silikon Schlauch
+- Bohrer
+- Akkuschrauber
+- Loombands
+- Messschieber
+- Cuttermesser
+- Lineal/Geodreieck/Zollstock
+- IC Sockel
+- Sekundenkleber
+- Kettengummis
+- Arduino UNO
+- Hochladekabel Arduino UNO
+- Feilen
+- Dremel mit Werkzeug
+- kleine Schraubendreher
+- Labornetzteil
+- Mehrfachsteckdose
+- Verlängerungskabel
