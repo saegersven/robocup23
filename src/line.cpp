@@ -130,7 +130,6 @@ void Line::grab_frame(int width, int height) {
 
 void Line::obstacle() {
 	while(running) {
-		continue;
 		if((obstacle_enabled == false) || (obstacle_active == true)) continue;
 
 		int dist = robot->distance();
@@ -301,7 +300,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 void Line::follow() {
 	float base_speed = LINE_FOLLOW_BASE_SPEED;
-	if (millis() - no_difference_time_stamp < 500) base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+	if (millis() - no_difference_time_stamp < 300) base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
@@ -329,14 +328,13 @@ void Line::follow() {
 	if(!last_frame.empty()) {
 			float diff = average_difference(frame, last_frame);
 
-			if(diff < 4.2f) {
+			if(diff < 4.0f) {
 				++no_difference_counter;
 				if(no_difference_counter == 100) {
 					if(ENABLE_NO_DIFFERENCE) {
 						std::cout << "No difference, increasing motor speed" << std::endl;
 						no_difference_time_stamp = millis(); // store at what time "speed mode" has been activated
-					} 
-					no_difference_counter = 0; // @saegersven does this make sense?
+					}
 				}
 			} else {
 				no_difference_counter = no_difference_counter >= 10 ? no_difference_counter - 10 : 0;
