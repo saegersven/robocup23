@@ -1,52 +1,41 @@
 - Laptop
 - Ladegerät für Laptop
 - Handys
-- 18650
-- Lipo Ladegerät
-- Lipo
-- Tücher zum Putzen
-- Kamera
-- Kamera Ladegerät
-- Kamera Ersatzakku
-- Essen
-- Trinken
-- Debris
-- Ladegerät Handy
-- Grünen Streifen
-- Roten Streifer
-- Holzkeil für Akkuwechsel
-- Tesa
-- EvShield
-- Powerbank
-- Doppelseitiges Klebeband
-- Lötstation
-- Lötzinn
-- Silvertape
-- Rescue bereich
-- Platten (drei große Testplatten)
-- Silber
-- Bumper
-- Kugeln
-- Rescue kit
-- Schwarze Ecke
 - alter Roboter als Backup
-- iphone Ladekabel
-- Farbsensoren
-- Kabeltasche
 - Roboter
-- RasPi
-- Teensy
-- L293D
-- 2. PCB
-- Step up Module
-- Step down Module
-- kleine und große Servos
-- Pololu 20d
-- RasPi Kamera
-- Raspi Kamera Kabel
-- Reifen
-- Omni Wheels
-- HC-SR04
+
+- Dremel mit Werkzeug
+- Labornetzteil
+- Akkuschrauber
+- Powerbank
+
+- Mehrfachsteckdose
+- Verlängerungskabel
+- kleine Schraubendreher
+- Feilen
+- Sekundenkleber
+- Messschieber
+- Cuttermesser
+- Schrumpfschlauch
+- Isolierband
+- Bohrer
+- Silikon Schlauch
+- Nüsse (oder Maulschlüssel)
+- Heißkleber
+- Ersatzstäbe
+- Tape
+- Pinzette
+- Schlitzschraubendreher
+- Abisolierzange
+- Seitenschneider
+- Krokoklemmen
+- Multimeter
+- Inbus
+- Torx
+- Zange
+- Schraubensicherung
+- Kabelbinder
+- M2, M2.5, M3, M4 Schrauben und Muttern
 - 3d printed chassis
 - ... handle
 - ... gate
@@ -55,59 +44,70 @@
 - ... gripper
 - ... cam_mount
 - ... motor mount
-- copper wire
+- Feuerzeug
+- Doppelseitiges Klebeband
+- 2. PCB
+- Lötstation
+- Lötzinn
+- Lötkabel
+- Lineal/Geodreieck/Zollstock
+- Reifen
+- Omni Wheels
+- HC-SR04
 - caps
-- M2, M2.5, M3, M4 Schrauben und Muttern
-- Schraubensicherung
-- Kabelbinder
-- Inbus
-- Torx
-- Zange
-- Abisolierzange
-- Seitenschneider
-- Krokoklemmen
-- Multimeter
-- Pinzette
-- Schlitzschraubendreher
-- Heißkleber
-- Ersatzstäbe
-- Tape
+- RasPi Kamera
+- Raspi Kamera Kabel
+- kleine und große Servos
+- Pololu 20d
+- Step up Module
+- Step down Module
+- RasPi
+- Teensy
+- L293D
+- Kabeltasche
+- Tesa
+- Schere
+- Holzkeil für Akkuwechsel
+- Ladegerät Handy
+- IC Sockel
+- Servohörner
+- VL53L0X
+- TP4056
+- 18650 Halter
+- DRK Lampe
+- USB Sticks
+- Lipo safe bag
+- Servo
+- USB C Kabel
+- 18650
+- Lipo Ladegerät
+- Lipo
+- Micro USB Kabel
 - Micro Sd Karte(n)
 - USB Hub/Reader
 - Lankabel
-- Micro USB Kabel
-- Nüsse (oder Maulschlüssel)
-- Widerstände
 - Taster
 - LEDs
 - Schalter
 - Header
-- Lipo safe bag
-- Servo
-- USB C Kabel
-- Schrumpfschlauch
-- Isolierband
-- TP4056
-- 18650 Halter
-- DRK Lampe
-- Servohörner
-- VL53L0X
-- USB Sticks
-- Silikon Schlauch
-- Bohrer
-- Akkuschrauber
-- Loombands
-- Messschieber
-- Cuttermesser
-- Lineal/Geodreieck/Zollstock
-- IC Sockel
-- Sekundenkleber
-- Kettengummis
-- Arduino UNO
-- Hochladekabel Arduino UNO
-- Feilen
-- Dremel mit Werkzeug
-- kleine Schraubendreher
-- Labornetzteil
-- Mehrfachsteckdose
-- Verlängerungskabel
+- Widerstände
+- Debris
+- Kamera
+- Kamera Ladegerät
+- Kamera Ersatzakku
+- Tücher zum Putzen
+- Rescue bereich
+- Platten (drei große Testplatten)
+- Kugeln
+- Rescue kit
+- Schwarze Ecke
+- Bumper
+- Grünen Streifen
+- Roten Streifer
+- Silvertape
+- Silber
+
+Dran denken:
+- Handy
+- Roboter
+- Laptop (mit Netzteil!)
