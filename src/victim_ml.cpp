@@ -49,14 +49,14 @@ cv::Mat VictimML::invoke(cv::Mat image) {
 
 std::vector<Victim> VictimML::extract_victims(cv::Mat probability_map, bool ignore_top) {
     if(ignore_top) {
-        /*for(int i = 0; i < TOP_Y; ++i) {
+        for(int i = 0; i < TOP_Y; ++i) {
             float* p = probability_map.ptr<float>(i);
             for(int j = 0; j < OUT_WIDTH; ++j) {
                 for(int k = 0; k < OUT_CHANNELS; ++k) {
                     p[j * OUT_CHANNELS + k] = 0.0f;
                 }
             }
-        }*/
+        }
     }
 
     const float THRESHOLD_DEAD = 0.3f;
