@@ -3,12 +3,10 @@
 - Handys
 - alter Roboter als Backup
 - Roboter
-
 - Dremel mit Werkzeug
 - Labornetzteil
 - Akkuschrauber
 - Powerbank
-
 - Mehrfachsteckdose
 - Verlängerungskabel
 - kleine Schraubendreher
@@ -106,8 +104,4 @@
 - Roten Streifer
 - Silvertape
 - Silber
-
-Dran denken:
-- Handy
-- Roboter
-- Laptop (mit Netzteil!)
+- LED Lamper

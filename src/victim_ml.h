@@ -22,7 +22,7 @@
 #define OUT_HEIGHT 20
 #define OUT_CHANNELS 2
 
-#define TOP_Y 6
+#define TOP_Y 3
 
 #define VICTIM_MODEL_PATH "/home/pi/robocup23/runtime_data/victims.tflite"
 

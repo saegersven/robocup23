@@ -139,8 +139,7 @@ void Rescue::rescue() {
 					robot->m(60, 60, dur);
 					robot->turn(-DTOR(25.0f));
 					robot->send_byte(CMD_PICK_UP_VICTIM);
-
-					robot->m(-70, -70, 400);
+					delay(5000);
 
 					find_center_new_new();
 					find_black_corner();
@@ -335,7 +334,7 @@ void Rescue::find_black_corner() {
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
 	const int SLOW_TURN_SPEED = 35;
-	const int FAST_TURN_SPEED = 45;
+	const int FAST_TURN_SPEED = 40;
 
 	int8_t turn_speed = FAST_TURN_SPEED;
 
