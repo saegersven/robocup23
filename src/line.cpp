@@ -22,6 +22,10 @@ bool is_red(uint8_t b, uint8_t g, uint8_t r) {
 	return 1.0f / RED_RATIO_THRESHOLD * r > b + g && r > RED_MIN_VALUE;
 }
 
+bool is_exit_green(uint8_t b, uint8_t g, uint8_t r) {
+	return 1.0f / EXIT_GREEN_RATIO_THRESHOLD * g > b + r && g > EXIT_GREEN_MIN_VALUE;
+}
+
 Line::Line(std::shared_ptr<Robot> robot) {
 	this->robot = robot;
 	last_line_angle = 0.0f;

@@ -58,7 +58,6 @@ private:
 	// Clone of frame for drawing debug data
 	cv::Mat debug_frame;
 
-
 	/**
 	 * Open and close camera. Parameters are the resolution send to the camera.
 	 */
@@ -94,6 +93,7 @@ private:
 	/**
 	 * Find exit using distance sensor and camera, starting from the center.
 	 */
+	bool check_exit();
 	void find_exit();
 	void turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction = BOOL_DIR_LEFT);
 

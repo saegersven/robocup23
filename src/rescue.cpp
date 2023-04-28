@@ -1,3 +1,8 @@
+Diese Datei kompiliert so nicht, weil du vergessen hast, beim Rescuekit nach vorne zu schnappen.
+Stop Procastination du Drückeberger, jetzt hol endlich das Hochladekabel!
+
+
+
 #include "rescue.h"
 
 #include <iostream>
@@ -58,7 +63,7 @@ void Rescue::rescue() {
 	// robot is roughly in the centre of the rescue area, no matter where the entrace was
 
 	find_center_new_new();
-	find_black_corner();
+	//find_black_corner();
 	
 	float last_x_victim = -1.0f;
 	float x_victim = 0.0f;
@@ -75,6 +80,8 @@ void Rescue::rescue() {
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 	delay(100);
 
+	find_exit();
+
 	const int MAX_TURNS = 20;
 	int turn_counter = 0;
 	int victim_counter = 0;
@@ -83,6 +90,7 @@ void Rescue::rescue() {
 
 	while(1) {
 		bool ignore_dead = victim_counter < 2;
+		bool find_center_called = false;
 
 		open_camera(VICTIM_CAP_RES);
 		grab_frame(VICTIM_CAP_RES);
@@ -175,9 +183,16 @@ void Rescue::rescue() {
 		if(!skip_turn) ++turn_counter;
 
 		if(turn_counter == MAX_TURNS) {
+			if(find_center_called) {
+				find_exit();
+				finished = true;
+				return;
+			}
+
 			turn_counter = 0;
 			robot->m(127, 127, 300);
 			find_center_new_new();
+			find_center_called = true;
 			robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 
 			++full_rotation_no_victims_count;
@@ -409,7 +424,7 @@ void Rescue::find_black_corner() {
 	robot->stop();
 	delay(42);
 	robot->m(-127, -127, 550);
-	robot->turn(DTOR(190.0f));
+	robot->turn(DTOR(180.0f));
 	delay(80);
 	robot->m(-50, -50, 1500);
 	robot->send_byte(CMD_UNLOAD);
@@ -446,9 +461,8 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 	}
 }
 
-#define EXIT_CAPTURE_RES 480, 270
 
-void Rescue::find_exit() {
+/*void Rescue::find_exit() {
 	const uint64_t MAX_TIME = 8000;
 	const int EXIT_MIN_DISTANCE = 130;
 	const int WALL_APPROACH_DISTANCE = 25;
@@ -532,6 +546,76 @@ void Rescue::find_exit() {
 			}
 		}
 		find_center_new_new();
+	}
+}*/
+
+#define DRIVE_ONE_TILE robot->m(127, 127, 30 * CM_TO_MS_FULL_SPEED)
+#define EXIT_DIST_TO_WALL 12
+#define EXIT_CAPTURE_WIDTH 480
+#define EXIT_CAPTURE_HEIGHT 270
+
+bool Rescue::check_exit() {
+	open_camera(EXIT_CAPTURE_WIDTH, EXIT_CAPTURE_HEIGHT);
+	frame = grab_frame(EXIT_CAPTURE_WIDTH, EXIT_CAPTURE_HEIGHT);
+	close_camera();
+
+	uint32_t num_green_pixels = 0;
+	cv::Mat green = in_range(frame, &is_exit_green, &num_green_pixels);
+
+	cv::imshow("Exit frame", frame);
+
+	cv::imshow("Exit green", green);
+	cv::waitKey(5000);
+
+	float percentage = (float)num_green_pixels / (float)EXIT_CAPTURE_HEIGHT / (float)EXIT_CAPTURE_WIDTH;
+	std::cout << "Exit green percentage: " << percentage << "\n";
+	return percentage > 0.12f;
+}
+
+void Rescue::find_exit() {
+	find_black_corner();
+	close_camera();
+
+	robot->servo(SERVO_CAM, CAM_EXIT_POS);
+
+	robot->m(-127, -127, 950);
+	robot->m(-42, -42, 500);
+
+	robot->m(70, 70, 200);
+	robot->turn(R45);
+	robot->m(100, 100, 300);
+	robot->turn(R90);
+	robot->m(30, 30, 1900);
+	robot->m(-100, -100, 500);
+	delay(200);
+
+	while(1) {
+		// Robot is facing the wall
+		int dist = robot->distance_avg(10, 0.2f);
+		std::cout << "Dist: " << dist << std::endl;
+
+		if(dist > 30) {
+			// There is no wall here, so this can be an entrance or an exit
+			robot->m(60, 60, 450);
+
+			// Check for green
+			if(check_exit()) {
+				robot->m(60, 60, 500);
+				return;
+			}
+
+			robot->m(-60, -60, 200);
+		} else {
+			robot->m(35, 35, 1200);
+			robot->m(-70, -70, 600);
+			delay(200);
+		}
+
+		robot->turn(-R90);
+
+		DRIVE_ONE_TILE;
+
+		robot->turn(R90);
 	}
 }
 

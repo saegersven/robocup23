@@ -26,6 +26,9 @@
 #define RED_RATIO_THRESHOLD 1.3f
 #define RED_MIN_VALUE 20
 
+#define EXIT_GREEN_RATIO_THRESHOLD 0.65f
+#define EXIT_GREEN_MIN_VALUE 10
+
 #define GREEN_RESULT_LEFT 1
 #define GREEN_RESULT_RIGHT 2
 #define GREEN_RESULT_DEAD_END 3
@@ -54,6 +57,7 @@ bool is_black(uint8_t b, uint8_t g, uint8_t r);
 bool is_green(uint8_t b, uint8_t g, uint8_t r);
 bool is_blue(uint8_t b, uint8_t g, uint8_t r);
 bool is_red(uint8_t b, uint8_t g, uint8_t r);
+bool is_exit_green(uint8_t b, uint8_t g, uint8_t r);
 
 /**
  * A group of pixels with a center and the number of pixels (size).
