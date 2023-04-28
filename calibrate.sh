@@ -1,0 +1,1 @@
+./tests/capture_from_camera/build/capture_from_camera

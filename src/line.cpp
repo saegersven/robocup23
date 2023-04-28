@@ -300,7 +300,14 @@ float Line::get_line_angle(cv::Mat in) {
 
 void Line::follow() {
 	float base_speed = LINE_FOLLOW_BASE_SPEED;
-	if (millis() - no_difference_time_stamp < 300) base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+	if (millis() - no_difference_time_stamp < 300) {
+		std::cout << "RUCKLING" << std::endl;
+		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+		if (std::abs(RTOD(last_line_angle)) > 10.0f) {
+			robot->m(127, 127, 42*2);
+			robot->turn(last_line_angle);
+		}
+	}
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
@@ -328,9 +335,9 @@ void Line::follow() {
 	if(!last_frame.empty()) {
 			float diff = average_difference(frame, last_frame);
 
-			if(diff < 4.0f) {
+			if(diff < 4.2f) {
 				++no_difference_counter;
-				if(no_difference_counter == 100) {
+				if(no_difference_counter == 200) {
 					if(ENABLE_NO_DIFFERENCE) {
 						std::cout << "No difference, increasing motor speed" << std::endl;
 						no_difference_time_stamp = millis(); // store at what time "speed mode" has been activated
@@ -643,6 +650,22 @@ void Line::rescue_kit() {
 	}
 }
 
+void Line::red() {
+	uint32_t num_red_pixels = 0;
+	in_range(frame, &is_red, &num_red_pixels);
+
+	uint32_t num_pixels = LINE_FRAME_HEIGHT * LINE_FRAME_WIDTH;
+	float red_percentage = (float)num_red_pixels / (float)num_pixels;
+	std::cout << "Red: " << red_percentage << std::endl;
+	if(red_percentage > 0.23f) {
+		std::cout << "Detected red" << std::endl;
+		close_camera();
+		robot->m(100, 100, 300);
+		delay(8000);
+		open_camera();
+	}
+}
+
 void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
 
@@ -651,6 +674,7 @@ void Line::line() {
 	follow();
 	green();
 	rescue_kit();
+	red();
 
 	//auto silver_start_time = std::chrono::high_resolution_clock::now();
 

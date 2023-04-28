@@ -111,7 +111,7 @@ void Rescue::rescue() {
 				close_camera();
 
 				if(x_victim == -1.0f) {
-					robot->m(70, 70, 400);
+					robot->m(70, 70, 200);
 					delay(30);
 					robot->turn(DTOR(-15.0f));
 					skip_turn = true;
@@ -134,7 +134,7 @@ void Rescue::rescue() {
 
 				if(enable_pickup && y_victim > 35.0f) {
 					close_camera();
-					int dur = (int)(7.0f * (67.0f - y_victim)) - 42*PI;
+					int dur = (int)(2.0f * (55.0f - y_victim)) - 60;
 					std::cout << "Duration: " << dur << std::endl;
 					robot->m(60, 60, dur);
 					robot->turn(-DTOR(25.0f));

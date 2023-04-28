@@ -186,6 +186,8 @@ private:
 	 */
 	void rescue_kit();
 
+	void red();
+
 public:
 	bool found_silver = false;
 

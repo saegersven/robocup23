@@ -22,8 +22,10 @@
 // Rescue victims: 160x120
 // Rescue corner: 160x120
 // Rescue exit: 640x480
-#define WIDTH 80
-#define HEIGHT 48
+#define WIDTH 160
+#define HEIGHT 120
+
+#define TIME
 
 void save_img(cv::Mat& img, const std::string& subfolder) {
     std::string filename = "/home/pi/Desktop/iamges/" + subfolder + "/" + std::to_string(millis()) + ".png";
@@ -42,6 +44,7 @@ int main(int, char**) {
         std::cerr << "ERROR! Unable to open camera\n";
         return -1;
     }
+    uint64_t last_time = millis();
     cv::Mat frame;
     for (;;) {
         cap.read(frame);
@@ -57,7 +60,13 @@ int main(int, char**) {
         }
         cv::imshow("Live", frame);
         
+#ifdef TIME
+        while(millis() - last_time < 50);
+        last_time = millis();
+        if(/*cv::waitKey(1) == 'c'*/true) {
+#else
         if(cv::waitKey(1) == 'c') {
+#endif
             save_img(frame, "captured");
             std::cout << "Saved img" << std::endl;
         }

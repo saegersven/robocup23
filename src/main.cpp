@@ -49,6 +49,7 @@ int main() {
 		delay(1);	
 	}
 	while(robot->button(BTN_RESTART));
+
 	line.start();
 	delay(40);
 	
