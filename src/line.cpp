@@ -37,7 +37,9 @@ void Line::start() {
 	last_line_angle = 0.0f;
 	camera_opened = false;
 	found_silver = false;
+	std::cout << "Opening camera" << std::endl;
 	open_camera(320, 192);
+	std::cout << "Opened camera" << std::endl;
 	silver_ml.start();
 	robot->set_blocked(false);
 	// Start obstacle thread
@@ -646,9 +648,20 @@ void Line::rescue_kit() {
 		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
 		save_img(frame, "rescue_kit");
 		close_camera();
-		robot->turn(angle - ARM_ANGLE_OFFSET);
+
+		const float ANGLE_TOLERANCE = DTOR(5.0f);
+		float to_turn = angle - ARM_ANGLE_OFFSET;
+		if(std::abs(to_turn) > ANGLE_TOLERANCE) {
+			if(to_turn > 0) to_turn -= ANGLE_TOLERANCE;
+			else to_turn += ANGLE_TOLERANCE;
+		}
+		robot->turn(to_turn);
+
+		int dur = distance * 2 - 120;
+		robot->m(70, 70, dur);
+
 		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
-		delay(2900); // wait for Teensy to pick up
+		delay(4000); // wait for Teensy to pick up
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
 		open_camera();
 	}

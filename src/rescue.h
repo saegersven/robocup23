@@ -94,6 +94,7 @@ private:
 	 * Find exit using distance sensor and camera, starting from the center.
 	 */
 	bool check_exit();
+	void turn_wall();
 	void find_exit();
 	void turn_until_wall(int* wall_dist, int* duration, int max_dist, bool direction = BOOL_DIR_LEFT);
 

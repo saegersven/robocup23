@@ -124,21 +124,31 @@ void pick_up_rescue_kit() {
   close_gripper(0);
   servo_arm.attach(SERVO_ARM_PIN);
   servo_arm.write(ARM_LOWER_POS);
-  m(-65, -65, 250);
+  delay(150);
+  m(-65, -65, 150);
   close_gripper(1);
   delay(20);
   open_gripper(0);
   delay(420);
-  m(60, 60, 200);
+  m(60, 60, 260);
   close_gripper(0);
-  m(30, 30, 420);
+  delay(50);
+  m(30, 30, 0);
+  delay(320);
+  open_gripper(0);
+  delay(50);
+  close_gripper(0);
+  delay(150);
+  stop();
+  m(-65, -65, 100);
+
   servo_arm.write(ARM_HIGHER_POS);
   delay(10);
   m(-50, -50, 350);
   delay(700);
-  open_gripper(150);
+  open_gripper(50);
   delay(100);
-  close_gripper(250);
+  close_gripper(200);
   servo_arm.detach();
   Serial.println(millis() - start);
 }
@@ -193,8 +203,8 @@ void pick_up_victim() {
   // detach servos
   servo_arm.detach();
 
-  open_gripper(110);
-  delay(20);
+  open_gripper(50);
+  delay(50);
   close_gripper(125);  
 }
 // opens gripper and moves arm down

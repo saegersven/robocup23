@@ -25,7 +25,7 @@
 #define WIDTH 160
 #define HEIGHT 120
 
-#define TIME
+//#define TIME
 
 void save_img(cv::Mat& img, const std::string& subfolder) {
     std::string filename = "/home/pi/Desktop/iamges/" + subfolder + "/" + std::to_string(millis()) + ".png";
