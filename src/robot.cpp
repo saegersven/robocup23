@@ -169,6 +169,32 @@ Robot::Robot() : blocked(false)
 #endif // ENABLE_VL53L0X
 }
 
+void Robot::start_camera(int width, int height, int framerate) {
+	camera.options->video_width = width;
+	camera.options->video_height = height;
+	camera.options->framerate = framerate;
+	camera.options->verbose = true;
+
+	camera.startVideo();
+	camera_running = true;
+}
+
+void Robot::stop_camera() {
+	camera.stopVideo();
+	camera_running = false;
+}
+
+cv::Mat Robot::grab_frame() {
+	if(!camera_running) std::cout << "Grabbing frame with closed camera" << std::endl;
+
+	cv::Mat frame;
+	if(!camera.getVideoFrame(frame, 1000)) {
+		std::cout << "Camera timed out" << std::endl,
+	}
+
+	return frame;
+}
+
 void Robot::spi_init() {
 	// Open device
 	if((spi_fd = open("/dev/spidev0.0", O_RDWR)) < 0) {

@@ -17,6 +17,15 @@ int main() {
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	robot->start_camera(142, 80, 120);
+	cv::Mat frame;
+	while(1) {
+		frame = robot->grab_frame();
+		cv::imshow("Frame", frame);
+		cv::waitKey(1);
+	}
+	return 0;
+
 	State state = State::line;
 	robot->stop();
 	/*
