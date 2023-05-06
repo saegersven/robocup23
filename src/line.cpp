@@ -139,7 +139,6 @@ void Line::obstacle() {
 		if((obstacle_enabled == false) || (obstacle_active == true)) continue;
 
 		int dist = robot->distance();
-		std::cout << dist << std::endl;
 		delay(30);
 
 		if(dist < 10) {
@@ -688,6 +687,11 @@ void Line::line() {
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
 	grab_frame(80, 48);
+	std::cout << "Test" << std::endl;
+	cv::imshow("Frame", frame);
+	cv::waitKey(1);
+	return;
+
 	follow();
 	green();
 	rescue_kit();

@@ -15,6 +15,29 @@ enum class State {
 int main() {
 	std::cout << "Program started." << std::endl;
 
+	cv::VideoCapture cap;
+	cap.open(0, cv::CAP_V4L2);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 180);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+
+	cv::Mat frame;
+	long long start = millis();
+	long frame_counter = 0;
+	while(1) {
+		cap.grab();
+		cap.retrieve(frame);
+
+		cv::transpose(frame, frame);
+
+		cv::imshow("Frame", frame);
+		++frame_counter;
+		long long time_now = millis();
+		std::cout << "FPS: " << 1.0f / (float)(time_now - start) * 1000.0f << std::endl;
+		start = time_now;
+		cv::waitKey(1);
+	}
+
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	State state = State::line;
@@ -52,7 +75,7 @@ int main() {
 
 	line.start();
 	delay(40);
-	
+
 	auto last_started = millis(); // time at which robot has been restarted
 	
 	// MAIN LOOP

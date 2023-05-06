@@ -70,6 +70,7 @@
 - IC Sockel
 - Servohörner
 - VL53L0X
+- BNO055
 - TP4056
 - 18650 Halter
 - DRK Lampe
