@@ -5,6 +5,8 @@
 #include <vector>
 #include <atomic>
 
+#include <lccv.hpp>
+
 extern "C" {
 #include "BNO055_driver/bno055.h"
 }
@@ -107,12 +109,19 @@ private:
 	// Orientation sensor
 	bno055_t bno055;
 
+	lccv::PiCamera camera;
+
 #ifdef ENABLE_VL53L0X
 	// Distance sensor
 	VL53L0X vl53l0x;
 #endif // ENABLE_VL53L0X
 public:
 	Robot();
+
+	bool camera_running;
+	void start_camera(int width, int height, int framerate);
+	void stop_camera();
+	cv::Mat grab_frame();
 
 	void set_blocked(bool blocked);
 
