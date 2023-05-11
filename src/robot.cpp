@@ -189,7 +189,7 @@ cv::Mat Robot::grab_frame() {
 
 	cv::Mat frame;
 	if(!camera.getVideoFrame(frame, 1000)) {
-		std::cout << "Camera timed out" << std::endl,
+		std::cout << "Camera timed out" << std::endl;
 	}
 
 	return frame;

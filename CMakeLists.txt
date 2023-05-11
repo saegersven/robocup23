@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
+set(CMAKE_CXX_STANDARD 17)
 project(robocup VERSION 23)
 
 set(TFLITE_ENABLE_XNNPACK OFF)
@@ -16,6 +17,12 @@ find_package(WiringPi REQUIRED)
 include_directories(${WIRINGPI_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBCAMERA REQUIRED libcamera)
+include_directories(${LIBCAMERA_INCLUDE_DIRS})
+
+add_subdirectory("libs/LCCV")
 
 #include_directories("libs/tensorflow_src")
 #include_directories("libs/tflite_build/flatbuffers/include")
@@ -43,4 +50,6 @@ target_link_libraries(robocup ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup i2c)
 target_link_libraries(robocup tensorflow-lite)
+
+target_link_libraries(robocup liblccv)
 #target_link_libraries(robocup Eigen3::Eigen)

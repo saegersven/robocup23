@@ -5,7 +5,7 @@
 #include <vector>
 #include <atomic>
 
-#include <lccv.hpp>
+#include "lccv.hpp"
 
 extern "C" {
 #include "BNO055_driver/bno055.h"

@@ -7,3 +7,6 @@
 [submodule "libs/tensorflow"]
 	path = libs/tensorflow
 	url = https://github.com/tensorflow/tensorflow.git
+[submodule "libs/LCCV"]
+	path = libs/LCCV
+	url = https://github.com/kbarni/LCCV

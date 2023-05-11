@@ -15,37 +15,21 @@ enum class State {
 int main() {
 	std::cout << "Program started." << std::endl;
 
-	cv::VideoCapture cap;
-	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 180);
-	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
-
-	cv::Mat frame;
-	long long start = millis();
-	long frame_counter = 0;
-	while(1) {
-		cap.grab();
-		cap.retrieve(frame);
-
-		cv::transpose(frame, frame);
-
-		cv::imshow("Frame", frame);
-		++frame_counter;
-		long long time_now = millis();
-		std::cout << "FPS: " << 1.0f / (float)(time_now - start) * 1000.0f << std::endl;
-		start = time_now;
-		cv::waitKey(1);
-	}
-
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	robot->start_camera(142, 80, 120);
 	cv::Mat frame;
+	long long start_time = millis();
+	long frame_counter = 0;
 	while(1) {
 		frame = robot->grab_frame();
 		cv::imshow("Frame", frame);
 		cv::waitKey(1);
+		delay(3000);
+
+		auto now = std::chrono::high_resolution_clock::now();
+		std::cout << frame_counter * 1000.0f / (millis() - start_time) << std::endl;
+		++frame_counter;
 	}
 	return 0;
 
