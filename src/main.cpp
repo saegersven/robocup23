@@ -25,7 +25,6 @@ int main() {
 		frame = robot->grab_frame();
 		cv::imshow("Frame", frame);
 		cv::waitKey(1);
-		delay(3000);
 
 		auto now = std::chrono::high_resolution_clock::now();
 		std::cout << frame_counter * 1000.0f / (millis() - start_time) << std::endl;
