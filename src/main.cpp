@@ -17,6 +17,7 @@ int main() {
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
+	/*
 	robot->start_camera(142, 80, 120);
 	cv::Mat frame;
 	long long start_time = millis();
@@ -30,7 +31,7 @@ int main() {
 		std::cout << frame_counter * 1000.0f / (millis() - start_time) << std::endl;
 		++frame_counter;
 	}
-	return 0;
+	return 0;*/
 
 	State state = State::line;
 	robot->stop();

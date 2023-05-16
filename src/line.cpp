@@ -38,7 +38,7 @@ void Line::start() {
 	camera_opened = false;
 	found_silver = false;
 	std::cout << "Opening camera" << std::endl;
-	open_camera(320, 192);
+	robot->start_camera(142, 80, 120);
 	std::cout << "Opened camera" << std::endl;
 	silver_ml.start();
 	robot->set_blocked(false);
@@ -54,27 +54,25 @@ void Line::check_silver() {
 	obstacle_enabled = false;
 	delay(20);
 	std::cout << "Checking silver before line..." << std::endl;
-	grab_frame(80, 48);
+	grab_frame();
 	std::cout << "Grabbed frame" << std::endl;
 	int dist = 100; //robot->distance_avg(10, 0.2f);
 	std::cout << "Distance: " << dist << std::endl;
 	if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 		std::cout << "Distance within range, counting black pixels..." << std::endl;
-		close_camera();
 
 		robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 100);
 		robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 100);
 		delay(200);
 
-		open_camera();
-		grab_frame(80, 48);
+		grab_frame();
 
 		uint32_t num_black_pixels = 0;
 		black = in_range(frame, &is_black, &num_black_pixels);
 		std::cout << "Black pixels: " << num_black_pixels << std::endl;
 		if(num_black_pixels < 200) {
 			std::cout << "Few black pixels, should be rescue" << std::endl;
-			close_camera();
+			robot->stop_camera();
 			found_silver = true;
 			return;
 		}
@@ -86,7 +84,6 @@ void Line::check_silver() {
 
 void Line::stop() {
 	robot->stop();
-	close_camera();
 	silver_ml.stop();
 	robot->set_blocked(false);
 	running = false; // Stop obstacle thread
@@ -96,7 +93,7 @@ void Line::stop() {
 	std::cout << "Line stopped." << std::endl;
 }
 
-void Line::open_camera(int width, int height) {
+/*void Line::open_camera(int width, int height) {
 	if(camera_opened) return;
 
 	cap.open(0, cv::CAP_V4L2);
@@ -117,10 +114,10 @@ void Line::close_camera() {
 
 	cap.release();
 	camera_opened = false;
-}
+}*/
 
 void Line::grab_frame(int width, int height) {
-	if(!camera_opened) {
+	/*if(!camera_opened) {
 		std::cerr << "Tried to grab frame with closed camera" << std::endl;
 		exit(ERRCODE_CAM_CLOSED);
 	}
@@ -131,6 +128,11 @@ void Line::grab_frame(int width, int height) {
 	debug_frame = frame.clone();
 	cv::flip(debug_frame, frame, 0);
 	cv::flip(frame, debug_frame, 1);
+	frame = debug_frame.clone();*/
+
+	frame = robot->grab_frame();
+	cv::transpose(frame, debug_frame);
+	debug_frame = debug_frame(cv::Range(94, 142), cv::Range(0, 80));
 	frame = debug_frame.clone();
 }
 
@@ -165,9 +167,6 @@ void Line::obstacle() {
 
 bool Line::obstacle_straight_line(int duration) {
 	auto start_t = std::chrono::high_resolution_clock::now();
-
-	close_camera();
-	open_camera();
 
 	while(1) {
 		robot->m(50, 50);
@@ -554,16 +553,13 @@ void Line::green() {
 		float angle = std::atan2(dif_y, dif_x) + PI05;
 		float distance = std::sqrt(dif_x*dif_x + dif_y*dif_y);
 
-		close_camera();
 		robot->turn(angle);
 		delay(50);
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 50));
 
 		// Take another frame and reevaluate
-		open_camera();
-		grab_frame(80, 48);
+		grab_frame();
 		save_img(frame, "green");
-		close_camera();
 		black = in_range(frame, &is_black);
 		uint8_t new_green_result = green_direction(global_average_x, global_average_y);
 		//uint8_t new_green_result = green_result;
@@ -584,8 +580,6 @@ void Line::green() {
 			delay(70);
 		}
 		robot->m(127, 127, 70);
-		open_camera();
-		grab_frame(80, 48);
 		uint32_t num_black_pixels = 0;
 		black = in_range(frame, &is_black, &num_black_pixels);
 		
@@ -595,20 +589,15 @@ void Line::green() {
 			uint32_t num_black_pixels_right = 0;
 			uint32_t num_black_pixels_left = 0;
 
-			grab_frame(80, 48);
-			close_camera();
+			grab_frame();
 
 			robot->turn(DTOR(40.0f));
-			open_camera();
-			grab_frame(80, 48);
-			close_camera();
+			grab_frame();
 
 			black = in_range(frame, &is_black, &num_black_pixels_right);
 
 			robot->turn(DTOR(-80.0f));
-			open_camera();
-			grab_frame(80, 48);
-			close_camera();
+			grab_frame();
 
 			black = in_range(frame, &is_black, &num_black_pixels_left);
 
@@ -616,7 +605,6 @@ void Line::green() {
 			if(num_black_pixels_right > num_black_pixels_left) {
 				robot->turn(DTOR(85.0f));
 			}
-			open_camera();
 		}
 		obstacle_enabled = true;
 	}
@@ -646,7 +634,6 @@ void Line::rescue_kit() {
 		float angle = std::atan2(group.y - center_y, group.x - center_x) + R90;
 		float distance = std::sqrt(std::pow(group.y - center_y, 2) + std::pow(group.x - center_x, 2));
 		save_img(frame, "rescue_kit");
-		close_camera();
 
 		const float ANGLE_TOLERANCE = DTOR(5.0f);
 		float to_turn = angle - ARM_ANGLE_OFFSET;
@@ -662,7 +649,6 @@ void Line::rescue_kit() {
 		robot->send_byte(CMD_PICK_UP_RESCUE_KIT);
 		delay(4000); // wait for Teensy to pick up
 		robot->turn(-angle + ARM_ANGLE_OFFSET);
-		open_camera();
 	}
 }
 
@@ -675,10 +661,8 @@ void Line::red() {
 	std::cout << "Red: " << red_percentage << std::endl;
 	if(red_percentage > 0.23f) {
 		std::cout << "Detected red" << std::endl;
-		close_camera();
 		robot->m(100, 100, 300);
 		delay(8000);
-		open_camera();
 	}
 }
 
@@ -686,7 +670,7 @@ void Line::line() {
 	//auto start_time = std::chrono::high_resolution_clock::now();
 
 	//auto main_start_time = std::chrono::high_resolution_clock::now();
-	grab_frame(80, 48);
+	grab_frame();
 	std::cout << "Test" << std::endl;
 	cv::imshow("Frame", frame);
 	cv::waitKey(1);
@@ -723,36 +707,30 @@ void Line::line() {
 		std::cout << "Distance: " << dist << std::endl;
 		if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
 			std::cout << "Distance within range, counting black pixels..." << std::endl;
-			close_camera();
 
 			robot->servo(SERVO_CAM, (int)((CAM_LOWER_POS + CAM_HIGHER_POS) / 2), 150);
 			delay(200);
 
-			open_camera();
-			grab_frame(80, 48);
+			grab_frame();
 
 			uint32_t num_black_pixels = 0;
 			black = in_range(frame, &is_black, &num_black_pixels);
 			std::cout << "Black pixels: " << num_black_pixels << std::endl;
 			if(num_black_pixels < 200) {
 				std::cout << "Few black pixels, should be rescue" << std::endl;
-				close_camera();
 				found_silver = true;
 				return;
 			}
 		}
 		robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
 		// while delaying for servo movement reopen camera prophylactically to clear frame buffer
-		close_camera();
 		delay(200);
 		robot->m(80, 80, 50);
-		open_camera();
 		obstacle_enabled = true;
 	}
 
 	if(obstacle_active) {
 		std::cout << "OBSTACLE ACTIVE" << std::endl;
-		close_camera();
 
 		robot->m(-100, -100, 120);
 		delay(20);
@@ -760,27 +738,20 @@ void Line::line() {
 		robot->m(100, 100, 500);
 		delay(20);
 		robot->turn(R90);
-		open_camera();
 
 		const uint32_t durations[] = {1250, 1250, 1250, 675};
 
 		for(int i = 0; i < 4; ++i) {
 			if(obstacle_straight_line(durations[i])) break;
 
-			close_camera();
 			robot->turn(R90);
-			open_camera();
 		}
-
-		close_camera();
 
 		robot->m(-40, -40, 180);
 		robot->m(-40, 40, 200);
 		robot->m(80, 80, 330);
 		robot->m(-80, 80, 180);
 		robot->m(-40, -40, 260);
-
-		open_camera();
 
 		obstacle_active = false;
 	}
