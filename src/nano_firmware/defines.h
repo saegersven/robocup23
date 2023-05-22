@@ -16,11 +16,11 @@
 #define M_GRIPPER_B       A2
 
 // Rear wheels have smaller circumference, therefore must turn faster
-#define REAR_WHEEL_FACTOR 1.2
+#define REAR_WHEEL_FACTOR 1.1
 
 // SERVOS
 #define NUM_SERVOS 1
-int servo_pins[NUM_SERVOS] = {A0, A1};
+//int servo_pins[NUM_SERVOS] = {A0, A1};
 
 // SENSORS
 #define SENSOR_DIST_1 0
