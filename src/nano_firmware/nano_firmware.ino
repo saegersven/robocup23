@@ -4,8 +4,6 @@
 
 #include "defines.h"
 
-const unsigned int MESSAGE_LENGTH = 3;
-
 char message[MESSAGE_LENGTH];
 unsigned int message_pos = 0;
 
@@ -59,7 +57,7 @@ void setup() {
 }
 
 void loop() {
-/*  
+  /*  
   // Delete message after 50ms of silence
   long long start_time = millis();
   while(!Serial.available()) {
@@ -72,21 +70,21 @@ void loop() {
     message[message_pos] = Serial.read();
     message_pos++;
 
-    if(message_pos == MESSAGE_LENGTH) {
+    if(message_pos == message_lengths[message[0]]) {
       parse_message();
       message_pos = 0;
     }
   }
-*/
+  */
 
-digitalWrite(M_LEFT_A, LOW);
-digitalWrite(M_LEFT_B, HIGH);
-digitalWrite(M_LEFT_FRONT_EN, HIGH);
-digitalWrite(M_LEFT_REAR_EN, HIGH);
+  digitalWrite(M_LEFT_A, LOW);
+  digitalWrite(M_LEFT_B, HIGH);
+  digitalWrite(M_LEFT_FRONT_EN, HIGH);
+  digitalWrite(M_LEFT_REAR_EN, HIGH);
 
 
-digitalWrite(M_RIGHT_A, LOW);
-digitalWrite(M_RIGHT_B, HIGH);
-digitalWrite(M_RIGHT_FRONT_EN, HIGH);
-digitalWrite(M_RIGHT_REAR_EN, HIGH);
+  digitalWrite(M_RIGHT_A, LOW);
+  digitalWrite(M_RIGHT_B, HIGH);
+  digitalWrite(M_RIGHT_FRONT_EN, HIGH);
+  digitalWrite(M_RIGHT_REAR_EN, HIGH);
 }

@@ -1,11 +1,15 @@
-void m(int8_t left_speed, int8_t right_speed) {
+void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
   // Left motors
   // Motors will be shorted to ground when speed is zero
   digitalWrite(M_LEFT_A, left_speed > 0);
   digitalWrite(M_LEFT_B, left_speed < 0);
 
-  if(left_speed < 0) left_speed = -left_speed;
-  uint8_t left_front_pulse_width = left_speed / 128 * 255;
+  if(left_speed < 0) {
+    if(left_speed == -128) left_speed = -127;
+    left_speed = -left_speed;
+  }
+
+  uint8_t left_front_pulse_width = left_speed * 2;
   uint8_t left_rear_pulse_width = left_front_pulse_width * REAR_WHEEL_FACTOR;
 
   // Set pulse-width to 100% for full stopping power
@@ -21,8 +25,11 @@ void m(int8_t left_speed, int8_t right_speed) {
   digitalWrite(M_RIGHT_A, right_speed > 0);
   digitalWrite(M_RIGHT_B, right_speed < 0);
 
-  if(right_speed < 0) right_speed = -right_speed;
-  uint8_t right_front_pulse_width = left_speed / 128 * 255;
+  if(right_speed < 0) {
+    if(right_speed == -128) right_speed = -127;
+    right_speed = -right_speed;
+  }
+  uint8_t right_front_pulse_width = right_speed * 2;
   uint8_t right_rear_pulse_width = right_front_pulse_width * REAR_WHEEL_FACTOR;
 
   if(right_speed == 0) {
@@ -44,6 +51,48 @@ void m(int8_t left_speed, int8_t right_speed) {
   Serial.print(right_rear_pulse_width);
 
   Serial.println("");
+
+  if(duration > 0) {
+    delay(duration);
+    m(0, 0, 0);
+  }
+}
+
+float get_heading() {
+  return 0.0f;
+}
+
+int sgn(float x) {
+  if(x < 0) return -1;
+  if(x == 0) return 0;
+  if(x > 0) return 1;
+}
+
+void turn(int16_t angle) {
+  if(angle == 0) return;
+
+  // Angle is in milliradians, convert to radians
+  float angle_rad = (float)angle / 1000.0f;
+  int max_duration = MAX_TIME_PER_RAD * angle_rad;
+  int min_duration = MIN_TIME_PER_RAD * angle_rad;
+
+  float final_heading = get_heading() + angle_rad;
+  if(final_heading > RAD360) final_heading -= RAD360;
+  if(final_heading < 0) final_heading += RAD360;
+
+  m(70 * sgn(angle_rad), -70 * sgn(angle_rad), 0);
+
+  uint16_t start_time = millis();
+
+  while(millis() - start_time < MIN_DURATION);
+  while(millis() - start_time < MAX_DURATION) {
+    // TODO: Read heading from sensor
+    float heading = get_heading();
+    if(abs(heading - final_heading) < TURN_TOLERANCE) {
+      break;
+    }
+  }
+  m(0, 0, 0);
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
@@ -84,11 +133,12 @@ void parse_message() {
   case CMD_MOTOR:
     int8_t left_speed = message[1];
     int8_t right_speed = message[2];
+    uint16_t duration = *((uint16_t*)&message[3]);
 
-    m(left_speed, right_speed);
+    m(left_speed, right_speed, duration);
     break;
   case CMD_STOP:
-    m(0, 0);
+    m(0, 0, 0);
     break;
   case CMD_GRIPPER:
     int8_t gripper_direction = message[1];
@@ -118,4 +168,9 @@ void parse_message() {
     Serial.write(msg, 2);
     break;
   }
+  case CMD_TURN:
+    int16_t angle = *((int16_t*)&message[3]);
+
+    turn(angle);
+    break;
 }

@@ -1,3 +1,6 @@
+// CONSTANTS
+#define RAD360 6.28318531f
+
 // MOTORS
 // A and B are pins to control the direction
 // EN are PWM control pins
@@ -17,6 +20,12 @@
 
 // Rear wheels have smaller circumference, therefore must turn faster
 #define REAR_WHEEL_FACTOR 1.1
+
+// Only serves to cancel turning after a *long* time so that the robot will not turn indefinitely (when stuck, for example).
+#define MAX_TIME_PER_RAD  900
+#define MIN_TIME_PER_RAD 200
+
+#define TURN_TOLERANCE 0.0872 // 5°
 
 // SERVOS
 #define NUM_SERVOS 1
@@ -40,3 +49,6 @@ int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
 #define CMD_SERVO_WRITE           0x04
 #define CMD_SENSOR                0x05
 #define CMD_GRIPPER               0x06
+#define CMD_TURN                  0x07
+
+int message_lengths[6] = {5, 1, 2, 3, 2, 2, 3};
