@@ -18,6 +18,8 @@
 #define M_GRIPPER_A       A3
 #define M_GRIPPER_B       A2
 
+#define PIN_BTN A6
+
 // Rear wheels have smaller circumference, therefore must turn faster
 #define REAR_WHEEL_FACTOR 1.1
 
@@ -31,16 +33,15 @@
 #define NUM_SERVOS 1
 //int servo_pins[NUM_SERVOS] = {A0, A1};
 
-// SENSORS
-#define SENSOR_DIST_1 0
-#define SENSOR_DIST_2 1
+// SENSOR IDS
+#define SENSOR_ID_DIST_1 0
+#define SENSOR_ID_DIST_2 1
+#define SENSOR_ID_DIST_3 2
+#define SENSOR_ID_BTN 3
 
-#define NUM_VL53L0X 2
-int dist_xshut_pins[NUM_VL53L0X] = {2, 3};
-int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
-
-#define SENSOR_BTN 2
-#define BTN_PIN A6
+#define NUM_VL53L0X 3
+int dist_xshut_pins[NUM_VL53L0X] = {12, 11, 10};
+int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B, 0x8C};
 
 // PROTOCOL
 #define CMD_MOTOR                 0x01
@@ -50,5 +51,6 @@ int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
 #define CMD_SENSOR                0x05
 #define CMD_GRIPPER               0x06
 #define CMD_TURN                  0x07
+#define CMD_M_BTN_OBSTACLE        0x08
 
-int message_lengths[6] = {5, 1, 2, 3, 2, 2, 3};
+int message_lengths[8] = {5, 1, 2, 3, 2, 2, 3, 3};   
