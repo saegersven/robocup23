@@ -73,7 +73,14 @@ int sgn(float x) {
 
 void turn(int16_t angle) {
   if(angle == 0) return;
+  uint16_t duration = abs((float)angle) / 1000.0f / RAD360 * 360.0f * MS_PER_DEGREE;
+  if(angle > 0) {
+    m(70, -70, duration);
+  } else {
+    m(-70, 70, duration);
+  }
 
+  return;
   // Angle is in milliradians, convert to radians
   float angle_rad = (float)angle / 1000.0f;
   int min_duration = MIN_TIME_PER_RAD * angle_rad;
@@ -151,7 +158,7 @@ void parse_message() {
     int8_t gripper_direction = message[1];
     gripper(gripper_direction);
   } else if(message[0] == CMD_TURN) {
-    int16_t angle = *((int16_t*)&message[3]);
+    int16_t angle = *((int16_t*)&message[1]);
 
     turn(angle);
   } else if(message[0] == CMD_SENSOR) {
@@ -168,7 +175,7 @@ void parse_message() {
       value = distance(sensor_id);
       break;
     case SENSOR_ID_BTN:
-      value = analogRead(PIN_BTN) > 200;
+      value = analogRead(PIN_BTN) > 400;
       break;
     }
 
@@ -184,7 +191,7 @@ void parse_message() {
     uint16_t dist = distance(SENSOR_ID_DIST_1) / 10;
     if(dist > 127) dist = 127;
     uint8_t flags = dist;
-    flags |= (analogRead(PIN_BTN) > 200) << 7;
+    flags |= (analogRead(PIN_BTN) > 400) << 7;
 
     Serial.write(&flags, 1);
   }

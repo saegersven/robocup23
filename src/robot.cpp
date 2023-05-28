@@ -20,101 +20,6 @@ extern "C" {
 #include "defines.h"
 #include "utils.h"
 
-int8_t i2c_write_byte_single(uint8_t dev_addr, uint8_t byte) {
-	return i2c_write(dev_addr, byte, nullptr, 0);
-}
-
-int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte) {
-	return i2c_write(dev_addr, reg_addr, &byte, 1);
-}
-
-// VL53L0X needs this for some reason
-int8_t i2c_write_word(uint8_t dev_addr, uint8_t reg_addr, uint16_t word) {
-	uint8_t buf[2];
-	buf[0] = word >> 8;
-	buf[1] = word;
-
-	return i2c_write(dev_addr, reg_addr, buf, 2);
-}
-
-int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t *reg_data, uint8_t cnt) {
-	int i2c_fd = open("/dev/i2c-1", O_RDWR);
-	if(i2c_fd < 0) {
-		std::cerr << "I2C init failed" << std::endl;
-		exit(ERRCODE_I2C);
-	}
-	if(ioctl(i2c_fd, I2C_SLAVE, dev_addr) < 0) {
-		std::cerr << "I2C device init failed (" << std::to_string(dev_addr) + ")" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	}
-
-	uint8_t buf[128];
-	buf[0] = reg_addr;
-	if(reg_data != nullptr) memcpy(buf + 1, reg_data, cnt);
-	int8_t count = write(i2c_fd, buf, cnt + 1);
-	if(count < 0) {
-		std::cerr << "I2C write failed" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	} else if(count != cnt + 1) {
-		std::cerr << "Short write to device" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	}
-	close(i2c_fd);
-
-	return 0;
-}
-
-int8_t i2c_read_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t* data) {
-	return i2c_read(dev_addr, reg_addr, data, 1);
-}
-
-int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t *data, uint8_t cnt) {
-	// Init I2C
-	int i2c_fd = open("/dev/i2c-1", O_RDWR);
-	if(i2c_fd < 0) {
-		std::cerr << "I2C init failed" << std::endl;
-		exit(ERRCODE_I2C);
-	}
-
-	// Select device
-	if(ioctl(i2c_fd, I2C_SLAVE, dev_addr) < 0) {
-		std::cerr << "I2C device init failed (" << std::to_string(dev_addr) + ")" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	}
-
-	// Write register address/command
-	if(write(i2c_fd, &reg_addr, 1) != 1) {
-		std::cerr << "I2C read failed (reg addr write)" << std::endl;
-		std::cerr << std::to_string(reg_addr) << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	}
-
-	// Read response
-	int8_t count = read(i2c_fd, data, cnt);
-	if(count < 0) {
-		std::cerr << "I2C read failed" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	} else if(count != cnt) {
-		std::cerr << "Short read from device" << std::endl;
-		close(i2c_fd);
-		exit(ERRCODE_I2C);
-	}
-	close(i2c_fd);
-
-	return 0;
-}
-
-// bno055 needs this
-void i2c_delay_msec(uint32_t ms) {
-	usleep(ms * 1000);
-}
-
 Robot::Robot() : blocked(false)
 #ifdef ENABLE_VL53L0X
 	, vl53l0x(VL53L0X_FORWARD_XSHUT)
@@ -129,44 +34,20 @@ Robot::Robot() : blocked(false)
 	pinMode(HCSR04_ECHO, INPUT);
 	digitalWrite(HCSR04_TRIGGER, LOW);
 
-	spi_init();
-
-#ifdef ENABLE_BNO055
-	bno055.bus_write = i2c_write;
-	bno055.bus_read = i2c_read;
-	bno055.delay_msec = i2c_delay_msec;
-	bno055.dev_addr = BNO055_I2C_ADDR;
-
-	uint32_t comres = 0;
-	comres += bno055_init(&bno055);
-	comres += bno055_set_power_mode(BNO055_POWER_MODE_NORMAL);
-	comres += bno055_set_operation_mode(BNO055_OPERATION_MODE_NDOF);
-
-	if(comres > 0) {
-		std::cerr << "BNO055 init failed" << std::endl;
-		exit(ERRCODE_BNO055);
+	serial_fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
+	if(serial_fd < 0) {
+		std::cout << "Could not open Serial." << std::endl;
 	}
 
-	uint8_t c_id = 0;
-	if(bno055_read_chip_id(&c_id) != 0) std::cout << "OH OH" << std::endl;
-	std::cout << std::to_string(c_id) << std::endl;
+	delay(2000);
 
-	std::cout << "BNO055 initialized" << std::endl;
-#endif // ENABLE_BNO055
+	std::cout << (int)button() << std::endl;
+	m(60, 60, 200);
+	turn(R90);
+	delay(1000);
+	turn(-R180);
+	exit(0);
 
-#ifdef ENABLE_VL53L0X
-	vl53l0x.i2c_readByte = &i2c_read_byte;
-	vl53l0x.i2c_readBytes = &i2c_read;
-	vl53l0x.i2c_writeByte = &i2c_write_byte;
-	vl53l0x.i2c_writeBytes = &i2c_write;
-	vl53l0x.i2c_writeWord = &i2c_write_word;
-
-	vl53l0x.initialize();
-	vl53l0x.setTimeout(200);
-	vl53l0x.setMeasurementTimingBudget(40000);
-
-	std::cout << "VL53L0X initialized" << std::endl;
-#endif // ENABLE_VL53L0X
 }
 
 void Robot::start_camera(int width, int height, int framerate) {
@@ -195,67 +76,16 @@ cv::Mat Robot::grab_frame() {
 	return frame;
 }
 
-void Robot::spi_init() {
-	// Open device
-	if((spi_fd = open("/dev/spidev0.0", O_RDWR)) < 0) {
-		std::cerr << "Could not open SPI device" << std::endl;
-		exit(ERRCODE_SPI);
-	}
-
-	// Set mode
-	spi_mode = SPI_MODE;
-	if(ioctl(spi_fd, SPI_IOC_WR_MODE, &spi_mode) < 0) {
-		std::cerr << "Could not set SPI mode" << std::endl;
-	}
-
-	if(ioctl(spi_fd, SPI_IOC_RD_MODE, &spi_mode) < 0) {
-		std::cout << "Could not get SPI mode" << std::endl;
-	}
-
-	// Set bits per word
-	spi_bits_per_word = SPI_BITS_PER_WORD;
-	if(ioctl(spi_fd, SPI_IOC_WR_BITS_PER_WORD, &spi_bits_per_word) < 0) {
-		std::cerr << "Could not set SPI bits per word" << std::endl;
-	}
-
-	if(ioctl(spi_fd, SPI_IOC_RD_BITS_PER_WORD, &spi_bits_per_word) < 0) {
-		std::cerr << "Could not get SPI bits per word" << std::endl;
-	}
-
-	// Set maximum speed
-	spi_speed = SPI_SPEED;
-	if(ioctl(spi_fd, SPI_IOC_WR_MAX_SPEED_HZ, &spi_speed) < 0) {
-		std::cerr << "Could not set SPI maximum speed" << std::endl;
-	}
-
-	if(ioctl(spi_fd, SPI_IOC_RD_MAX_SPEED_HZ, &spi_speed) < 0) {
-		std::cout << "Could not get SPI maximum speed" << std::endl;
-	}
-}
-
-void Robot::spi_write(uint8_t* data, uint8_t len) {
-	spi_ioc_transfer transfer;
-	memset(&transfer, 0, sizeof(transfer));
-	transfer.tx_buf = (unsigned long)data;
-	transfer.len = len;
-	transfer.delay_usecs = 0;
-	transfer.speed_hz = spi_speed;
-	transfer.bits_per_word = spi_bits_per_word;
-	transfer.cs_change = 0;
-
-	int8_t ret = ioctl(spi_fd, SPI_IOC_MESSAGE(1), &transfer);
-
-	if(ret < 0) {
-		std::cerr << "SPI transfer failed" << std::endl;
-	}
-}
-
 void Robot::set_blocked(bool blocked) {
 	this->blocked = blocked;
 }
 
-bool Robot::button(uint8_t pin) {
-	return digitalRead(pin) == HIGH;
+bool Robot::button() {
+	char msg[2] = {0x05, 3};
+
+	write(serial_fd, msg, 2);
+	if(read(serial_fd, msg, 2) != 2) return false;
+	return msg[0] || msg[1];
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {
@@ -265,58 +95,40 @@ void Robot::m(int8_t left, int8_t right, int32_t duration) {
 		left = -left;
 		right = -right;
 	}
-	uint8_t msg[3] = {CMD_MOTOR, *(uint8_t*)(&left), *(uint8_t*)(&right)};
-	//i2c_write(TEENSY_I2C_ADDR, CMD_MOTOR, msg, 2);
-	
-	spi_write(msg, 3);
+	if(duration > 65535) duration = 65535;
+	uint16_t dur = duration;
+	char msg[5] = {0x01, 60, 60, 0, 0};
+	memcpy(&msg[3], &dur, 2);
 
-	if(duration > 0) {
-		delay(duration);
-		// stop a few times in case Teensy misses first stop signal
-		stop();
-		stop();
-		delay(10);
-		stop();
-		delay(10);
-		stop();
-	}
+	std::cout << (int)write(serial_fd, msg, 5) << std::endl;
+	delay(duration + 10);
 }
 
 void Robot::stop() {
 	if(blocked) return;
 
-	//send_byte(CMD_STOP);
-	digitalWrite(STOP_PIN, HIGH);
-	delayMicroseconds(100);
-	digitalWrite(STOP_PIN, LOW);
-	delayMicroseconds(200),
-	digitalWrite(STOP_PIN, HIGH);
-	delayMicroseconds(100);
-	digitalWrite(STOP_PIN, LOW);
-	delayMicroseconds(100);
-	digitalWrite(STOP_PIN, HIGH);
-	delayMicroseconds(100);
-	digitalWrite(STOP_PIN, LOW);
+	char msg = 0;
+	write(serial_fd, &msg, 1);
 }
 
 // turns given angle in radians
 void Robot::turn(float angle) {
 	if(blocked) return;
 
-	if(angle == 0.0f) return;
-	uint16_t duration = std::abs(angle) * RTOD(MS_PER_DEGREE);
-	if(angle > 0) {
-		m(70, -70, duration);
-	} else {
-		m(-70, 70, duration);
-	}
+	int16_t angle_mrad = angle * 1000;
+	char msg[3] = {0x07, 0, 0};
+	memcpy(&msg[1], &angle_mrad, 2);
+
+	std::cout << (int)write(serial_fd, msg, 3) << std::endl;
+
+	delay((int)(RTOD(angle) * MS_PER_DEGREE + 10));
 }
 
 void Robot::send_byte(char b) {
 	if(blocked) return;
 	//i2c_write_byte_single(TEENSY_I2C_ADDR, b);
 	uint8_t msg[1] = {b};
-	spi_write(msg, 1);
+	//spi_write(msg, 1);
 }
 
 void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
@@ -324,54 +136,33 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 
 	uint8_t msg[3] = {CMD_SERVO, servo_id, angle};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
-	spi_write(msg, 3);
+	//spi_write(msg, 3);
 	if(delay_ms != 0) delay(delay_ms);
 }
 
 float Robot::read_heading() {
 	int16_t data = 0.0;
 
-	if(bno055_read_euler_h(&data) != 0) {
+	/*if(bno055_read_euler_h(&data) != 0) {
 		std::cerr << "Error reading euler data" << std::endl;
 		exit(ERRCODE_BNO055);
-	}
+	}*/
 	return DTOR((float)data / 16.0f);
 }
 
 float Robot::read_pitch() {
 	int16_t data = 0.0;
 
-	if(bno055_read_euler_r(&data) != 0) {
+	/*if(bno055_read_euler_r(&data) != 0) {
 		std::cerr << "Error reading euler data" << std::endl;
 		exit(ERRCODE_BNO055);
-	}
+	}*/
 	return DTOR((float)data / 16.0f);
 }
 
 // returns front distance in cm
 int Robot::distance() {
-	digitalWrite(HCSR04_TRIGGER, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(HCSR04_TRIGGER, LOW);
-
-    uint64_t real_starttime = micros();
-	uint64_t starttime = micros();
-	uint64_t endtime = micros();
-	const uint64_t max_time = 8000;
-
-	while (digitalRead(HCSR04_ECHO) == LOW) {
-		starttime = micros();
-		if(starttime - real_starttime > max_time) return 300;
-	}
-	while (digitalRead(HCSR04_ECHO) == HIGH) {
-		endtime = micros();
-		if(endtime - real_starttime > max_time) return 300;
-	}
-
-	uint64_t travel_time = endtime - starttime;
-
-	// convert travel time of sound signal to cm (TODO: check for overflow)
-	return (int)(0.5 * travel_time * 0.000001 * 34300);
+	return 0;
 }
 
 int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {

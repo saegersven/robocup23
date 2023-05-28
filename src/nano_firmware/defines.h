@@ -29,6 +29,8 @@
 
 #define TURN_TOLERANCE 0.0872 // 5°
 
+#define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
+
 // SERVOS
 #define NUM_SERVOS 1
 //int servo_pins[NUM_SERVOS] = {A0, A1};

@@ -60,11 +60,11 @@ int main() {
 	delay(810);
 
 	std::cout << "Init." << std::endl;
-	while(!robot->button(BTN_RESTART)) {
+	while(!robot->button()) {
 		robot->send_byte(CMD_READY);
 		delay(1);	
 	}
-	while(robot->button(BTN_RESTART));
+	while(robot->button());
 
 	line.start();
 	delay(40);
@@ -74,10 +74,10 @@ int main() {
 	// MAIN LOOP
 	while(1) {
 		uint64_t duration = millis();
-		while(robot->button(BTN_RESTART)) delayMicros(100);
+		while(robot->button()) delayMicros(100);
 		duration = millis() - duration;
 		if(duration > 20 && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
-			while(robot->button(BTN_RESTART));
+			while(robot->button());
 			robot->stop();
 			switch(state) {
 				case State::line:
@@ -93,11 +93,11 @@ int main() {
 			robot->send_byte(CMD_SERVOS_HOME_POS);
 			delay(300);
 
-			while(!robot->button(BTN_RESTART)) {
+			while(!robot->button()) {
 				robot->send_byte(CMD_READY);
 				delay(1);
 			} 
-			while(robot->button(BTN_RESTART));
+			while(robot->button());
 			std::cout << "Start." << std::endl;
 			line.start();
 			line.check_silver();

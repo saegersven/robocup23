@@ -81,40 +81,15 @@ extern "C" {
 
 #define T180_ERR (-DTOR(6.0f))
 
-//#define ENABLE_VL53L0X
-//#define ENABLE_BNO055
-
-/*
- * I2C interface functions. These are passed to the bno055 and vl53l0x drivers
- * and used for communication with the Teensy.
- */
-int8_t i2c_write_byte_single(uint8_t dev_addr, uint8_t byte);
-int8_t i2c_write_byte(uint8_t dev_addr, uint8_t reg_addr, uint8_t byte);
-int8_t i2c_write(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t cnt);
-int8_t i2c_read(uint8_t dev_addr, uint8_t reg_addr, uint8_t* reg_data, uint8_t cnt);
-void i2c_delay_msec(uint32_t ms);
-
 class Robot {
 private:
 	// Linux file handles
-	int i2c_fd;
-	int spi_fd;
+	int serial_fd;
 
 	std::atomic<bool> blocked;
 
-	uint8_t spi_mode;
-	uint32_t spi_speed;
-	uint8_t spi_bits_per_word;
-
-	// Orientation sensor
-	bno055_t bno055;
-
 	lccv::PiCamera camera;
 
-#ifdef ENABLE_VL53L0X
-	// Distance sensor
-	VL53L0X vl53l0x;
-#endif // ENABLE_VL53L0X
 public:
 	Robot();
 
@@ -125,20 +100,7 @@ public:
 
 	void set_blocked(bool blocked);
 
-	/**
-	 * Initialize spi
-	 */
-	void spi_init();
-
-	/**
-	 * Write bytes to Teensy over SPI
-	 */
-	void spi_write(uint8_t* data, uint8_t len);
-
-	/**
-	 * Simple digital read
-	 */
-	bool button(uint8_t pin);
+	bool button();
 
 	/**
 	 * Sends left and right motor speeds to the motor controller.

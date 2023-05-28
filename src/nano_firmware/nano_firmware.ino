@@ -59,7 +59,7 @@ void setup() {
   m(0, 0, 0);
 }
 
-void loop() {  
+void loop() {
   // Delete message after 50ms of silence
   long long start_time = millis();
   while(!Serial.available()) {
