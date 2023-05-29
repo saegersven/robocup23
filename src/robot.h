@@ -93,6 +93,8 @@ private:
 public:
 	Robot();
 
+	void init_serial();
+
 	bool camera_running;
 	void start_camera(int width, int height, int framerate);
 	void stop_camera();

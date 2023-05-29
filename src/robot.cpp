@@ -1,21 +1,18 @@
 #include "robot.h"
 
 extern "C" {
-#include <linux/i2c-dev.h>
-#include <linux/spi/spidev.h>
-#include <i2c/smbus.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <termios.h>
 }
-
-#include <wiringPi.h>
 
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
 #include <thread>
-#include <unistd.h>
 
 #include "defines.h"
 #include "utils.h"
@@ -34,20 +31,45 @@ Robot::Robot() : blocked(false)
 	pinMode(HCSR04_ECHO, INPUT);
 	digitalWrite(HCSR04_TRIGGER, LOW);
 
-	serial_fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY);
-	if(serial_fd < 0) {
+	delay(2000); // Wait for Nano to boot up
+}
+
+void Robot::init_serial() {
+	termios options;
+	speed_t baud_rate = B115200;
+
+	int status;
+
+	if((serial_fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK)) < 0) {
 		std::cout << "Could not open Serial." << std::endl;
 	}
 
-	delay(2000);
+	fcntl(serial_fd, F_SETFL, O_RDWR);
 
-	std::cout << (int)button() << std::endl;
-	m(60, 60, 200);
-	turn(R90);
-	delay(1000);
-	turn(-R180);
-	exit(0);
+	tcgetattr(serial_fd, &options);
 
+	cfmakeraw(&options);
+	cfsetispeed(&options, baud_rate);
+	cfsetospeed(&options, baud_rate);
+
+	options.c_cflag |= (CLOCAL | CREAD);
+	options.c_cflag &= ~PARENB;
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag &= ~CSIZE;
+	options.c_cflag |= CS8;
+	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
+	options.c_oflag &= ~OPOST;
+
+	options.c_cc[VMIN] = 0;
+	options.c_cc[VTIME] = 10; // One second (10 deciseconds)
+
+	tcsetattr(serial_fd, TCSANOW, &options);
+	ioctl(serial_fd, TIOCMGET, &status);
+
+	status |= TIOCM_DTR;
+	status |= TIOCM_RTS;
+
+	ioctl(serial_fd, TIOCMSET, &status);
 }
 
 void Robot::start_camera(int width, int height, int framerate) {
