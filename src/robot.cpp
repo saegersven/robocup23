@@ -18,18 +18,8 @@ extern "C" {
 #include "utils.h"
 
 Robot::Robot() : blocked(false)
-#ifdef ENABLE_VL53L0X
-	, vl53l0x(VL53L0X_FORWARD_XSHUT)
-#endif // ENABLE_VL53L0X
 {
-	wiringPiSetupGpio();
-
-	pinMode(BTN_RESTART, INPUT);
-	pinMode(STOP_PIN, OUTPUT);
-	digitalWrite(STOP_PIN, LOW);
-	pinMode(HCSR04_TRIGGER, OUTPUT);
-	pinMode(HCSR04_ECHO, INPUT);
-	digitalWrite(HCSR04_TRIGGER, LOW);
+	init_serial();
 
 	delay(2000); // Wait for Nano to boot up
 }
@@ -61,7 +51,7 @@ void Robot::init_serial() {
 	options.c_oflag &= ~OPOST;
 
 	options.c_cc[VMIN] = 0;
-	options.c_cc[VTIME] = 10; // One second (10 deciseconds)
+	options.c_cc[VTIME] = 5; // 0.5 seconds (5 deciseconds)
 
 	tcsetattr(serial_fd, TCSANOW, &options);
 	ioctl(serial_fd, TIOCMGET, &status);
@@ -103,7 +93,10 @@ void Robot::set_blocked(bool blocked) {
 }
 
 bool Robot::button() {
-	char msg[2] = {0x05, 3};
+	return false;
+	char msg[2] = {CMD_SENSOR, 3};
+
+	tcflush(serial_fd, TCIOFLUSH);
 
 	write(serial_fd, msg, 2);
 	if(read(serial_fd, msg, 2) != 2) return false;
@@ -119,17 +112,17 @@ void Robot::m(int8_t left, int8_t right, int32_t duration) {
 	}
 	if(duration > 65535) duration = 65535;
 	uint16_t dur = duration;
-	char msg[5] = {0x01, 60, 60, 0, 0};
+	char msg[5] = {CMD_MOTOR, *((char*)&left), *((char*)&right), 0, 0};
 	memcpy(&msg[3], &dur, 2);
 
-	std::cout << (int)write(serial_fd, msg, 5) << std::endl;
-	delay(duration + 10);
+	write(serial_fd, msg, 5);
+	delay(duration);
 }
 
 void Robot::stop() {
 	if(blocked) return;
 
-	char msg = 0;
+	char msg = CMD_STOP;
 	write(serial_fd, &msg, 1);
 }
 
@@ -138,27 +131,29 @@ void Robot::turn(float angle) {
 	if(blocked) return;
 
 	int16_t angle_mrad = angle * 1000;
-	char msg[3] = {0x07, 0, 0};
+	char msg[3] = {CMD_TURN, 0, 0};
 	memcpy(&msg[1], &angle_mrad, 2);
 
-	std::cout << (int)write(serial_fd, msg, 3) << std::endl;
+	write(serial_fd, msg, 3);
 
 	delay((int)(RTOD(angle) * MS_PER_DEGREE + 10));
 }
 
-void Robot::send_byte(char b) {
+void Robot::attach_detach_servo(uint8_t servo_id) {
 	if(blocked) return;
-	//i2c_write_byte_single(TEENSY_I2C_ADDR, b);
-	uint8_t msg[1] = {b};
-	//spi_write(msg, 1);
+
+	uint8_t msg[2] = {CMD_SERVO_ATTACH_DETACH, servo_id};
+
+	write(serial_fd, msg, 2);
 }
 
 void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	if(blocked) return;
 
-	uint8_t msg[3] = {CMD_SERVO, servo_id, angle};
+	uint8_t msg[3] = {CMD_SERVO_WRITE, servo_id, angle};
 	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
 	//spi_write(msg, 3);
+	write(serial_fd, msg, 3);
 	if(delay_ms != 0) delay(delay_ms);
 }
 
@@ -183,8 +178,16 @@ float Robot::read_pitch() {
 }
 
 // returns front distance in cm
-int Robot::distance() {
-	return 0;
+int Robot::distance(uint8_t sensor_id) {
+	uint8_t msg[2] = {CMD_SENSOR, sensor_id};
+	write(serial_fd, msg, 2);
+
+	if(read(serial_fd, msg, 2) != 2) return 0xFFFF;
+
+	uint16_t dist;
+	memcpy(&dist, msg, 2);
+
+	return dist;
 }
 
 int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {

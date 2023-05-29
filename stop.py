@@ -16,4 +16,4 @@ time.sleep(2)
 ser.write(bytearray([0x02]))
 ser.close()
 
-print("Stopped motors from python script")
+print("--- Stopped motors from python script ---")

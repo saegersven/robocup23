@@ -7,71 +7,23 @@
 
 #include "lccv.hpp"
 
-extern "C" {
-#include "BNO055_driver/bno055.h"
-}
+// PROTOCOL
+#define CMD_MOTOR                 0x01
+#define CMD_STOP                  0x02
+#define CMD_SERVO_ATTACH_DETACH   0x03
+#define CMD_SERVO_WRITE           0x04
+#define CMD_SENSOR                0x05
+#define CMD_GRIPPER               0x06
+#define CMD_TURN                  0x07
+#define CMD_M_BTN_OBSTACLE        0x08
 
-//#include "vl53l0x-linux/VL53L0X.hpp"
-
-#define SPI_MODE 0
-#define SPI_SPEED 500'000 // Hz
-#define SPI_BITS_PER_WORD 8
-
-#define TEENSY_I2C_ADDR 0x2a
-#define BNO055_I2C_ADDR 0x28
-
-#define VL53L0X_FORWARD_XSHUT -1
-#define VL53L0X_FORWARD_ADDR 0x29
-
-#define HCSR04_TRIGGER 22
-#define HCSR04_ECHO 17
-
-#define DIST_FORWARD 0
-
-#define DEV_TEENSY 0
-#define DEV_BNO055 1
-#define DEV_VL53L0X 2
-
-// SPI commands (abitrary numbers)
-#define CMD_MOTOR 11
-#define CMD_STOP 21
-#define CMD_SERVO 31
-#define CMD_READY 41
-#define CMD_SERVOS_HOME_POS 51
-#define CMD_ARM_DOWN 61
-#define CMD_ARM_UP 71
-#define CMD_ARM_HALF_UP 81
-#define CMD_UNLOAD 91
-#define CMD_PICK_UP_RESCUE_KIT 101
-#define CMD_PICK_UP_VICTIM 111
-
-#define SERVO_CAM 0
-#define SERVO_ARM 1
-#define SERVO_GRIPPER1 2
-#define SERVO_GRIPPER2 3
-#define SERVO_GATE 4
-
-// servo position (UPDATE IN BOTH FILES!!!)
-#define CAM_LOWER_POS 73
-#define CAM_HIGHER_POS 140
-#define CAM_MID_POS ((CAM_LOWER_POS + CAM_HIGHER_POS) / 2)
-#define CAM_EXIT_POS 90
+#define SERVO_ARM 0
+#define SERVO_GATE 1
 
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
-
-#define GRIPPER1_OPEN 160
-#define GRIPPER1_CLOSED 60
-
-#define GRIPPER2_OPEN 70
-#define GRIPPER2_CLOSED 160
-
 #define GATE_OPEN 110
 #define GATE_CLOSED 17
-
-#define BTN_RESTART 4
-
-#define STOP_PIN 9
 
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 
@@ -122,13 +74,9 @@ public:
 	void turn(float angle);
 
 	/**
-	 * Send a single byte to the Teensy.
-	 */
-	void send_byte(char b);
-
-	/**
 	 * Send Servo command with servo id and angle.
 	 */
+	void attach_detach_servo(uint8_t servo_id);
 	void servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms = 650);
 
 	/**
@@ -141,8 +89,8 @@ public:
 	float read_pitch();
 
 	/**
-	 * Read distance from forward HCSR04 ultrasonic sensor in millimeters
+	 * Read distance
 	 */
-	int distance();
+	int distance(uint8_t sensor_id = 0);
 	int distance_avg(uint8_t num_measurements, float remove_percentage);
 };

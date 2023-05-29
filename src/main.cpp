@@ -50,21 +50,13 @@ int main() {
 	
 	Rescue rescue(robot);
 	
-	// set servos to default position
-	delay(50);
-	robot->send_byte(CMD_SERVOS_HOME_POS);
-	delay(20);
-	robot->send_byte(CMD_SERVOS_HOME_POS);
-	delay(20);
-	robot->send_byte(CMD_SERVOS_HOME_POS);
-	delay(810);
+	// TODO: SET SERVOS TO DEFAULT POS
 
 	std::cout << "Init." << std::endl;
-	while(!robot->button()) {
-		robot->send_byte(CMD_READY);
-		delay(1);	
+	/*while(!robot->button()) {
+		delay(10);	
 	}
-	while(robot->button());
+	while(robot->button());*/
 
 	line.start();
 	delay(40);
@@ -90,17 +82,15 @@ int main() {
 			}
 			
 			std::cout << "Stop." << std::endl;
-			robot->send_byte(CMD_SERVOS_HOME_POS);
 			delay(300);
 
 			while(!robot->button()) {
-				robot->send_byte(CMD_READY);
-				delay(1);
+				delay(10);
 			} 
 			while(robot->button());
 			std::cout << "Start." << std::endl;
 			line.start();
-			line.check_silver();
+			//line.check_silver();
 		}
 
 		switch(state) {

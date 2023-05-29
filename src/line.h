@@ -104,11 +104,7 @@ private:
 
 	SilverML silver_ml;
 
-	// Camera control
-	bool camera_opened;
-	void open_camera(int width=LINE_CAPTURE_WIDTH, int height=LINE_CAPTURE_HEIGHT);
-	void close_camera();
-	void grab_frame(int width=LINE_FRAME_WIDTH, int height=LINE_FRAME_HEIGHT);
+	void grab_frame();
 
 	/**
 	 * Async method, checks distance
