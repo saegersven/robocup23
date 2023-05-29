@@ -33,8 +33,16 @@ int main() {
 	}
 	return 0;*/
 
+	while(true) {
+		auto start_time = millis();
+		std::cout << robot->button() << "\n";
+		auto receive_time = millis();
+		std::cout << receive_time - start_time<< std::endl;
+	}
+
 	State state = State::line;
 	robot->stop();
+
 	/*
 	// obstacle motor values:
 	robot->m(50, 50, 0);

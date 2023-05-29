@@ -1,5 +1,6 @@
-#include <Wire.h>
 #include <VL53L0X.h>
+
+#include <Wire.h>
 #include <Servo.h>
 
 #include "defines.h"
@@ -12,7 +13,7 @@ Servo servos[NUM_SERVOS];
 VL53L0X dist_sensors[NUM_VL53L0X];
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Configure pins
   pinMode(LED_BUILTIN, OUTPUT);
@@ -72,6 +73,12 @@ void loop() {
     message[message_pos] = Serial.read();
     message_pos++;
 
+    if(message[message_pos - 1] == 'S') {
+      uint8_t msg = 42;
+      Serial.write(&msg, 1);
+      message_pos = 0;
+    }
+    
     if(message_pos == message_lengths[message[0] - 1]) {
       parse_message();
       message_pos = 0;

@@ -158,8 +158,8 @@ void Line::follow() {
 	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
 
 	robot->m(
-		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127),
-		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127)
+		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127),
+		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127)
 		);
 
 	last_frame = frame.clone();

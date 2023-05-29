@@ -54,6 +54,8 @@ public:
 
 	void set_blocked(bool blocked);
 
+	int serial_available();
+
 	bool button();
 
 	/**

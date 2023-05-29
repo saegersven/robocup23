@@ -30,7 +30,7 @@ void Robot::init_serial() {
 
 	int status;
 
-	if((serial_fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK)) < 0) {
+	if((serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK)) < 0) {
 		std::cout << "Could not open Serial." << std::endl;
 	}
 
@@ -47,7 +47,7 @@ void Robot::init_serial() {
 	options.c_cflag &= ~CSTOPB;
 	options.c_cflag &= ~CSIZE;
 	options.c_cflag |= CS8;
-	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ISIG | IEXTEN);
+	options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
 	options.c_oflag &= ~OPOST;
 
 	options.c_cc[VMIN] = 0;
@@ -60,6 +60,8 @@ void Robot::init_serial() {
 	status |= TIOCM_RTS;
 
 	ioctl(serial_fd, TIOCMSET, &status);
+
+	delay(10);
 }
 
 void Robot::start_camera(int width, int height, int framerate) {
@@ -92,14 +94,21 @@ void Robot::set_blocked(bool blocked) {
 	this->blocked = blocked;
 }
 
+int Robot::serial_available() {
+	int res;
+	if(ioctl(serial_fd, FIONREAD, &res) == -1) return -1;
+
+	return res;
+}
+
 bool Robot::button() {
-	return false;
 	char msg[2] = {CMD_SENSOR, 3};
 
 	tcflush(serial_fd, TCIOFLUSH);
 
 	write(serial_fd, msg, 2);
-	if(read(serial_fd, msg, 2) != 2) return false;
+
+	if(read(serial_fd, &msg, 2) != 2) return false;
 	return msg[0] || msg[1];
 }
 

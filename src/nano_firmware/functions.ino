@@ -146,6 +146,7 @@ void parse_message() {
     break;
   }
   */
+  
   if(message[0] == CMD_MOTOR) {
     int8_t left_speed = message[1];
     int8_t right_speed = message[2];
