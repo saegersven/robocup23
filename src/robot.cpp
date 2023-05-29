@@ -7,6 +7,7 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <termios.h>
+#include <ftdi_sio.h>
 }
 
 #include <cstdlib>
@@ -62,6 +63,8 @@ void Robot::init_serial() {
 	ioctl(serial_fd, TIOCMSET, &status);
 
 	delay(10);
+
+	ioctl(serial_fd, FTDI_SIO_SET_LATENCY_TIMER, 2); // Set latency timer to 2ms, instead of 16ms
 }
 
 void Robot::start_camera(int width, int height, int framerate) {
