@@ -61,24 +61,20 @@ int main() {
 	// TODO: SET SERVOS TO DEFAULT POS
 
 	std::cout << "Init." << std::endl;
-	/*while(!robot->button()) {
+	while(!robot->button()) {
 		delay(10);	
 	}
-	while(robot->button());*/
+	while(robot->button());
 
 	line.start();
-	delay(40);
-
-	while (1) {
-		line.line();
-	}
+	delay(100);
 
 	auto last_started = millis(); // time at which robot has been restarted
 	
 	// MAIN LOOP
 	while(1) {
 		uint64_t duration = millis();
-		while(robot->button()) delayMicros(100);
+		while(robot->button()) delay(10);
 		duration = millis() - duration;
 		if(duration > 20 && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
 			while(robot->button());

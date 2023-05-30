@@ -34,14 +34,14 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	float e = (3.25f * x - 2.0f);
+	float e = (3.25f * x - 2.3f);
 	float f = std::exp(-e*e) - 0.1f;
 	return f > 0.0f ? f : 0.0f;
 }
 
 float Line::green_weight(float x) {
 	float f = green_weight_slope * x + 1.0f;
-	return f < 1.0f ? 1.0f : f;	
+	return f < 0.0f ? 0.0f : f;	
 }
 
 void Line::create_maps() {
@@ -67,7 +67,7 @@ void Line::create_maps() {
 void Line::start() {
 	last_line_angle = 0.0f;
 
-	robot->start_camera(142, 80, 120);
+	robot->start_camera(2304, 1296, 120);
 	robot->set_blocked(false);
 
 	running = true;
@@ -85,7 +85,10 @@ void Line::stop() {
 
 void Line::grab_frame() {
 	frame = robot->grab_frame();
-	cv::transpose(frame, debug_frame);
+	//cv::imshow("Frame1", frame);
+	cv::resize(frame, debug_frame, cv::Size(142, 80));
+	cv::transpose(debug_frame, frame);
+	cv::flip(frame, debug_frame, 1);
 	debug_frame = debug_frame(cv::Range(94, 142), cv::Range(0, 80));
 	frame = debug_frame.clone();
 }
@@ -106,8 +109,8 @@ float Line::get_line_angle(cv::Mat in) {
 
 		for(int x = 0; x < in.cols; ++x) {
 			// Low-quality servos make the camera see part of the wheels, ignore that part of the image
-			if((x < LINE_CORNER_WIDTH || x > (LINE_FRAME_WIDTH - LINE_CORNER_WIDTH))
-				&& y > (LINE_FRAME_HEIGHT - LINE_CORNER_HEIGHT)) continue;
+			//if((x < LINE_CORNER_WIDTH || x > (LINE_FRAME_WIDTH - LINE_CORNER_WIDTH))
+			//	&& y > (LINE_FRAME_HEIGHT - LINE_CORNER_HEIGHT)) continue;
 
 			if(p[x]) {
 				float distance_weight = p_dwm[x];
@@ -127,9 +130,14 @@ float Line::get_line_angle(cv::Mat in) {
 		}
 	}
 
-	if(num_angles < 40) return 0.0f;
+	if(num_angles < 50) return 0.0f;
 	if(total_weight == 0.0f) return 0.0f;
+
+	std::cout << num_angles << std::endl;
+
 	weighted_line_angle /= total_weight;
+
+	if(num_angles < 300) return weighted_line_angle * num_angles / 300.0f;
 
 	return weighted_line_angle;
 }
@@ -140,6 +148,8 @@ void Line::follow() {
 
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
+
+	cv::imshow("Black", black);
 
 	float line_angle = get_line_angle(black);
 
@@ -158,18 +168,17 @@ void Line::follow() {
 		0.4, cv::Scalar(0, 100, 100));
 	// END DEBUG
 
-	float extra_sensitivity = 0.3141f * line_angle * line_angle * line_angle * line_angle + 1.0f;
+	float extra_sensitivity = 0.4f * std::abs(line_angle * line_angle) + 1.0f;
 
-	float ees_l = line_angle < 0.0f ? 1.5f : 0.2f;
-	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
+	float ees_l = line_angle < 0.0f ? 1.4f : 1.0f;
+	float ees_r = line_angle > 0.0f ? 1.4f : 1.0f;
 
-	robot->m(
-		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127),
-		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127)
-		);
+	float us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - last_frame_t).count();
+	float line_angle_d = last_line_angle / us * 1000000.0f;
+
 	/*robot->m(
-		clamp(base_speed - line_angle * line_follow_sensitivity, -128, 127),
-		clamp(base_speed + line_angle * line_follow_sensitivity, -128, 127)
+		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
+		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);*/
 
 	last_frame = frame.clone();
@@ -244,6 +253,8 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 	if(groups.size() == 0) return 0;
 	
+	std::cout << groups.size() << " Groups\n";
+
 	const int cut_width = 30;
 	const int cut_height = 30;
 
@@ -251,13 +262,10 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 	// of a dead-end or late evaluation of green points behind a line, when the lower line is
 	// already out of the frame
 	for(int i = 0; i < groups.size(); ++i) {
-		if(groups[i].y < 10) return 0;
+		if(groups[i].y < 15) return 0;
 		if(groups[i].y > 35) return 0;
 		//if(groups[i].x < 8) return 0;
 		//if(groups[i].x > frame.cols - 8) return 0;
-
-		cv::circle(debug_frame, cv::Point((int)groups[i].x, (int)groups[i].y),
-			2, cv::Scalar(0, 0, 255), 2);
 	}
 
 	// Global average is the average of all green dots for optimal approach.
@@ -312,6 +320,9 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 			result |= average_x < groups[i].x ? 0x02 : 0x01;
 		}
+
+		cv::circle(debug_frame, cv::Point((int)groups[i].x, (int)groups[i].y),
+			2, cv::Scalar(is_considered ? 255 : 0, 0, is_considered ? 0 : 255), 2);
 	}
 
 	global_average_x /= num_green_points;
@@ -321,11 +332,14 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 }
 
 void Line::green() {
+	float global_average_x, global_average_y;
+
 	// Green active time
 	auto now = std::chrono::high_resolution_clock::now();
 	uint32_t time_since_last_green = std::chrono::duration_cast<std::chrono::milliseconds>(now - green_start_t).count();
 
 	green_active = time_since_last_green < GREEN_DURATION;
+	if(green_active) std::cout << "GREEN ACTIVE\n";
 	if(!green_active) green_weight_slope = 0.0f;
 
 	uint8_t green_result = green_direction(global_average_x, global_average_y);
@@ -336,8 +350,9 @@ void Line::green() {
 
 		if(green_result == GREEN_RESULT_DEAD_END) {
 			// Dead-End regardless of green_active
-			robot->turn(DTOR(170.0f));
-			robot->m(127, 127, 150);
+			robot->m(127, 127, 200);
+			robot->turn(DTOR(180.0f));
+			robot->m(127, 127, 100);
 			return;
 		}
 
@@ -359,7 +374,7 @@ void Line::line() {
 	auto now_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
 	int fps = std::round(1.0f / ((float)us / 1000000.0f));
-	std::cout << fps << std::endl;
+	//std::cout << fps << std::endl;
 	cv::putText(debug_frame, std::to_string(fps),
 		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 255, 0));

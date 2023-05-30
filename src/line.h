@@ -42,16 +42,17 @@
 #define LINE_CORNER_WIDTH 7
 #define LINE_CORNER_HEIGHT 8
 
-#define LINE_FOLLOW_BASE_SPEED 50
+#define LINE_FOLLOW_BASE_SPEED 35
 #define LINE_FOLLOW_STRAIGHT_LINE_SPEED 60
 #define LINE_FOLLOW_SENSITIVITY 50.0f
+#define LINE_FOLLOW_D 0.05f
 
 #define ARM_ANGLE_OFFSET DTOR(25.0f)
 
 #define ENABLE_NO_DIFFERENCE true // should robot increase motor speed when frame = last_frame?
 
-#define GREEN_WEIGHT_SLOPE 0.1f
-#define GREEN_DURATION 1000
+#define GREEN_WEIGHT_SLOPE 0.6f
+#define GREEN_DURATION 500
 
 /**
  * Single-pixel thresholding operations
@@ -140,6 +141,8 @@ private:
 	 * Output range 0 to 1
 	 */
 	float distance_weight(float x);
+
+	float green_weight(float x);
 
 	/**
 	 * Creates maps to speed up line following.
