@@ -40,7 +40,7 @@ float Line::distance_weight(float x) {
 }
 
 void Line::create_maps() {
-	float center_x = LINE_FRAME_WIDTH / 2;
+	float center_x = LINE_FRAME_WIDTH / 2 - 7.0f;
 	float center_y = LINE_FRAME_HEIGHT;
 
 	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32FC1);
@@ -91,7 +91,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 	uint32_t num_angles = 0;
 	// Bottom center coordinates (point close to center of rotation of the robot)
-	float center_x = in.cols / 2.0f;
+	float center_x = in.cols / 2.0f - 7.0f;
 	float center_y = in.rows;
 
 	for(int y = 0; y < in.rows; ++y) {
@@ -161,6 +161,10 @@ void Line::follow() {
 		clamp(base_speed - line_angle * extra_sensitivity * ees_r * line_follow_sensitivity, -128, 127),
 		clamp(base_speed + line_angle * extra_sensitivity * ees_l * line_follow_sensitivity, -128, 127)
 		);
+	/*robot->m(
+		clamp(base_speed - line_angle * line_follow_sensitivity, -128, 127),
+		clamp(base_speed + line_angle * line_follow_sensitivity, -128, 127)
+		);*/
 
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
@@ -175,6 +179,7 @@ void Line::line() {
 	auto now_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
 	int fps = std::round(1.0f / ((float)us / 1000000.0f));
+	std::cout << fps << std::endl;
 	cv::putText(debug_frame, std::to_string(fps),
 		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 255, 0));

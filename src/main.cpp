@@ -33,12 +33,12 @@ int main() {
 	}
 	return 0;*/
 
-	while(true) {
+	/*while(true) {
 		auto start_time = millis();
 		std::cout << robot->button() << "\n";
 		auto receive_time = millis();
 		std::cout << receive_time - start_time<< std::endl;
-	}
+	}*/
 
 	State state = State::line;
 	robot->stop();
@@ -68,6 +68,10 @@ int main() {
 
 	line.start();
 	delay(40);
+
+	while (1) {
+		line.line();
+	}
 
 	auto last_started = millis(); // time at which robot has been restarted
 	

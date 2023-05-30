@@ -7,13 +7,15 @@ extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <termios.h>
-#include <ftdi_sio.h>
 }
 
 #include <cstdlib>
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <fstream>
+#include <sstream>
+#include <string>
 
 #include "defines.h"
 #include "utils.h"
@@ -29,11 +31,29 @@ void Robot::init_serial() {
 	termios options;
 	speed_t baud_rate = B115200;
 
+	std::string dev_filename = "/dev/ttyUSB0";
+	std::string dev_name = "ttyUSB0";
+
 	int status;
 
-	if((serial_fd = open("/dev/ttyS0", O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK)) < 0) {
+	while((serial_fd = open(dev_filename.c_str(), O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK)) < 0) {
 		std::cout << "Could not open Serial." << std::endl;
+		std::cout << "Trying USB1..." << std::endl;
+		dev_filename = "/dev/ttyUSB1";
+		dev_name = "ttyUSB1";
 	}
+
+	std::cout << "Opened serial:" << dev_name << std::endl;
+
+	std::stringstream ss;
+	ss << "/sys/bus/usb-serial/drivers/ftdi_sio/" << dev_name << "/latency_timer";
+	std::string latency_file_name = ss.str();
+	std::cout << "Set latency to 2ms in " << latency_file_name << std::endl;
+
+	std::ofstream out(latency_file_name);
+	out << "2" << std::endl;
+	out.close();
+
 
 	fcntl(serial_fd, F_SETFL, O_RDWR);
 
@@ -63,8 +83,6 @@ void Robot::init_serial() {
 	ioctl(serial_fd, TIOCMSET, &status);
 
 	delay(10);
-
-	ioctl(serial_fd, FTDI_SIO_SET_LATENCY_TIMER, 2); // Set latency timer to 2ms, instead of 16ms
 }
 
 void Robot::start_camera(int width, int height, int framerate) {
@@ -106,8 +124,6 @@ int Robot::serial_available() {
 
 bool Robot::button() {
 	char msg[2] = {CMD_SENSOR, 3};
-
-	tcflush(serial_fd, TCIOFLUSH);
 
 	write(serial_fd, msg, 2);
 

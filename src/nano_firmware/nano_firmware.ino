@@ -13,7 +13,7 @@ Servo servos[NUM_SERVOS];
 VL53L0X dist_sensors[NUM_VL53L0X];
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   // Configure pins
   pinMode(LED_BUILTIN, OUTPUT);
@@ -72,12 +72,6 @@ void loop() {
   while (Serial.available() > 0)  {
     message[message_pos] = Serial.read();
     message_pos++;
-
-    if(message[message_pos - 1] == 'S') {
-      uint8_t msg = 42;
-      Serial.write(&msg, 1);
-      message_pos = 0;
-    }
     
     if(message_pos == message_lengths[message[0] - 1]) {
       parse_message();
