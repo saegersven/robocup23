@@ -39,6 +39,11 @@ float Line::distance_weight(float x) {
 	return f > 0.0f ? f : 0.0f;
 }
 
+float Line::green_weight(float x) {
+	float f = green_weight_slope * x + 1.0f;
+	return f < 1.0f ? 1.0f : f;	
+}
+
 void Line::create_maps() {
 	float center_x = LINE_FRAME_WIDTH / 2 - 7.0f;
 	float center_y = LINE_FRAME_HEIGHT;
@@ -112,8 +117,9 @@ float Line::get_line_angle(cv::Mat in) {
 					//float angle = std::atan2(y - center_y, x - center_x) + PI05;
 					float angle = p_pam[x];
 					float angle_difference_weight = difference_weight(angle - last_line_angle);
+					float x_green_weight = green_weight(x - center_x);
 
-					float weight = angle_difference_weight * distance_weight;
+					float weight = angle_difference_weight * distance_weight * x_green_weight;
 					weighted_line_angle += weight * angle;
 					total_weight += weight;
 				}
@@ -170,10 +176,184 @@ void Line::follow() {
 	last_line_angle = line_angle;
 }
 
+void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_pixels, float& center_x, float& center_y) {
+	int col_limit = ir.cols - 1;
+	int row_limit = ir.rows - 1;
+
+	for(int y = -1; y <= 1; ++y) {
+		int y_index = y_pos + y;
+
+		uint8_t* p = ir.ptr<uint8_t>(y_index);
+
+		for(int x = -1; x <= 1; ++x) {
+			if(y == 0 && x == 0) continue;
+
+			int x_index = x_pos + x;
+
+			if(p[x_index] == 0xFF) {
+				p[x_index] = 0x7F;
+				center_x += (float)x_index;
+				center_y += (float)y_index;
+				++num_pixels;
+
+				if(x_index > 0 && x_index < col_limit && y_index > 0 && y_index < row_limit)
+					add_to_group_center(x_index, y_index, ir, num_pixels, center_x, center_y);
+			}
+		}
+	}
+}
+
+std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
+	std::vector<Group> groups;
+
+	uint32_t num_pixels = 0;
+	ir = in_range(frame, f, &num_pixels);
+
+	if(num_pixels < 50) return groups;
+
+	for(int y = 0; y < ir.rows; ++y) {
+		uint8_t* p = ir.ptr<uint8_t>(y);
+		for(int x = 0; x < ir.cols; ++x) {
+			// Don't check for non-zero, as found pixels are set to 0x7F
+			// This way, information does not get lost
+			// check for non-zero pixels
+			if(p[x] == 0xFF) {
+				//std::cout << "Creating group at " << x << ", " << y << std::endl;
+				uint32_t num_group_pixels = 0;
+				float group_center_x = 0.0f;
+				float group_center_y = 0.0f;
+				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
+
+				if(num_group_pixels > 130) {
+					group_center_x /= num_group_pixels;
+					group_center_y /= num_group_pixels;
+					groups.push_back({group_center_x, group_center_y, num_group_pixels});
+				}
+			}
+		}
+	}
+
+	return groups;
+}
+
+uint8_t Line::green_direction(float& global_average_x, float& global_average_y) {
+	uint8_t result = 0;
+
+	cv::Mat green;
+	std::vector<Group> groups = find_groups(frame, green, &is_green);
+
+	if(groups.size() == 0) return 0;
+	
+	const int cut_width = 30;
+	const int cut_height = 30;
+
+	// Check if all of the groups are between certain y values to prevent premature evaluation
+	// of a dead-end or late evaluation of green points behind a line, when the lower line is
+	// already out of the frame
+	for(int i = 0; i < groups.size(); ++i) {
+		if(groups[i].y < 10) return 0;
+		if(groups[i].y > 35) return 0;
+		//if(groups[i].x < 8) return 0;
+		//if(groups[i].x > frame.cols - 8) return 0;
+
+		cv::circle(debug_frame, cv::Point((int)groups[i].x, (int)groups[i].y),
+			2, cv::Scalar(0, 0, 255), 2);
+	}
+
+	// Global average is the average of all green dots for optimal approach.
+	global_average_x = 0.0f;
+	global_average_y = 0.0f;
+	uint8_t num_green_points = 0;
+
+	// Cut out part of the black matrix around group centers
+	for(int i = 0; i < groups.size(); ++i) {
+		// Horizontal range
+		int x_start = groups[i].x - cut_width / 2;
+		int x_end = groups[i].x + cut_width / 2;
+		if(x_start < 0) x_start = 0;
+		if(x_end > black.cols) x_end = black.cols;
+
+		// Vertical range
+		int y_start = groups[i].y - cut_height / 2;
+		int y_end = groups[i].y + cut_height / 2;
+		if(y_start < 0) y_start = 0;
+		if(y_end > black.rows) y_end = black.rows;
+
+		float average_x = 0.0f;
+		float average_y = 0.0f;
+
+		uint32_t num_pixels = 0;
+
+		// Calculate the "average black pixel" around the green dot
+		int y, x;
+		for(y = y_start; y < y_end; ++y) {
+			uint8_t* p = black.ptr<uint8_t>(y);
+			uint8_t* p_grn = green.ptr<uint8_t>(y);
+			for(x = x_start; x < x_end; ++x) {
+				uint8_t p_val = p[x];
+				uint8_t p_grn_val = p_grn[x];
+				if(p_val && !p_grn_val) {
+					average_x += (float)x;
+					average_y += (float)y;
+					++num_pixels;
+				}
+			}
+		}
+		average_x /= num_pixels;
+		average_y /= num_pixels;
+
+		bool is_considered = average_y < groups[i].y;
+		// Determine the quadrant of the average pixel
+		if(is_considered) {
+			// Only consider dot below the line (average is above green dot)
+			global_average_x += average_x;
+			global_average_y += average_y;
+			++num_green_points;
+
+			result |= average_x < groups[i].x ? 0x02 : 0x01;
+		}
+	}
+
+	global_average_x /= num_green_points;
+	global_average_y /= num_green_points;
+
+	return result;
+}
+
+void Line::green() {
+	// Green active time
+	auto now = std::chrono::high_resolution_clock::now();
+	uint32_t time_since_last_green = std::chrono::duration_cast<std::chrono::milliseconds>(now - green_start_t).count();
+
+	green_active = time_since_last_green < GREEN_DURATION;
+	if(!green_active) green_weight_slope = 0.0f;
+
+	uint8_t green_result = green_direction(global_average_x, global_average_y);
+
+	if(green_result != 0) {
+		obstacle_enabled = false;
+		obstacle_active = false;
+
+		if(green_result == GREEN_RESULT_DEAD_END) {
+			// Dead-End regardless of green_active
+			robot->turn(DTOR(170.0f));
+			robot->m(127, 127, 150);
+			return;
+		}
+
+		if(green_active) return;
+
+		green_start_t = now;
+
+		green_weight_slope = GREEN_WEIGHT_SLOPE * (green_result == GREEN_RESULT_LEFT ? -1.0f : 1.0f);
+	}
+}
+
 void Line::line() {
 	grab_frame();
 
 	follow();
+	green();
 
 	// DEBUG
 	auto now_t = std::chrono::high_resolution_clock::now();

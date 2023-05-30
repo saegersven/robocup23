@@ -50,6 +50,9 @@
 
 #define ENABLE_NO_DIFFERENCE true // should robot increase motor speed when frame = last_frame?
 
+#define GREEN_WEIGHT_SLOPE 0.1f
+#define GREEN_DURATION 1000
+
 /**
  * Single-pixel thresholding operations
  */
@@ -99,6 +102,10 @@ private:
 
 	uint32_t no_difference_counter = 0;
 	long long no_difference_time_stamp = 0;
+
+	float green_weight_slope = 0.0f;
+	std::chrono::time_point<std::chrono::high_resolution_clock> green_start_t;
+	bool green_active = false;
 
 	std::chrono::time_point<std::chrono::high_resolution_clock> last_frame_t;
 
