@@ -20,7 +20,7 @@ extern "C" {
 #include "defines.h"
 #include "utils.h"
 
-Robot::Robot() : blocked(false)
+Robot::Robot() : blocked(false), has_frame(false)
 {
 	init_serial();
 
@@ -85,28 +85,52 @@ void Robot::init_serial() {
 	delay(10);
 }
 
-void Robot::start_camera(int width, int height, int framerate) {
-	camera.options->video_width = width;
-	camera.options->video_height = height;
-	camera.options->framerate = framerate;
-	camera.options->verbose = true;
+void Robot::start_camera() {
+	cap.open(0, cv::CAP_V4L2);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 192);
+	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+	cap.set(cv::CAP_PROP_FPS, 120);
 
-	camera.startVideo();
+	if(!cap.isOpened()) {
+		std::cout << "Could not open camera." << std::endl;
+		exit(ERRCODE_CAM_SETUP);
+	}
+
 	camera_running = true;
+
+	std::thread t([this] {this->camera_thread();});
+	t.detach();
+}
+
+void Robot::camera_thread() {
+	while(camera_running) {
+		cap.grab();
+		frame_lock.lock();
+		cap.retrieve(curr_frame);
+		cv::resize(curr_frame, curr_frame, cv::Size(80, 48));
+		frame_lock.unlock();
+		has_frame = true;
+	}
 }
 
 void Robot::stop_camera() {
-	camera.stopVideo();
+	cap.release();
 	camera_running = false;
+	has_frame = false;
 }
 
 cv::Mat Robot::grab_frame() {
 	if(!camera_running) std::cout << "Grabbing frame with closed camera" << std::endl;
 
+	while(!has_frame);
+	has_frame = false;
+
 	cv::Mat frame;
-	if(!camera.getVideoFrame(frame, 1000)) {
-		std::cout << "Camera timed out" << std::endl;
-	}
+	
+	frame_lock.lock();
+	cv::flip(curr_frame, frame, -1);
+	frame_lock.unlock();
 
 	return frame;
 }

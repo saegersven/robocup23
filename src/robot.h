@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <vector>
 #include <atomic>
+#include <mutex>
 
-#include "lccv.hpp"
+#include <opencv2/opencv.hpp>
 
 // PROTOCOL
 #define CMD_MOTOR                 0x01
@@ -40,15 +41,20 @@ private:
 
 	std::atomic<bool> blocked;
 
-	lccv::PiCamera camera;
+	std::atomic<bool> has_frame;
+	cv::VideoCapture cap;
+	std::mutex frame_lock;
+	cv::Mat curr_frame;
 
 public:
 	Robot();
 
 	void init_serial();
 
-	bool camera_running;
-	void start_camera(int width, int height, int framerate);
+	// Camera thread running?
+	std::atomic<bool> camera_running;
+	void start_camera();
+	void camera_thread();
 	void stop_camera();
 	cv::Mat grab_frame();
 

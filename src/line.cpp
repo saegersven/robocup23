@@ -34,7 +34,7 @@ float Line::difference_weight(float x) {
 }
 
 float Line::distance_weight(float x) {
-	float e = (3.25f * x - 2.3f);
+	float e = (3.25f * x - 2.0f);
 	float f = std::exp(-e*e) - 0.1f;
 	return f > 0.0f ? f : 0.0f;
 }
@@ -67,7 +67,7 @@ void Line::create_maps() {
 void Line::start() {
 	last_line_angle = 0.0f;
 
-	robot->start_camera(2304, 1296, 120);
+	robot->start_camera();
 	robot->set_blocked(false);
 
 	running = true;
@@ -77,6 +77,7 @@ void Line::start() {
 void Line::stop() {
 	robot->stop();
 	robot->set_blocked(false);
+	robot->stop_camera();
 	running = false;
 
 	cv::destroyAllWindows();
@@ -85,12 +86,7 @@ void Line::stop() {
 
 void Line::grab_frame() {
 	frame = robot->grab_frame();
-	//cv::imshow("Frame1", frame);
-	cv::resize(frame, debug_frame, cv::Size(142, 80));
-	cv::transpose(debug_frame, frame);
-	cv::flip(frame, debug_frame, 1);
-	debug_frame = debug_frame(cv::Range(94, 142), cv::Range(0, 80));
-	frame = debug_frame.clone();
+	debug_frame = frame.clone();
 }
 
 float Line::get_line_angle(cv::Mat in) {
@@ -104,6 +100,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 	for(int y = 0; y < in.rows; ++y) {
 		uint8_t* p = in.ptr<uint8_t>(y);
+		uint8_t* p_grn = green_mat.ptr<uint8_t>(y);
 		float* p_dwm = this->distance_weight_map.ptr<float>(y);
 		float* p_pam = this->pixel_angles_map.ptr<float>(y);
 
@@ -112,7 +109,7 @@ float Line::get_line_angle(cv::Mat in) {
 			//if((x < LINE_CORNER_WIDTH || x > (LINE_FRAME_WIDTH - LINE_CORNER_WIDTH))
 			//	&& y > (LINE_FRAME_HEIGHT - LINE_CORNER_HEIGHT)) continue;
 
-			if(p[x]) {
+			if(p[x] && !p_grn[x]) {
 				float distance_weight = p_dwm[x];
 				if(distance_weight > 0.0f) {
 					++num_angles;
@@ -149,6 +146,7 @@ void Line::follow() {
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
 
+
 	cv::imshow("Black", black);
 
 	float line_angle = get_line_angle(black);
@@ -168,18 +166,18 @@ void Line::follow() {
 		0.4, cv::Scalar(0, 100, 100));
 	// END DEBUG
 
-	float extra_sensitivity = 0.4f * std::abs(line_angle * line_angle) + 1.0f;
+	float extra_sensitivity = 0.3141f * line_angle * line_angle * line_angle * line_angle + 1.0f;
 
-	float ees_l = line_angle < 0.0f ? 1.4f : 1.0f;
-	float ees_r = line_angle > 0.0f ? 1.4f : 1.0f;
+	float ees_l = line_angle < 0.0f ? 1.5f : 0.2f;
+	float ees_r = line_angle > 0.0f ? 1.5f : 0.2f;
 
 	float us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - last_frame_t).count();
 	float line_angle_d = last_line_angle / us * 1000000.0f;
 
-	/*robot->m(
+	robot->m(
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
 		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
-		);*/
+		);
 
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
@@ -215,8 +213,8 @@ void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_p
 std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
 	std::vector<Group> groups;
 
-	uint32_t num_pixels = 0;
-	ir = in_range(frame, f, &num_pixels);
+	uint32_t num_pixels = green_num_pixels;
+	//ir = in_range(frame, f, &num_pixels);
 
 	if(num_pixels < 50) return groups;
 
@@ -248,8 +246,10 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 uint8_t Line::green_direction(float& global_average_x, float& global_average_y) {
 	uint8_t result = 0;
 
-	cv::Mat green;
-	std::vector<Group> groups = find_groups(frame, green, &is_green);
+	std::vector<Group> groups = find_groups(frame, green_mat, &is_green);
+
+	cv::imshow("Green", green_mat);
+	cv::waitKey(1);
 
 	if(groups.size() == 0) return 0;
 	
@@ -262,7 +262,7 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 	// of a dead-end or late evaluation of green points behind a line, when the lower line is
 	// already out of the frame
 	for(int i = 0; i < groups.size(); ++i) {
-		if(groups[i].y < 15) return 0;
+		if(groups[i].y < 17) return 0;
 		if(groups[i].y > 35) return 0;
 		//if(groups[i].x < 8) return 0;
 		//if(groups[i].x > frame.cols - 8) return 0;
@@ -296,7 +296,7 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 		int y, x;
 		for(y = y_start; y < y_end; ++y) {
 			uint8_t* p = black.ptr<uint8_t>(y);
-			uint8_t* p_grn = green.ptr<uint8_t>(y);
+			uint8_t* p_grn = green_mat.ptr<uint8_t>(y);
 			for(x = x_start; x < x_end; ++x) {
 				uint8_t p_val = p[x];
 				uint8_t p_grn_val = p_grn[x];
@@ -352,11 +352,19 @@ void Line::green() {
 			// Dead-End regardless of green_active
 			robot->m(127, 127, 200);
 			robot->turn(DTOR(180.0f));
-			robot->m(127, 127, 100);
+			robot->m(127, 127, 160);
 			return;
 		}
 
 		if(green_active) return;
+
+		float dx = global_average_x - frame.cols / 2.0f;
+		float dy = global_average_y - (frame.rows + 20.0f);
+		float angle = std::atan2(dy, dx) + PI05;
+		float distance = std::sqrt(dx*dx + dy*dy);
+
+		robot->m(50 + (last_line_angle + angle) * 40, 50 - (last_line_angle + angle) * 40);
+		delay((int)(distance * 2.5f));
 
 		green_start_t = now;
 
@@ -367,6 +375,7 @@ void Line::green() {
 void Line::line() {
 	grab_frame();
 
+	green_mat = in_range(frame, &is_green, &green_num_pixels);
 	follow();
 	green();
 

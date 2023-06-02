@@ -18,11 +18,6 @@ include_directories(${WIRINGPI_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
 
-find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBCAMERA REQUIRED libcamera)
-include_directories(${LIBCAMERA_INCLUDE_DIRS})
-
-add_subdirectory("libs/LCCV")
 
 #include_directories("libs/tensorflow_src")
 #include_directories("libs/tflite_build/flatbuffers/include")
@@ -51,5 +46,4 @@ target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup i2c)
 target_link_libraries(robocup tensorflow-lite)
 
-target_link_libraries(robocup liblccv)
 #target_link_libraries(robocup Eigen3::Eigen)

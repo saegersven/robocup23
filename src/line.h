@@ -42,9 +42,9 @@
 #define LINE_CORNER_WIDTH 7
 #define LINE_CORNER_HEIGHT 8
 
-#define LINE_FOLLOW_BASE_SPEED 35
+#define LINE_FOLLOW_BASE_SPEED 48
 #define LINE_FOLLOW_STRAIGHT_LINE_SPEED 60
-#define LINE_FOLLOW_SENSITIVITY 50.0f
+#define LINE_FOLLOW_SENSITIVITY 57.0f
 #define LINE_FOLLOW_D 0.05f
 
 #define ARM_ANGLE_OFFSET DTOR(25.0f)
@@ -89,6 +89,8 @@ private:
 	cv::Mat debug_frame;
 	// Thresholded frame
 	cv::Mat black;
+	cv::Mat green_mat;
+	uint32_t green_num_pixels;
 
 	// used for silver testing
 	bool test = false;
