@@ -71,6 +71,7 @@ void Line::start() {
 	robot->set_blocked(false);
 
 	running = true;
+	found_silver = false;
 	std::cout << "Line started.\n";
 }
 
@@ -143,9 +144,36 @@ void Line::follow() {
 	float base_speed = LINE_FOLLOW_BASE_SPEED;
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 
+	// If frame does not change much, try to get unstuck by increasing motor speed
+	if(!last_frame.empty) {
+		float diff = average_difference(frame, last_frame);
+
+		if(diff < 4.2f) {
+			++no_difference_counter;
+			if(no_difference_counter == 200) {
+				if(ENABLE_NO_DIFFERENCE) {
+					std::cout << "No difference\n";
+					no_difference_time_stamp = millis();
+				}
+			}
+		} else {
+			// Slowly decrease counter by 10 at a time
+			no_difference_counter = no_difference_counter >= 10 ? no_difference_counter - 10 : 0;
+		}
+	}
+
+	if(millis() - no_difference_time_stamp < 300) {
+		std::cout << "Increasing base motor speed\n";
+		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+		if(std::abs(RTOD(last_line_angle)) > 10.0f) {
+			std::cout << "Large line angle, trying to get unstuck\n";
+			robot->m(127, 127, 42*2);
+			robot->turn(last_line_angle);
+		}
+	}
+
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
-
 
 	cv::imshow("Black", black);
 
@@ -178,6 +206,7 @@ void Line::follow() {
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
 		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);
+
 
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
@@ -372,14 +401,121 @@ void Line::green() {
 	}
 }
 
+void Line::rescue_kit() {
+	cv::Mat blue;
+	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
+
+	if(groups.size() > 0) {
+		// Use biggest group
+		Group group = groups[0];
+
+		if(groups.size() > 1) {
+			for(int i = 1; i < groups.size(); ++i) {
+				if(groups[i].num_pixels > group.num_pixels) {
+					group = groups[i];
+				}
+			}
+		}
+
+		if(group.num_pixels < 100) return;
+
+		robot->stop();
+
+		// Approach rescue kit
+		float center_x = frame.cols / 2.0f;
+		float center_y = frame.rows + 20.0f;
+		float dy = group.y - center_y;
+		float dx = group.x - center_x;
+		float angle = std::atan2(dy, dx) + R90;
+		float distance = std::sqrt(dy*dy + dx*dx);
+
+		// We can easily tolerate +-5° when picking up
+		// With higher angles, we risk driving off an edge
+		// So turn only as much as needed
+		const float ANGLE_TOLERANCE = DTOR(5.0f);
+		float to_turn = angle - ARM_ANGLE_OFFSET;
+		if(std::abs(to_turn) > ANGLE_TOLERANCE) {
+			if(to_turn > 0) to_turn -= ANGLE_TOLERANCE;
+			else to_turn += ANGLE_TOLERANCE;
+		}
+		robot->turn(to_turn);
+
+		int dur = distance * 2 - 120;
+		robot->m(70, 70, dur);
+
+		// Collect rescue kit
+		robot->gripper(GRIPPER_CLOSE, 200);
+		robot->attach_detach_servo(SERVO_ARM); // attach
+		robot->servo(SERVO_ARM, ARM_LOWER_POS, 150);
+		robot->m(-65, -65, 150);
+		delay(20);
+		robot->gripper(GRIPPER_OPEN);
+		delay(420);
+		robot->m(60, 60, 260);
+		robot->gripper(GRIPPER_CLOSE);
+		delay(50);
+		robot->m(30, 30);
+		delay(320);
+		robot->gripper(GRIPPER_OPEN);
+		delay(50);
+		robot->gripper(GRIPPER_CLOSE);
+		delay(150);
+		robot->m(-65, -65, 100);
+		robot->servo(SERVO_ARM, ARM_HIGHER_POS, 10);
+		robot->m(-50, -50, 350);
+		delay(700);
+		robot->gripper(GRIPPER_OPEN, 50);
+		delay(100);
+		robot->gripper(GRIPPER_CLOSE, 200);
+		robot->attach_detach_servo(SERVO_ARM); // detach
+
+		robot->turn(-angle + ARM_ANGLE_OFFSET);
+	}
+}
+
+void Line::red() {
+	uint32_t num_red_pixels = 0;
+	in_range(frame, &is_red, &num_red_pixels);
+
+	uint32_t num_pixels = LINE_FRAME_HEIGHT * LINE_FRAME_WIDTH;
+	float red_percentage = (float)num_red_pixels / (float)num_pixels;
+	std::cout << "Red: " << red_percentage << std::endl;
+	if(red_percentage > 0.23f) {
+		std::cout << "Detected red" << std::endl;
+		robot->m(100, 100, 300);
+		delay(8000);
+	}
+}
+
+void Line::silver() {
+	silver_ml.set_frame(frame);
+
+	if(silver_ml.get_current_prediction()) {
+		obstacle_enabled = false;
+		robot->set_blocked(false);
+		delay(50);
+		std::cout << "NN detected silver" << std::endl;
+		robot->turn(last_line_angle / 3.0f);
+		robot->stop();
+
+		found_silver = true;
+	}
+}
+
 void Line::line() {
 	grab_frame();
 
+	// Do green thresholding globally so we can exclude green points
+	// during line following (dark green is often mistaken for black)
+	// This improves asymmetric intersections where the robot has to go straight
 	green_mat = in_range(frame, &is_green, &green_num_pixels);
 	follow();
 	green();
+	rescue_kit();
+	red();
+	silver();
 
-	// DEBUG
+	// DEBUG, show fps and current frame
 	auto now_t = std::chrono::high_resolution_clock::now();
 	uint32_t us = std::chrono::duration_cast<std::chrono::microseconds>(now_t - last_frame_t).count();
 	int fps = std::round(1.0f / ((float)us / 1000000.0f));

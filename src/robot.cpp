@@ -209,6 +209,19 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	if(delay_ms != 0) delay(delay_ms);
 }
 
+void Robot::gripper(int8_t gripper_direction, uint16_t delay_ms) {
+	if(blocked) return;
+
+	char msg[2] = {CMD_GRIPPER, gripper_direction};
+
+	write(serial_fd, msg, 2);
+	if(delay_ms != 0) {
+		delay(delay_ms);
+		msg[1] = GRIPPER_OFF;
+		write(serial_fd, msg, 2);
+	}
+}
+
 float Robot::read_heading() {
 	int16_t data = 0.0;
 

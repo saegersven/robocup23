@@ -26,6 +26,10 @@
 #define GATE_OPEN 110
 #define GATE_CLOSED 17
 
+#define GRIPPER_OPEN -1
+#define GRIPPER_CLOSE 1
+#define GRIPPER_OFF 0
+
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 
 #define CM_TO_MS_FULL_SPEED 18.0f
@@ -86,6 +90,11 @@ public:
 	 */
 	void attach_detach_servo(uint8_t servo_id);
 	void servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms = 650);
+
+	/**
+	 * Command gripper
+	*/
+	void gripper(int8_t gripper_direction, uint16_t delay_ms = 0);
 
 	/**
 	 * Read orientation values (euler angles) from BNO055.

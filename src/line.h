@@ -200,6 +200,8 @@ private:
 
 	void red();
 
+	void silver();
+
 public:
 	bool found_silver = false;
 
