@@ -59,16 +59,9 @@ int main(int, char**) {
             break;
         }
         cv::imshow("Live", frame);
-        
-#ifdef TIME
-        while(millis() - last_time < 50);
-        last_time = millis();
-        if(/*cv::waitKey(1) == 'c'*/true) {
-#else
         if(cv::waitKey(1) == 'c') {
-#endif
             save_img(frame, "captured");
-            std::cout << "Saved img" << std::endl;
+            std::cout << "Saved img (" << WIDTH << "x" << HEIGHT << ")" << std::endl;
         }
         
         //save_img(frame, "captured");

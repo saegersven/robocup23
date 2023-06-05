@@ -7,6 +7,7 @@
 
 char message[5];
 unsigned int message_pos = 0;
+bool led_on = false;
 
 Servo servos[NUM_SERVOS];
 
@@ -35,18 +36,18 @@ void setup() {
   Wire.begin();
 
   // Configure distance sensors
-  for(int i = 0; i < NUM_VL53L0X; ++i) {
+  for (int i = 0; i < NUM_VL53L0X; ++i) {
     pinMode(dist_xshut_pins[i], OUTPUT);
     delay(10);
     digitalWrite(dist_xshut_pins[i], LOW);
   }
   delay(10);
 
-  for(int i = 0; i < NUM_VL53L0X; ++i) {
+  for (int i = 0; i < NUM_VL53L0X; ++i) {
     digitalWrite(dist_xshut_pins[i], HIGH);
     delay(10);
 
-    if(!dist_sensors[i].init()) {
+    if (!dist_sensors[i].init()) {
       //Serial.print("Failed to detect and initialize sensor DIST ");
       //Serial.println(i);
     }
@@ -63,8 +64,8 @@ void setup() {
 void loop() {
   // Delete message after 50ms of silence
   long long start_time = millis();
-  while(!Serial.available()) {
-    if(millis() - start_time > 50) {
+  while (!Serial.available()) {
+    if (millis() - start_time > 50) {
       message_pos = 0;
     }
   }
@@ -72,20 +73,20 @@ void loop() {
   while (Serial.available() > 0)  {
     message[message_pos] = Serial.read();
     message_pos++;
-    
-    if(message_pos == message_lengths[message[0] - 1]) {
+
+    if (message_pos == message_lengths[message[0] - 1]) {
       parse_message();
       message_pos = 0;
     }
   }
-  
+
   /*m(127, 127, 500);
-  m(-127, -127, 500);
-  m(-127, 127, 500);
-  m(127, -127, 500);
-  
-  m(50, 50, 500);
-  m(-50, -50, 500);
-  m(-50, 50, 500);
-  m(50, -50, 500);*/
+    m(-127, -127, 500);
+    m(-127, 127, 500);
+    m(127, -127, 500);
+
+    m(50, 50, 500);
+    m(-50, -50, 500);
+    m(-50, 50, 500);
+    m(50, -50, 500);*/
 }

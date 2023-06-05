@@ -308,9 +308,9 @@ void Rescue::find_center_new() {
 void Rescue::find_center_new_new() {
 	const int MAX_TIME = 5000;
 
-	uint64_t start_time = millis();
+	uint64_t start_time = millis_();
 
-	while(millis() - start_time < MAX_TIME) {
+	while(millis_() - start_time < MAX_TIME) {
 		float dist = robot->distance_avg(5, 0.2f);
 		if(dist > 80.0f && dist < 110.0f) {
 			robot->m(127, 35);
@@ -344,10 +344,10 @@ void Rescue::find_black_corner() {
 	bool found_corner = false;
 
 	while (!found_corner) {
-		uint64_t start_time = millis();
-		uint64_t real_start_time = millis();
+		uint64_t start_time = millis_();
+		uint64_t real_start_time = millis_();
 
-		while (millis() - real_start_time < max_time || millis() - start_time < total_time) {
+		while (millis_() - real_start_time < max_time || millis_() - start_time < total_time) {
 			deg_per_iteration = 10;
 			cv::Mat frame = grab_frame(160, 120);
 			cv::Mat res = corner_ml.invoke(frame);
@@ -358,7 +358,7 @@ void Rescue::find_black_corner() {
 			cv::waitKey(1);
 
 			if(corner_ml.extract_corner(res, x_corner, y_corner)) {
-				uint64_t new_start_time = millis() - 2000;
+				uint64_t new_start_time = millis_() - 2000;
 				start_time = start_time > new_start_time ? start_time : new_start_time;
 				robot->m(22, -22);
 				deg_per_iteration = 5;
@@ -650,24 +650,24 @@ void Rescue::turn_until_wall(int* wall_dist, int* duration, int max_dist, bool d
 	const int turn_speed_left = direction == BOOL_DIR_LEFT ? -35 : 35;
 	const int turn_speed_right = -turn_speed_left;
 	uint64_t offset = 0;
-	*duration = millis();
+	*duration = millis_();
 	robot->m(turn_speed_left, turn_speed_right);
 	while(1) {
 		int dist = robot->distance();
 		if(dist < max_dist) {
-			uint64_t start_time_stop = millis();
+			uint64_t start_time_stop = millis_();
 			robot->stop();
 			dist = robot->distance_avg(4, 0.2f);
 			if(dist < max_dist) break;
 			robot->m(turn_speed_left, turn_speed_right);
-			offset += millis() - start_time_stop;
+			offset += millis_() - start_time_stop;
 		}
 	}
 	robot->m(turn_speed_left, turn_speed_right, 50);
 	delay(20);
 	robot->stop();
 	*wall_dist = robot->distance_avg(20, 0.2f);
-	*duration = millis() - *duration - offset;
+	*duration = millis_() - *duration - offset;
 }
 
 bool is_black2(uint8_t b, uint8_t g, uint8_t r) {

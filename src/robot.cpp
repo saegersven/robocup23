@@ -17,11 +17,19 @@ extern "C" {
 #include <sstream>
 #include <string>
 
+#include <wiringPi.h>
+
 #include "defines.h"
 #include "utils.h"
 
 Robot::Robot() : blocked(false), has_frame(false)
 {
+	wiringPiSetupGpio();
+	pullUpDnControl(SERVO_CAM_PIN, PUD_OFF);
+	pinMode(SERVO_CAM_PIN, PWM_OUTPUT);
+	pwmSetMode(PWM_MODE_MS);
+	pwmSetClock(1920);
+	pwmSetRange(1024);
 	init_serial();
 
 	delay(2000); // Wait for Nano to boot up
@@ -135,6 +143,14 @@ cv::Mat Robot::grab_frame() {
 	return frame;
 }
 
+void Robot::set_cam_angle(uint8_t angle) {
+	int pw = (int)(((float)angle / 180.0f + 1.0f) / 0.1f * 1024.0f);
+	std::cout << "Pulse width: " << pw << std::endl;
+	if(pw < 0) pw = 0;
+	if(pw > 1024) pw = 1024;
+	pwmWrite(SERVO_CAM_PIN, pw);
+}
+
 void Robot::set_blocked(bool blocked) {
 	this->blocked = blocked;
 }
@@ -178,6 +194,11 @@ void Robot::stop() {
 	write(serial_fd, &msg, 1);
 }
 
+void Robot::toggle_led() {
+	char msg = CMD_TOGGLE_LED;
+	write(serial_fd, &msg, 1);
+}
+
 // turns given angle in radians
 void Robot::turn(float angle) {
 	if(blocked) return;
@@ -212,7 +233,7 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 void Robot::gripper(int8_t gripper_direction, uint16_t delay_ms) {
 	if(blocked) return;
 
-	char msg[2] = {CMD_GRIPPER, gripper_direction};
+	uint8_t msg[2] = {CMD_GRIPPER, *((uint8_t*)&gripper_direction)};
 
 	write(serial_fd, msg, 2);
 	if(delay_ms != 0) {

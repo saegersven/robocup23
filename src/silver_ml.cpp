@@ -1,6 +1,6 @@
 #include "silver_ml.h"
 
-SilverML::SilverML() {}
+SilverML::SilverML() : current_prediction(false) {}
 
 void SilverML::start() {
 	running = true;

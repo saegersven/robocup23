@@ -60,23 +60,26 @@ int main() {
 	
 	// TODO: SET SERVOS TO DEFAULT POS
 
+	robot->set_cam_angle(90);
 	std::cout << "Init." << std::endl;
+	robot->toggle_led();
 	while(!robot->button()) {
-		delay(10);	
+		delay(10);
 	}
 	while(robot->button());
 
 	line.start();
+	robot->toggle_led();
 	delay(100);
 
-	auto last_started = millis(); // time at which robot has been restarted
+	auto last_started = millis_(); // time at which robot has been restarted
 	
 	// MAIN LOOP
 	while(1) {
-		uint64_t duration = millis();
+		uint64_t duration = millis_();
 		while(robot->button()) delay(10);
-		duration = millis() - duration;
-		if(duration > 20 && millis() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
+		duration = millis_() - duration;
+		if(duration > 20 && millis_() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
 			while(robot->button());
 			robot->stop();
 			switch(state) {
@@ -91,14 +94,16 @@ int main() {
 			
 			std::cout << "Stop." << std::endl;
 			delay(300);
+			robot->toggle_led();
 
 			while(!robot->button()) {
 				delay(10);
 			} 
 			while(robot->button());
 			std::cout << "Start." << std::endl;
-			line.start();
+			robot->toggle_led();
 			//line.check_silver();
+			line.start();
 		}
 
 		switch(state) {

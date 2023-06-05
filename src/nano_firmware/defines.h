@@ -19,6 +19,8 @@
 #define M_GRIPPER_B       A2
 
 #define PIN_BTN A6
+#define PIN_LED 13
+#define PIN_BATTERY_VOLTAGE A7
 
 // Rear wheels have smaller circumference, therefore must turn faster
 #define REAR_WHEEL_FACTOR 1.1
@@ -32,8 +34,8 @@
 #define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
 
 // SERVOS
-#define NUM_SERVOS 1
-//int servo_pins[NUM_SERVOS] = {A0, A1};
+#define NUM_SERVOS 2
+int servo_pins[NUM_SERVOS] = {A0, A1};
 
 // SENSOR IDS
 #define SENSOR_ID_DIST_1 0
@@ -54,5 +56,6 @@ int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B, 0x8C};
 #define CMD_GRIPPER               0x06
 #define CMD_TURN                  0x07
 #define CMD_M_BTN_OBSTACLE        0x08
+#define CMD_TOGGLE_LED            0x09
 
-int message_lengths[8] = {5, 1, 2, 3, 2, 2, 3, 3};   
+int message_lengths[9] = {5, 1, 2, 3, 2, 2, 3, 3, 1};   

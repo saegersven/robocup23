@@ -70,6 +70,8 @@ void Line::start() {
 	robot->start_camera();
 	robot->set_blocked(false);
 
+	silver_ml.start();
+
 	running = true;
 	found_silver = false;
 	std::cout << "Line started.\n";
@@ -145,7 +147,7 @@ void Line::follow() {
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 
 	// If frame does not change much, try to get unstuck by increasing motor speed
-	if(!last_frame.empty) {
+	if(!last_frame.empty()) {
 		float diff = average_difference(frame, last_frame);
 
 		if(diff < 4.2f) {
@@ -153,16 +155,16 @@ void Line::follow() {
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
 					std::cout << "No difference\n";
-					no_difference_time_stamp = millis();
+					no_difference_time_stamp = millis_();
 				}
 			}
 		} else {
-			// Slowly decrease counter by 10 at a time
-			no_difference_counter = no_difference_counter >= 10 ? no_difference_counter - 10 : 0;
+			// Slowly decrease counter by 30 at a time
+			no_difference_counter = no_difference_counter >= 30 ? no_difference_counter - 30 : 0;
 		}
 	}
 
-	if(millis() - no_difference_time_stamp < 300) {
+	/*if(millis() - no_difference_time_stamp < 300) {
 		std::cout << "Increasing base motor speed\n";
 		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
 		if(std::abs(RTOD(last_line_angle)) > 10.0f) {
@@ -170,7 +172,7 @@ void Line::follow() {
 			robot->m(127, 127, 42*2);
 			robot->turn(last_line_angle);
 		}
-	}
+	}*/
 
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
@@ -242,8 +244,8 @@ void Line::add_to_group_center(int x_pos, int y_pos, cv::Mat ir, uint32_t& num_p
 std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<bool (uint8_t, uint8_t, uint8_t)> f) {
 	std::vector<Group> groups;
 
-	uint32_t num_pixels = green_num_pixels;
-	//ir = in_range(frame, f, &num_pixels);
+	uint32_t num_pixels = 0;
+	ir = in_range(frame, f, &num_pixels);
 
 	if(num_pixels < 50) return groups;
 
@@ -406,6 +408,7 @@ void Line::rescue_kit() {
 	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
 
 	if(groups.size() > 0) {
+		std::cout << "Rescue kit groups: " << groups.size() << std::endl;
 		// Use biggest group
 		Group group = groups[0];
 
@@ -479,8 +482,8 @@ void Line::red() {
 
 	uint32_t num_pixels = LINE_FRAME_HEIGHT * LINE_FRAME_WIDTH;
 	float red_percentage = (float)num_red_pixels / (float)num_pixels;
-	std::cout << "Red: " << red_percentage << std::endl;
 	if(red_percentage > 0.23f) {
+		std::cout << "Red: " << red_percentage << std::endl;
 		std::cout << "Detected red" << std::endl;
 		robot->m(100, 100, 300);
 		delay(8000);
@@ -505,12 +508,8 @@ void Line::silver() {
 void Line::line() {
 	grab_frame();
 
-	// Do green thresholding globally so we can exclude green points
-	// during line following (dark green is often mistaken for black)
-	// This improves asymmetric intersections where the robot has to go straight
-	green_mat = in_range(frame, &is_green, &green_num_pixels);
+	green(); // follow() needs green
 	follow();
-	green();
 	rescue_kit();
 	red();
 	silver();

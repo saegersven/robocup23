@@ -17,17 +17,22 @@
 #define CMD_GRIPPER               0x06
 #define CMD_TURN                  0x07
 #define CMD_M_BTN_OBSTACLE        0x08
+#define CMD_TOGGLE_LED			  0x09
 
 #define SERVO_ARM 0
 #define SERVO_GATE 1
+
+#define SERVO_CAM_PIN 19 // GPIO pin of cam servo (hardware pwm pin)
+#define CAM_LOWER_POS 42
+#define CAM_HIGHER_POS 42
 
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
 #define GATE_OPEN 110
 #define GATE_CLOSED 17
 
-#define GRIPPER_OPEN -1
-#define GRIPPER_CLOSE 1
+#define GRIPPER_OPEN 1
+#define GRIPPER_CLOSE -1
 #define GRIPPER_OFF 0
 
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
@@ -60,6 +65,7 @@ public:
 	void start_camera();
 	void camera_thread();
 	void stop_camera();
+	void set_cam_angle(uint8_t angle);
 	cv::Mat grab_frame();
 
 	void set_blocked(bool blocked);
@@ -78,6 +84,11 @@ public:
 	 * Stop all four drive motors
 	 */
 	void stop();
+
+	/**
+	 * toggles LED of Nano
+	 */
+	void toggle_led();
 
 	/**
 	 * Turn by a specified angle (in radians). Positive angles result in clockwise
