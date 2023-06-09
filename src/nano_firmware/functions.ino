@@ -112,9 +112,7 @@ void gripper(int8_t dir) {
 }
 
 uint16_t distance(int sensor_id) {
-  uint16_t value = dist_sensors[sensor_id].readRangeSingleMillimeters();
-  //if(dist_sensors[sensor_id].timeoutOccurred()) { Serial.print("DIST TIMEOUT"); }
-  return 2000;
+  return dist_sensors[sensor_id].readRangeContinuousMillimeters();
 }
 
 // returns battery voltage in V

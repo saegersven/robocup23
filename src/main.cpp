@@ -77,10 +77,10 @@ int main() {
 	// MAIN LOOP
 	while(1) {
 		uint64_t duration = millis_();
-		while(robot->button()) delay(10);
+		while(robot->button() && robot->button() && robot->button()) delay(10);
 		duration = millis_() - duration;
 		if(duration > 20 && millis_() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
-			while(robot->button());
+			while(robot->button() && robot->button() && robot->button());
 			robot->stop();
 			switch(state) {
 				case State::line:
@@ -96,10 +96,10 @@ int main() {
 			delay(300);
 			robot->toggle_led();
 
-			while(!robot->button()) {
+			while(!(robot->button() && robot->button() && robot->button())) {
 				delay(10);
 			} 
-			while(robot->button());
+			while(robot->button() && robot->button() && robot->button());
 			std::cout << "Start." << std::endl;
 			robot->toggle_led();
 			//line.check_silver();

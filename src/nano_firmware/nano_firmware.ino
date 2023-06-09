@@ -15,6 +15,7 @@ VL53L0X dist_sensors[NUM_VL53L0X];
 
 void setup() {
   Serial.begin(115200);
+  Wire.begin();
 
   // Configure pins
   pinMode(LED_BUILTIN, OUTPUT);
@@ -33,8 +34,6 @@ void setup() {
   pinMode(M_GRIPPER_A, OUTPUT);
   pinMode(M_GRIPPER_B, OUTPUT);
 
-  Wire.begin();
-
   // Configure distance sensors
   for (int i = 0; i < NUM_VL53L0X; ++i) {
     pinMode(dist_xshut_pins[i], OUTPUT);
@@ -48,13 +47,14 @@ void setup() {
     delay(10);
 
     if (!dist_sensors[i].init()) {
-      //Serial.print("Failed to detect and initialize sensor DIST ");
-      //Serial.println(i);
+      Serial.print("Failed to initialize dist sensor ");
+      Serial.println(i);
     }
 
     dist_sensors[i].setAddress(dist_addresses[i]);
-
-    dist_sensors[i].setTimeout(200);
+    dist_sensors[i].setMeasurementTimingBudget(20000);
+    dist_sensors[i].startContinuous();
+    dist_sensors[i].setTimeout(100);
     delay(10);
   }
 
@@ -79,14 +79,4 @@ void loop() {
       message_pos = 0;
     }
   }
-
-  /*m(127, 127, 500);
-    m(-127, -127, 500);
-    m(-127, 127, 500);
-    m(127, -127, 500);
-
-    m(50, 50, 500);
-    m(-50, -50, 500);
-    m(-50, 50, 500);
-    m(50, -50, 500);*/
 }
