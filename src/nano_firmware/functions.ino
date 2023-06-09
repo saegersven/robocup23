@@ -43,18 +43,6 @@ void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
   analogWrite(M_RIGHT_FRONT_EN, right_front_pulse_width);
   analogWrite(M_RIGHT_REAR_EN, right_rear_pulse_width);
 
-  /*Serial.print("Left front: ");
-    Serial.print(left_front_pulse_width);
-    Serial.print("   Right front: ");
-    Serial.print(right_front_pulse_width);
-
-    Serial.print("   Left rear: ");
-    Serial.print(left_rear_pulse_width);
-    Serial.print("   Right rear: ");
-    Serial.print(right_rear_pulse_width);
-
-    Serial.println("");*/
-
   if (duration > 0) {
     delay(duration);
     m(0, 0, 0);

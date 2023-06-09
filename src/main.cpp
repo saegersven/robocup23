@@ -17,29 +17,6 @@ int main() {
 
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
-	/*
-	robot->start_camera(142, 80, 120);
-	cv::Mat frame;
-	long long start_time = millis();
-	long frame_counter = 0;
-	while(1) {
-		frame = robot->grab_frame();
-		cv::imshow("Frame", frame);
-		cv::waitKey(1);
-
-		auto now = std::chrono::high_resolution_clock::now();
-		std::cout << frame_counter * 1000.0f / (millis() - start_time) << std::endl;
-		++frame_counter;
-	}
-	return 0;*/
-
-	/*while(true) {
-		auto start_time = millis();
-		std::cout << robot->button() << "\n";
-		auto receive_time = millis();
-		std::cout << receive_time - start_time<< std::endl;
-	}*/
-
 	State state = State::line;
 	robot->stop();
 

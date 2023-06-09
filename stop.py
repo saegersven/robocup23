@@ -20,4 +20,4 @@ try:
         print("--- Stopped motors from python script ---")
 
 except:
-        print("Coudn't stop motors, no NANO connected.")
+        print("Coudn't stop motors, no NANO on USB0.")
