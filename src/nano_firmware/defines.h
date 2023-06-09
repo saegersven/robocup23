@@ -22,6 +22,11 @@
 #define PIN_LED 13
 #define PIN_BATTERY_VOLTAGE A7
 
+// XSHUT pins of VL52L0X
+#define PIN_XSHUT_DIST1 12
+#define PIN_XSHUT_DIST2 11
+#define PIN_XSHUT_DIST3 10
+
 // Rear wheels have smaller circumference, therefore must turn faster
 #define REAR_WHEEL_FACTOR 1.1
 

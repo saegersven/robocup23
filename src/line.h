@@ -94,7 +94,8 @@ private:
 
 	// used for silver testing
 	bool test = false;
-
+	
+	// used to align before gaps. Currently not working
 	bool correct_gap_line_angle = true;
 
 	std::atomic<bool> running;

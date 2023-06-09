@@ -32,7 +32,7 @@ Robot::Robot() : blocked(false), has_frame(false)
 	pwmSetRange(1024);
 	init_serial();
 
-	delay(2000); // Wait for Nano to boot up
+	delay(2000); // Wait for Nano to boot up (can probably be shorter)
 }
 
 void Robot::init_serial() {
@@ -110,7 +110,7 @@ void Robot::start_camera() {
 	std::thread t([this] {this->camera_thread();});
 	t.detach();
 }
-
+// constantly grabs frame from camera
 void Robot::camera_thread() {
 	while(camera_running) {
 		cap.grab();
