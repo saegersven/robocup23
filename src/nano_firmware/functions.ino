@@ -115,6 +115,20 @@ uint16_t distance(int sensor_id) {
   return dist_sensors[sensor_id].readRangeContinuousMillimeters();
 }
 
+// returns heading of BNO055 (z rotation). Used for accurate turning
+float heading() {
+  sensors_event_t orientationData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  return orientationData.orientation.x;
+}
+
+// returns pitch of BNO055 (x rotation). Used to detect ramps
+// !!! sensor is not mounted flat. Pitch of -5 is normal
+float pitch() {
+  sensors_event_t orientationData;
+  bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
+  return  orientationData.orientation.z;
+}
 // returns battery voltage in V
 float get_battery_voltage() {
   return ((5.0f / 1023.0f) * analogRead(PIN_BATTERY_VOLTAGE)) * 2.0f;
