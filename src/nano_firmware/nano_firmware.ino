@@ -1,17 +1,19 @@
 #include <VL53L0X.h>
-
 #include <Wire.h>
 #include <Servo.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BNO055.h>
 
 #include "defines.h"
 
 char message[5];
 unsigned int message_pos = 0;
-bool led_on = false;
+bool led_on = false; // global variable to store current debug led state. Led state can be toggled via RasPi
 
 Servo servos[NUM_SERVOS];
 
 VL53L0X dist_sensors[NUM_VL53L0X];
+Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28);
 
 void setup() {
   Serial.begin(115200);
@@ -46,10 +48,7 @@ void setup() {
     digitalWrite(dist_xshut_pins[i], HIGH);
     delay(10);
 
-    if (!dist_sensors[i].init()) {
-      Serial.print("Failed to initialize dist sensor ");
-      Serial.println(i);
-    }
+    if (!dist_sensors[i].init()) error(3);
 
     dist_sensors[i].setAddress(dist_addresses[i]);
     dist_sensors[i].setMeasurementTimingBudget(20000);
@@ -57,6 +56,10 @@ void setup() {
     dist_sensors[i].setTimeout(100);
     delay(10);
   }
+
+  if (!bno.begin()) error(2);
+
+  if (get_battery_voltage() < 6.5) error(1);
 
   m(0, 0, 0);
 }

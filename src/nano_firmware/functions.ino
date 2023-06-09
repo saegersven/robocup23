@@ -204,3 +204,20 @@ void parse_message() {
     toggle_led();
   }
 }
+
+// emergency function that is only being called when there is something really really wrong
+// currently the function is called when:
+// - the battery voltage is critically low (error_code 1)
+// - the gyro sensor could not be initialized (error_code 2)
+// - one of the distance sensors could not be initialized (error_code 3)
+void error(int error_code) {
+  while (1) {
+    Serial.print("--- ERROR: ");
+    Serial.print(error_code);
+    Serial.println(" ---");
+    digitalWrite(13, HIGH);
+    delay(42);
+    digitalWrite(13, LOW);
+    delay(42);
+  }
+}
