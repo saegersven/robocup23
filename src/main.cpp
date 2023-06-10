@@ -20,6 +20,8 @@ int main() {
 	State state = State::line;
 	robot->stop();
 
+	robot->servo_cam(45, 1000); // does not work. Investigate...
+
 	/*
 	// obstacle motor values:
 	robot->m(50, 50, 0);

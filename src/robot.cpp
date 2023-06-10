@@ -1,5 +1,4 @@
 #include "robot.h"
-
 extern "C" {
 #include <fcntl.h>
 #include <unistd.h>
@@ -18,6 +17,7 @@ extern "C" {
 #include <string>
 
 #include <wiringPi.h>
+#include <softPwm.h>
 
 #include "defines.h"
 #include "utils.h"
@@ -27,9 +27,9 @@ Robot::Robot() : blocked(false), has_frame(false)
 	wiringPiSetupGpio();
 	pullUpDnControl(SERVO_CAM_PIN, PUD_OFF);
 	pinMode(SERVO_CAM_PIN, PWM_OUTPUT);
-	pwmSetMode(PWM_MODE_MS);
-	pwmSetClock(1920);
-	pwmSetRange(1024);
+	//pwmSetMode(PWM_MODE_MS);
+	//pwmSetClock(1920);
+	//pwmSetRange(1024);
 	init_serial();
 
 	delay(2000); // Wait for Nano to boot up (can probably be shorter)
@@ -148,7 +148,7 @@ void Robot::set_cam_angle(uint8_t angle) {
 	std::cout << "Pulse width: " << pw << std::endl;
 	if(pw < 0) pw = 0;
 	if(pw > 1024) pw = 1024;
-	pwmWrite(SERVO_CAM_PIN, pw);
+	//pwmWrite(SERVO_CAM_PIN, pw);
 }
 
 void Robot::set_blocked(bool blocked) {
@@ -245,21 +245,13 @@ void Robot::gripper(int8_t gripper_direction, uint16_t delay_ms) {
 
 float Robot::read_heading() {
 	int16_t data = 0.0;
-
-	/*if(bno055_read_euler_h(&data) != 0) {
-		std::cerr << "Error reading euler data" << std::endl;
-		exit(ERRCODE_BNO055);
-	}*/
+	// TODO: serial to NANO
 	return DTOR((float)data / 16.0f);
 }
 
 float Robot::read_pitch() {
 	int16_t data = 0.0;
-
-	/*if(bno055_read_euler_r(&data) != 0) {
-		std::cerr << "Error reading euler data" << std::endl;
-		exit(ERRCODE_BNO055);
-	}*/
+	// TODO: serial to NANO
 	return DTOR((float)data / 16.0f);
 }
 
@@ -300,4 +292,19 @@ int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
 	float avg = sum / (arr_len - 2 * kthPercent);
 
 	return (int)avg;
+}
+
+void Robot::servo_cam(int16_t angle, uint16_t d) {
+	std::cout << "in servo_cam function" << std::endl;
+	if(softPwmCreate(SERVO_CAM_PIN, 0, 200)) {
+		std::cout << "Error setting up PWM for pin " << SERVO_CAM_PIN << std::endl;
+		exit(-1);
+	}
+	std::cout << "set up pwm" << std::endl;
+	softPwmWrite(SERVO_CAM_PIN, map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
+		SERVO_MIN_PULSE, SERVO_MAX_PULSE) / 100.0f);
+
+	std::cout << "wrote pwm" << std::endl;
+	if(d != 0) delay(d);
+	softPwmStop(SERVO_CAM_PIN);
 }

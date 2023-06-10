@@ -26,6 +26,13 @@
 #define CAM_LOWER_POS 42
 #define CAM_HIGHER_POS 42
 
+
+// Servo parameters
+#define SERVO_MIN_PULSE 1000
+#define SERVO_MAX_PULSE 2000
+#define SERVO_MIN_ANGLE -45
+#define SERVO_MAX_ANGLE 45
+
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
 #define GATE_OPEN 110
@@ -121,4 +128,6 @@ public:
 	 */
 	int distance(uint8_t sensor_id = 0);
 	int distance_avg(uint8_t num_measurements, float remove_percentage);
+
+	void servo_cam(int16_t angle, uint16_t d);
 };

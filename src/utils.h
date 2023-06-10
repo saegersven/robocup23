@@ -71,3 +71,5 @@ cv::Mat two_channel_to_three_channel(cv::Mat in);
  * returns average difference between two given frames
  */
 float average_difference(cv::Mat a, cv::Mat b);
+
+float map(float s, float a1, float a2, float b1, float b2);
