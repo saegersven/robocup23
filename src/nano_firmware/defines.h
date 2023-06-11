@@ -34,7 +34,7 @@
 #define MIN_TIME_PER_DEG  3
 #define MAX_TIME_PER_DEG  MIN_TIME_PER_DEG * 5 // always multiply Min * 5!!! Makes sense, trust me :)
 
-#define TURN_TOLERANCE 3 // 3°
+#define TURN_TOLERANCE 1 // in deg
 
 #define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
 

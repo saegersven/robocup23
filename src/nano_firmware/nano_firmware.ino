@@ -64,6 +64,9 @@ void setup() {
   m(0, 0, 0);
 
   turn(-90);
+  delay(2000);
+  turn(90);
+  turn(90);
   while (1) {
     Serial.println(get_heading());
   }

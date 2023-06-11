@@ -58,16 +58,7 @@ int sgn(float x) {
 // angle in deg
 void turn(int16_t angle) {
   if (angle == 0) return;
-  /*
-  uint16_t duration = abs((float)angle) / 1000.0f / RAD360 * 360.0f * MS_PER_DEGREE;
-  if (angle > 0) {
-    m(70, -70, duration);
-  } else {
-    m(-70, 70, duration);
-  }
-
-  return;
-  */
+  
   int min_duration = MIN_TIME_PER_DEG * abs(angle);
   int max_duration = MAX_TIME_PER_DEG * abs(angle);
 
@@ -77,23 +68,20 @@ void turn(int16_t angle) {
   if (final_heading > 360.0f) final_heading -= 360.0f;
   if (final_heading < 0) final_heading += 360.0f;
   
-  m(70 * sgn(angle), -70 * sgn(angle), 0);
+  m(90 * sgn(angle), -90 * sgn(angle), 0);
 
   long long start_time = millis();
 
   while (millis() - start_time < min_duration);
   while (millis() - start_time < max_duration) {
-    // TODO: Read heading from sensor
     float heading = get_heading();
-    Serial.print("cur_heading: ");
-    Serial.print(heading);
-    Serial.print("  |  heading - final_heading = " );
-    Serial.println(abs(heading - final_heading));
+    m((heading + 15)* sgn(angle), -(heading + 15) * sgn(angle), 0); // as robot reaches goal heading, decrease motor speed
     if (abs(heading - final_heading) < TURN_TOLERANCE) {
       break;
     }
   }
   m(0, 0, 0);
+  // TODO: maybe turn a bit in opposite direction?!
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
