@@ -49,18 +49,16 @@ void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
   }
 }
 
-float get_heading() {
-  return 0.0f;
-}
-
 int sgn(float x) {
   if (x < 0) return -1;
   if (x == 0) return 0;
   if (x > 0) return 1;
 }
 
+// angle in deg
 void turn(int16_t angle) {
   if (angle == 0) return;
+  /*
   uint16_t duration = abs((float)angle) / 1000.0f / RAD360 * 360.0f * MS_PER_DEGREE;
   if (angle > 0) {
     m(70, -70, duration);
@@ -69,23 +67,28 @@ void turn(int16_t angle) {
   }
 
   return;
-  // Angle is in milliradians, convert to radians
-  float angle_rad = (float)angle / 1000.0f;
-  int min_duration = MIN_TIME_PER_RAD * angle_rad;
-  int max_duration = MAX_TIME_PER_RAD * angle_rad;
+  */
+  int min_duration = MIN_TIME_PER_DEG * abs(angle);
+  int max_duration = MAX_TIME_PER_DEG * abs(angle);
 
-  float final_heading = get_heading() + angle_rad;
-  if (final_heading > RAD360) final_heading -= RAD360;
-  if (final_heading < 0) final_heading += RAD360;
+  float cur_heading = get_heading();
+  float final_heading = cur_heading + angle;
+  
+  if (final_heading > 360.0f) final_heading -= 360.0f;
+  if (final_heading < 0) final_heading += 360.0f;
+  
+  m(70 * sgn(angle), -70 * sgn(angle), 0);
 
-  m(70 * sgn(angle_rad), -70 * sgn(angle_rad), 0);
-
-  uint16_t start_time = millis();
+  long long start_time = millis();
 
   while (millis() - start_time < min_duration);
   while (millis() - start_time < max_duration) {
     // TODO: Read heading from sensor
     float heading = get_heading();
+    Serial.print("cur_heading: ");
+    Serial.print(heading);
+    Serial.print("  |  heading - final_heading = " );
+    Serial.println(abs(heading - final_heading));
     if (abs(heading - final_heading) < TURN_TOLERANCE) {
       break;
     }
@@ -104,7 +107,7 @@ uint16_t distance(int sensor_id) {
 }
 
 // returns heading of BNO055 (z rotation). Used for accurate turning
-float heading() {
+float get_heading() {
   sensors_event_t orientationData;
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   return orientationData.orientation.x;
@@ -112,7 +115,7 @@ float heading() {
 
 // returns pitch of BNO055 (x rotation). Used to detect ramps
 // !!! sensor is not mounted flat. Pitch of -5 is normal
-float pitch() {
+float get_pitch() {
   sensors_event_t orientationData;
   bno.getEvent(&orientationData, Adafruit_BNO055::VECTOR_EULER);
   return  orientationData.orientation.z;

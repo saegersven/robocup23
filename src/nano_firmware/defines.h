@@ -31,10 +31,10 @@
 #define REAR_WHEEL_FACTOR 1.1
 
 // Only serves to cancel turning after a *long* time so that the robot will not turn indefinitely (when stuck, for example).
-#define MAX_TIME_PER_RAD  900
-#define MIN_TIME_PER_RAD 200
+#define MIN_TIME_PER_DEG  3
+#define MAX_TIME_PER_DEG  MIN_TIME_PER_DEG * 5 // always multiply Min * 5!!! Makes sense, trust me :)
 
-#define TURN_TOLERANCE 0.0872 // 5°
+#define TURN_TOLERANCE 3 // 3°
 
 #define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
 

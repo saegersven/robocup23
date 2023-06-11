@@ -57,11 +57,16 @@ void setup() {
     delay(10);
   }
 
-  //if (!bno.begin()) error(2);
+  if (!bno.begin()) error(2);
 
   if (get_battery_voltage() < 6.5) error(1);
 
   m(0, 0, 0);
+
+  turn(-90);
+  while (1) {
+    Serial.println(get_heading());
+  }
 }
 
 void loop() {
