@@ -1,21 +1,23 @@
 #include <Wire.h>
 #include <VL53L0X.h>
-#define NUM_VL53L0X 3
+#define NUM_VL53L0X 2
 VL53L0X dist_sensors[NUM_VL53L0X];
-int dist_xshut_pins[NUM_VL53L0X] = {12, 11, 10};
-int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B, 0x8C};
+int dist_xshut_pins[NUM_VL53L0X] = {12, 11};
+int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
 
 void setup() {
   Serial.begin(115200);
   Wire.begin();
   
-  // Configure distance sensors
-  for (int i = 0; i < NUM_VL53L0X; ++i) {
-    pinMode(dist_xshut_pins[i], OUTPUT);
-    delay(10);
-    digitalWrite(dist_xshut_pins[i], LOW);
-  }
+  // shutdown sensors
+  pinMode(dist_xshut_pins[0], OUTPUT);
+  pinMode(dist_xshut_pins[1], OUTPUT);
   delay(10);
+  digitalWrite(dist_xshut_pins[0], LOW);
+  digitalWrite(dist_xshut_pins[0], LOW);
+  delay(10);
+
+  Serial.println("Sensors shut down");
 
   for (int i = 0; i < NUM_VL53L0X; ++i) {
     digitalWrite(dist_xshut_pins[i], HIGH);
@@ -39,8 +41,6 @@ void loop() {
   Serial.print(dist_sensors[0].readRangeContinuousMillimeters());
   Serial.print("  ");
   Serial.print(dist_sensors[1].readRangeContinuousMillimeters());
-  Serial.print("  ");
-  Serial.print(dist_sensors[2].readRangeContinuousMillimeters());
   long long endtime = millis();
   Serial.print("   | Took: ");
   Serial.print((int)(endtime - starttime));

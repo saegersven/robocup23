@@ -80,8 +80,7 @@ void turn(int16_t angle) {
       break;
     }
   }
-  m(0, 0, 0);
-  // TODO: maybe turn a bit in opposite direction?!
+  m(0, 0, 5);
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
@@ -91,6 +90,7 @@ void gripper(int8_t dir) {
 }
 
 uint16_t distance(int sensor_id) {
+  if (sensor_id > NUM_VL53L0X) return -1;
   return dist_sensors[sensor_id].readRangeContinuousMillimeters();
 }
 

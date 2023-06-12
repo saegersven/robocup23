@@ -35,38 +35,56 @@ void setup() {
 
   pinMode(M_GRIPPER_A, OUTPUT);
   pinMode(M_GRIPPER_B, OUTPUT);
+  Serial.println("1");
 
   // Configure distance sensors
   for (int i = 0; i < NUM_VL53L0X; ++i) {
     pinMode(dist_xshut_pins[i], OUTPUT);
     delay(10);
     digitalWrite(dist_xshut_pins[i], LOW);
+    Serial.println("2");
   }
   delay(10);
+    Serial.println("3");
 
   for (int i = 0; i < NUM_VL53L0X; ++i) {
+    
+    Serial.println("3.14");
     digitalWrite(dist_xshut_pins[i], HIGH);
     delay(10);
 
-    if (!dist_sensors[i].init()) error(3);
+    Serial.println("3.5");
+    if (!dist_sensors[i].init()) error(3); // freezes here
+    Serial.println("3.6");
 
     dist_sensors[i].setAddress(dist_addresses[i]);
     dist_sensors[i].setMeasurementTimingBudget(20000);
     dist_sensors[i].startContinuous();
     dist_sensors[i].setTimeout(100);
+    Serial.println("4");
     delay(10);
   }
+  
+    Serial.println("5");
 
   if (!bno.begin()) error(2);
+    Serial.println("6");
 
   if (get_battery_voltage() < 6.5) error(1);
 
-  m(0, 0, 0);
+  Serial.println(distance(0));
+  Serial.println(distance(1));
 
-  turn(-90);
+  m(0, 0, 0);
   delay(2000);
   turn(90);
+  delay(2000);
   turn(90);
+  delay(2000);
+  turn(90);
+  delay(2000);
+  turn(90);
+  delay(2000);
   while (1) {
     Serial.println(get_heading());
   }

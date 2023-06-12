@@ -48,9 +48,9 @@ int servo_pins[NUM_SERVOS] = {A0, A1};
 #define SENSOR_ID_DIST_3 2
 #define SENSOR_ID_BTN 3
 
-#define NUM_VL53L0X 3
-int dist_xshut_pins[NUM_VL53L0X] = {12, 11, 10};
-int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B, 0x8C};
+#define NUM_VL53L0X 2
+int dist_xshut_pins[NUM_VL53L0X] = {12, 11};
+int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
 
 // PROTOCOL
 #define CMD_MOTOR                 0x01
