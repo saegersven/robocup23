@@ -1,6 +1,3 @@
-// CONSTANTS
-#define RAD360 6.28318531f
-
 // MOTORS
 // A and B are pins to control the direction
 // EN are PWM control pins
@@ -25,16 +22,15 @@
 // XSHUT pins of VL52L0X
 #define PIN_XSHUT_DIST1 12
 #define PIN_XSHUT_DIST2 11
-#define PIN_XSHUT_DIST3 10
 
 // Rear wheels have smaller circumference, therefore must turn faster
 #define REAR_WHEEL_FACTOR 1.1
 
 // Only serves to cancel turning after a *long* time so that the robot will not turn indefinitely (when stuck, for example).
-#define MIN_TIME_PER_DEG  3
+#define MIN_TIME_PER_DEG  5 // around 10% less then using gyro. So even if gyro fails robot might still be able to work
 #define MAX_TIME_PER_DEG  MIN_TIME_PER_DEG * 5 // always multiply Min * 5!!! Makes sense, trust me :)
 
-#define TURN_TOLERANCE 1 // in deg
+#define TURN_TOLERANCE 2 // in deg
 
 #define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
 
@@ -45,7 +41,6 @@ int servo_pins[NUM_SERVOS] = {A0, A1};
 // SENSOR IDS
 #define SENSOR_ID_DIST_1 0
 #define SENSOR_ID_DIST_2 1
-#define SENSOR_ID_DIST_3 2
 #define SENSOR_ID_BTN 3
 
 #define NUM_VL53L0X 2

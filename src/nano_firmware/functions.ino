@@ -57,6 +57,9 @@ int sgn(float x) {
 
 // angle in deg
 void turn(int16_t angle) {
+  Serial.print(angle);
+  Serial.print(" deg took: ");
+  angle -= 0.14 * angle; // robot overturns slightly, probably because motors don't stop immediately. This is the quick fix
   if (angle == 0) return;
   
   int min_duration = MIN_TIME_PER_DEG * abs(angle);
@@ -68,19 +71,20 @@ void turn(int16_t angle) {
   if (final_heading > 360.0f) final_heading -= 360.0f;
   if (final_heading < 0) final_heading += 360.0f;
   
-  m(90 * sgn(angle), -90 * sgn(angle), 0);
+  m(50 * sgn(angle), -50 * sgn(angle), 0);
 
   long long start_time = millis();
 
   while (millis() - start_time < min_duration);
   while (millis() - start_time < max_duration) {
     float heading = get_heading();
-    m((heading + 15)* sgn(angle), -(heading + 15) * sgn(angle), 0); // as robot reaches goal heading, decrease motor speed
+    //m((heading + 15)* sgn(angle), -(heading + 15) * sgn(angle), 0); // as robot reaches goal heading, decrease motor speed
     if (abs(heading - final_heading) < TURN_TOLERANCE) {
       break;
     }
   }
-  m(0, 0, 5);
+  Serial.println((int)(millis() - start_time));
+  m(0, 0, 50);
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
@@ -168,7 +172,6 @@ void parse_message() {
     switch (sensor_id) {
       case SENSOR_ID_DIST_1:
       case SENSOR_ID_DIST_2:
-      case SENSOR_ID_DIST_3:
         // Relies on distance sensors having ids 0, 1, etc.
         // This is the only type of sensor where we need to index an array, so that is fine.
         value = distance(sensor_id);
