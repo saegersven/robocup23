@@ -35,8 +35,8 @@
 #define MS_PER_DEGREE ((4.2f - 0.15f) * 1.08f) // milliseconds a one degree turn takes
 
 // SERVOS
-#define NUM_SERVOS 2
-int servo_pins[NUM_SERVOS] = {A0, A1};
+#define NUM_SERVOS 3
+int servo_pins[NUM_SERVOS] = {A0, A1, 10};
 
 // SENSOR IDS
 #define SENSOR_ID_DIST_1 0

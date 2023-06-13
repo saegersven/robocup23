@@ -64,11 +64,6 @@ void setup() {
   if (get_battery_voltage() < 6.5) error(1);
 
   m(0, 0, 0);
-  delay(2000);
-  turn(180);
-  while (1) {
-    Serial.println(get_heading());
-  }
 }
 
 void loop() {

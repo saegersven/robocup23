@@ -61,16 +61,16 @@ void turn(int16_t angle) {
   Serial.print(" deg took: ");
   angle -= 0.14 * angle; // robot overturns slightly, probably because motors don't stop immediately. This is the quick fix
   if (angle == 0) return;
-  
+
   int min_duration = MIN_TIME_PER_DEG * abs(angle);
   int max_duration = MAX_TIME_PER_DEG * abs(angle);
 
   float cur_heading = get_heading();
   float final_heading = cur_heading + angle;
-  
+
   if (final_heading > 360.0f) final_heading -= 360.0f;
   if (final_heading < 0) final_heading += 360.0f;
-  
+
   m(50 * sgn(angle), -50 * sgn(angle), 0);
 
   long long start_time = millis();
@@ -178,6 +178,14 @@ void parse_message() {
         break;
       case SENSOR_ID_BTN:
         value = analogRead(PIN_BTN) > 400;
+        if (value) {
+          for (int i = 0; i < 5; ++i) {
+            digitalWrite(13, HIGH);
+            delay(20);
+            digitalWrite(13, LOW);
+            delay(20);
+          }
+        }
         break;
     }
 

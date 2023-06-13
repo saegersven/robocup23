@@ -21,10 +21,18 @@
 
 #define SERVO_ARM 0
 #define SERVO_GATE 1
+#define SERVO_CAM 2
 
-#define SERVO_CAM_PIN 19 // GPIO pin of cam servo (hardware pwm pin)
 #define CAM_LOWER_POS 42
-#define CAM_HIGHER_POS 42
+#define CAM_HIGHER_POS 100
+#define ARM_LOWER_POS 3
+#define ARM_HIGHER_POS 180
+#define GATE_OPEN 110
+#define GATE_CLOSED 0
+
+#define GRIPPER_OPEN 1
+#define GRIPPER_CLOSE -1
+#define GRIPPER_OFF 0
 
 
 // Servo parameters
@@ -32,15 +40,6 @@
 #define SERVO_MAX_PULSE 2000
 #define SERVO_MIN_ANGLE -45
 #define SERVO_MAX_ANGLE 45
-
-#define ARM_LOWER_POS 3
-#define ARM_HIGHER_POS 180
-#define GATE_OPEN 110
-#define GATE_CLOSED 17
-
-#define GRIPPER_OPEN 1
-#define GRIPPER_CLOSE -1
-#define GRIPPER_OFF 0
 
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 

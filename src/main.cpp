@@ -20,7 +20,6 @@ int main() {
 	State state = State::line;
 	robot->stop();
 
-	robot->servo_cam(45, 1000); // does not work. Investigate...
 
 	/*
 	// obstacle motor values:
@@ -37,9 +36,12 @@ int main() {
 	
 	Rescue rescue(robot);
 	
-	// TODO: SET SERVOS TO DEFAULT POS
+	// SET SERVOS TO DEFAULT POS
+	robot->attach_detach_servo(SERVO_CAM); // attach cam servo
+	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+	robot->servo(1, GATE_CLOSED, 300);
+	robot->servo(0, ARM_HIGHER_POS, 300);
 
-	robot->set_cam_angle(90);
 	std::cout << "Init." << std::endl;
 	robot->toggle_led();
 	while(!robot->button()) {
@@ -72,6 +74,11 @@ int main() {
 			}
 			
 			std::cout << "Stop." << std::endl;
+			// SET SERVOS TO DEFAULT POS
+			robot->attach_detach_servo(SERVO_CAM); // attach cam servo
+			robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+			robot->servo(1, GATE_CLOSED, 300);
+			robot->servo(0, ARM_HIGHER_POS, 300);
 			delay(300);
 			robot->toggle_led();
 

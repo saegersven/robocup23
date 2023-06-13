@@ -22,14 +22,7 @@ extern "C" {
 #include "defines.h"
 #include "utils.h"
 
-Robot::Robot() : blocked(false), has_frame(false)
-{
-	wiringPiSetupGpio();
-	pullUpDnControl(SERVO_CAM_PIN, PUD_OFF);
-	pinMode(SERVO_CAM_PIN, PWM_OUTPUT);
-	//pwmSetMode(PWM_MODE_MS);
-	//pwmSetClock(1920);
-	//pwmSetRange(1024);
+Robot::Robot() : blocked(false), has_frame(false) {
 	init_serial();
 
 	delay(2000); // Wait for Nano to boot up (can probably be shorter)
@@ -224,8 +217,6 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	if(blocked) return;
 
 	uint8_t msg[3] = {CMD_SERVO_WRITE, servo_id, angle};
-	//i2c_write(TEENSY_I2C_ADDR, CMD_SERVO, msg, 2);
-	//spi_write(msg, 3);
 	write(serial_fd, msg, 3);
 	if(delay_ms != 0) delay(delay_ms);
 }
@@ -292,19 +283,4 @@ int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
 	float avg = sum / (arr_len - 2 * kthPercent);
 
 	return (int)avg;
-}
-
-void Robot::servo_cam(int16_t angle, uint16_t d) {
-	std::cout << "in servo_cam function" << std::endl;
-	if(softPwmCreate(SERVO_CAM_PIN, 0, 200)) {
-		std::cout << "Error setting up PWM for pin " << SERVO_CAM_PIN << std::endl;
-		exit(-1);
-	}
-	std::cout << "set up pwm" << std::endl;
-	softPwmWrite(SERVO_CAM_PIN, map(angle, SERVO_MIN_ANGLE, SERVO_MAX_ANGLE,
-		SERVO_MIN_PULSE, SERVO_MAX_PULSE) / 100.0f);
-
-	std::cout << "wrote pwm" << std::endl;
-	if(d != 0) delay(d);
-	softPwmStop(SERVO_CAM_PIN);
 }
