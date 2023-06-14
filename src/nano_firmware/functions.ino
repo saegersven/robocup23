@@ -151,6 +151,10 @@ void parse_message() {
     int8_t right_speed = message[2];
     uint16_t duration = *((uint16_t*)&message[3]);
 
+    // debugging
+    //EEPROM.write(0, left_speed);
+    //EEPROM.write(1, right_speed);
+    //EEPROM.write(2, duration);
     m(left_speed, right_speed, duration);
   } else if (message[0] == CMD_STOP) {
     m(0, 0, 0);
@@ -175,7 +179,6 @@ void parse_message() {
         break;
       case SENSOR_ID_BTN:
         value = analogRead(PIN_BTN) > 350;
-        if (value) digitalWrite(13, HIGH);
         break;
     }
 

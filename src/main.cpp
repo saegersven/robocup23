@@ -17,26 +17,32 @@ int main() {
 
 	State state = State::line;
 	Line line(robot);
-	Rescue rescue(robot);
+	line.start();
+
+
+	while (1) {
+		line.line();
+	}
+
+
+
+
+
+	//Rescue rescue(robot);
 
 	// SET SERVOS TO DEFAULT POS
-	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
-	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
-	robot->servo(1, GATE_CLOSED, 300);
-	robot->servo(0, ARM_HIGHER_POS, 300);
-
-
-	
+	//robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
+	//robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+	//robot->servo(1, GATE_CLOSED, 300);
+	//robot->servo(0, ARM_HIGHER_POS, 300);
+	/*
 	robot->toggle_led();
 	while(!robot->button()) {
 		delay(10);
-		std::cout << "waiting for button press" << std::endl;
 	}
 	while(robot->button());
-
 	line.start();
 	robot->toggle_led();
-	delay(100);
 
 	auto last_started = millis_(); // time at which robot has been restarted
 	
@@ -103,4 +109,5 @@ int main() {
 	}
 
 	return 0;
+	*/
 }

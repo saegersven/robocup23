@@ -3,6 +3,8 @@
 #include <Servo.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
+#include <EEPROM.h> // only used for debugging
+
 
 #include "defines.h"
 
