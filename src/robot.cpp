@@ -156,7 +156,7 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-	char msg[2] = {CMD_SENSOR, 3};
+	char msg[2] = {CMD_SENSOR, 2};
 
 	write(serial_fd, msg, 2);
 

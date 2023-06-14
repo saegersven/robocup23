@@ -13,39 +13,24 @@ enum class State {
 };
 
 int main() {
-	std::cout << "Program started." << std::endl;
-
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
 	State state = State::line;
-	robot->stop();
-
-
-	/*
-	// obstacle motor values:
-	robot->m(50, 50, 0);
-	while (robot->distance() > 8);
-	robot->m(-50, -50, 100);
-	robot->turn(DTOR(92));
-	delay(3000);
-	robot->m(54, 127, 0);
-	delay(3000);
-	robot->stop();
-	*/
 	Line line(robot);
-	
 	Rescue rescue(robot);
-	
+
 	// SET SERVOS TO DEFAULT POS
-	robot->attach_detach_servo(SERVO_CAM); // attach cam servo
+	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
 	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
 	robot->servo(1, GATE_CLOSED, 300);
 	robot->servo(0, ARM_HIGHER_POS, 300);
 
-	std::cout << "Init." << std::endl;
+
+	
 	robot->toggle_led();
 	while(!robot->button()) {
 		delay(10);
+		std::cout << "waiting for button press" << std::endl;
 	}
 	while(robot->button());
 

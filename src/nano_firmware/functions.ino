@@ -57,8 +57,6 @@ int sgn(float x) {
 
 // angle in deg
 void turn(int16_t angle) {
-  Serial.print(angle);
-  Serial.print(" deg took: ");
   angle -= 0.14 * angle; // robot overturns slightly, probably because motors don't stop immediately. This is the quick fix
   if (angle == 0) return;
 
@@ -83,7 +81,6 @@ void turn(int16_t angle) {
       break;
     }
   }
-  Serial.println((int)(millis() - start_time));
   m(0, 0, 50);
 }
 
@@ -177,15 +174,8 @@ void parse_message() {
         value = distance(sensor_id);
         break;
       case SENSOR_ID_BTN:
-        value = analogRead(PIN_BTN) > 400;
-        if (value) {
-          for (int i = 0; i < 5; ++i) {
-            digitalWrite(13, HIGH);
-            delay(20);
-            digitalWrite(13, LOW);
-            delay(20);
-          }
-        }
+        value = analogRead(PIN_BTN) > 350;
+        if (value) digitalWrite(13, HIGH);
         break;
     }
 

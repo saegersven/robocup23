@@ -15,7 +15,7 @@ ser = serial.Serial(
 time.sleep(3)
 while True:
 	#ser.write(bytearray([0x01, 60, 60, 200, 0]))
-	ser.write(bytearray([0x05, 3]))
+	ser.write(bytearray([0x05, 2]))
 	start_time = time.time()
 	#time.sleep(0.05)
 	val = ser.read(2)

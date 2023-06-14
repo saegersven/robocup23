@@ -45,8 +45,6 @@ void setup() {
   delay(10);
 
   for (int i = 0; i < NUM_VL53L0X; ++i) {
-
-    Serial.println("3.14");
     digitalWrite(dist_xshut_pins[i], HIGH);
     delay(10);
 

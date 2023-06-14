@@ -41,7 +41,7 @@ int servo_pins[NUM_SERVOS] = {A0, A1, 10};
 // SENSOR IDS
 #define SENSOR_ID_DIST_1 0
 #define SENSOR_ID_DIST_2 1
-#define SENSOR_ID_BTN 3
+#define SENSOR_ID_BTN 2
 
 #define NUM_VL53L0X 2
 int dist_xshut_pins[NUM_VL53L0X] = {12, 11};
