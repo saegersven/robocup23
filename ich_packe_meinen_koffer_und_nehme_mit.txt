@@ -105,4 +105,8 @@
 - Roten Streifer
 - Silvertape
 - Silber
-- LED Lamper
+- LED Lampe
+- poster
+- rote/grüne Ecke
+- schwarzer Streifen
+- Arduino Nanos
