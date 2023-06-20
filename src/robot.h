@@ -45,9 +45,10 @@
 
 #define CM_TO_MS_FULL_SPEED 18.0f
 
-#define MS_PER_DEGREE (4.2f - 0.15f) * 1.06f // milliseconds a one degree turn takes
+#define MS_PER_DEGREE 5.5f // milliseconds a one degree turn takes
 
 #define T180_ERR (-DTOR(6.0f))
+
 
 class Robot {
 private:

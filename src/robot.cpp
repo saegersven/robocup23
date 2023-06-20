@@ -203,7 +203,7 @@ void Robot::turn(float angle) {
 
 	write(serial_fd, msg, 3);
 
-	delay((int)(RTOD(angle) * MS_PER_DEGREE + 10));
+	delay((int)(RTOD(std::abs(angle)) * MS_PER_DEGREE + 10));
 }
 
 void Robot::attach_detach_servo(uint8_t servo_id) {

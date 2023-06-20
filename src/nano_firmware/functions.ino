@@ -1,4 +1,7 @@
 void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
+  Serial.print(left_speed);
+  Serial.print(right_speed);
+  Serial.println(duration);
   // Left motors
   // Motors will be shorted to ground when speed is zero
   digitalWrite(M_LEFT_A, left_speed < 0);
@@ -55,8 +58,11 @@ int sgn(float x) {
   if (x > 0) return 1;
 }
 
-// angle in deg
-void turn(int16_t angle) {
+// angle in mrad
+void turn(int16_t mrad) {
+  int16_t angle = (int)((float)mrad / 1000.0f * 180.0f / 3.141592f);
+  // TODO: fix
+  // if (abs(angle) > 30) angle -= 3;
   angle -= 0.14 * angle; // robot overturns slightly, probably because motors don't stop immediately. This is the quick fix
   if (angle == 0) return;
 
@@ -151,10 +157,6 @@ void parse_message() {
     int8_t right_speed = message[2];
     uint16_t duration = *((uint16_t*)&message[3]);
 
-    // debugging
-    //EEPROM.write(0, left_speed);
-    //EEPROM.write(1, right_speed);
-    //EEPROM.write(2, duration);
     m(left_speed, right_speed, duration);
   } else if (message[0] == CMD_STOP) {
     m(0, 0, 0);
