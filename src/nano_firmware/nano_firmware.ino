@@ -64,11 +64,6 @@ void setup() {
   if (get_battery_voltage() < 6.5) error(1);
 
   m(0, 0, 0);
-  servos[2].attach(10);
-  servos[2].write(50);
-  delay(1000);
-  servos[2].detach();
-  m(49, 49, 1000);
 }
 
 void loop() {

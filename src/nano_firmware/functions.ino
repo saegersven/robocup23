@@ -24,7 +24,7 @@ void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
 
   // Left motors
   analogWrite(M_LEFT_FRONT_EN, left_front_pulse_width);
-  analogWrite(M_LEFT_REAR_EN, left_rear_pulse_width);
+  analogWrite(M_LEFT_REAR_EN, left_front_pulse_width); // front and rear turn with same speed now. See comment below for explanation
 
   // Right Motors
   digitalWrite(M_RIGHT_A, right_speed < 0);
@@ -44,7 +44,7 @@ void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
   }
 
   analogWrite(M_RIGHT_FRONT_EN, right_front_pulse_width);
-  analogWrite(M_RIGHT_REAR_EN, right_rear_pulse_width);
+  //analogWrite(M_RIGHT_REAR_EN, right_rear_pulse_width); // Pin 9 can't be used as PWM Pin due to usage of servo.h. We connected M_RIGHT_FRONT_EN and M_RIGHT_REAR_EN on the PCB
 
   if (duration > 0) {
     delay(duration);
