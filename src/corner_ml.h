@@ -17,10 +17,11 @@
 
 #define CORNER_IN_WIDTH 160
 #define CORNER_IN_HEIGHT 120
+#define CORNER_IN_CHANNELS 3
 
 #define CORNER_OUT_WIDTH 32
 #define CORNER_OUT_HEIGHT 12
-#define CORNER_OUT_CHANNELS 1
+#define CORNER_OUT_CHANNELS 2
 
 #define CORNER_MODEL_PATH "/home/pi/robocup23/runtime_data/corner.tflite"
 
@@ -52,6 +53,7 @@ public:
      * neural net using cv::findContours and thresholding operations.
      * x and y will be between 0 and IN_WIDTH or IN_HEIGHT.
      * Returns true if a corner was found, false otherwise.
+     * If red is true, this method only finds red corners, if it is false, it will only find green corners.
      */
-    bool extract_corner(cv::Mat probability_map, float& x, float& y);
+    bool extract_corner(cv::Mat probability_map, float& x, float& y, bool red);
 };
