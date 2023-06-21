@@ -449,7 +449,7 @@ void Line::rescue_kit() {
 		// Collect rescue kit
 		robot->gripper(GRIPPER_CLOSE, 200);
 		robot->attach_detach_servo(SERVO_ARM); // attach
-		robot->servo(SERVO_ARM, ARM_LOWER_POS, 150);
+		robot->servo(SERVO_ARM, ARM_LOWER_POS, 250);
 		robot->m(-65, -65, 150);
 		delay(20);
 		robot->gripper(GRIPPER_OPEN);

@@ -202,9 +202,8 @@ void Robot::turn(float angle) {
 	memcpy(&msg[1], &angle_mrad, 2);
 
 	write(serial_fd, msg, 3);
-
-	delay((int)(RTOD(std::abs(angle)) * MS_PER_DEGREE + 10));
-	std::cout << "hi" << std::endl;
+	delay((uint16_t) (315 * (uint16_t) std::abs(angle))); // turning one rad takes 315ms
+	delay(250);
 }
 
 void Robot::attach_detach_servo(uint8_t servo_id) {

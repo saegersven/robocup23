@@ -14,10 +14,7 @@ enum class State {
 
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-
-	robot->m(49, 49, 1000);
-	robot->turn(3141);
-	robot->m(49, 49, 1000);
+	robot->servo(2, CAM_LOWER_POS, 500);
 	State state = State::line;
 	Line line(robot);
 	line.start();
