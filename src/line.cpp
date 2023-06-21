@@ -133,7 +133,7 @@ float Line::get_line_angle(cv::Mat in) {
 	if(num_angles < 50) return 0.0f;
 	if(total_weight == 0.0f) return 0.0f;
 
-	std::cout << num_angles << std::endl;
+	//std::cout << num_angles << std::endl;
 
 	weighted_line_angle /= total_weight;
 
@@ -284,7 +284,7 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 	if(groups.size() == 0) return 0;
 	
-	std::cout << groups.size() << " Groups\n";
+	//std::cout << groups.size() << " Groups\n";
 
 	const int cut_width = 30;
 	const int cut_height = 30;
@@ -497,11 +497,12 @@ void Line::silver() {
 		obstacle_enabled = false;
 		robot->set_blocked(false);
 		delay(50);
-		std::cout << "NN detected silver" << std::endl;
-		robot->turn(last_line_angle / 3.0f);
+		std::cout << "NN detected silver. But it has been ignored. Pls check code" << std::endl;
+		robot->turn(last_line_angle / 3.0f); // align with silver stripe
 		robot->stop();
 
-		found_silver = true;
+		//found_silver = true;
+		found_silver = false;
 	}
 }
 

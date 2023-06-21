@@ -357,7 +357,7 @@ void Rescue::find_black_corner() {
 			cv::imshow("frame", frame);
 			cv::waitKey(1);
 
-			if(corner_ml.extract_corner(res, x_corner, y_corner)) {
+			if(corner_ml.extract_corner(res, x_corner, y_corner, false)) { // !!! false ignores red corners, please adjust
 				uint64_t new_start_time = millis_() - 2000;
 				start_time = start_time > new_start_time ? start_time : new_start_time;
 				robot->m(22, -22);
@@ -368,7 +368,7 @@ void Rescue::find_black_corner() {
 					robot->turn(-DTOR(5.0f));
 					frame = grab_frame(160, 120);
 					res = corner_ml.invoke(frame);
-					corner_ml.extract_corner(res, x_corner, y_corner);
+					corner_ml.extract_corner(res, x_corner, y_corner, false); // !!! false ignores red corners, please adjust
 					robot->turn((x_corner / CORNER_IN_WIDTH - 0.5f) * DTOR(65.0f));
 					found_corner = true;
 					save_img(frame, "possible_corner");

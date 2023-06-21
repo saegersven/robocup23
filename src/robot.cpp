@@ -165,7 +165,7 @@ bool Robot::button() {
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {
-	std::cout << "left: " << static_cast<int>(left) << "  right: " << static_cast<int>(right) << "  dur: " << duration << std::endl;
+	//std::cout << "left: " << static_cast<int>(left) << "  right: " << static_cast<int>(right) << "  dur: " << duration << std::endl;
 	if(blocked) return;
 	if(duration < 0) {
 		duration = -duration;
