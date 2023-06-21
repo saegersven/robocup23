@@ -23,15 +23,17 @@ cv::Mat CornerML::invoke(cv::Mat image) {
     for(int i = 0; i < image.rows; ++i) {
         cv::Vec3b* p = image.ptr<cv::Vec3b>(i);
         for(int j = 0; j < image.cols; ++j) {
-            float d = ((float)p[j][0] + p[j][1] + p[j][2]) / 3.0f;
-            input_layer[i * image.cols + j] = d;
+            for(int k = 0; k < CORNER_IN_CHANNELS; k++) {
+                float d = (float)p[j][k];
+                input_layer[i * image.cols * CORNER_IN_CHANNELS + j * CORNER_IN_CHANNELS + k] = d;
+            }
         }
     }
 
     interpreter->Invoke();
     output_layer = interpreter->typed_output_tensor<float>(0);
 
-    cv::Mat out(CORNER_OUT_HEIGHT, CORNER_OUT_WIDTH, CV_32FC1);
+    cv::Mat out(CORNER_OUT_HEIGHT, CORNER_OUT_WIDTH, CV_32FC2);
 
     for(int i = 0; i < CORNER_OUT_HEIGHT; ++i) {
         float* p = out.ptr<float>(i);
@@ -48,15 +50,22 @@ cv::Mat CornerML::invoke(cv::Mat image) {
     return out;
 }
 
-bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y) {
-    const float THRESHOLD = 0.4f;
+bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y, bool red) {
+    const float THRESHOLD_RED = 0.4f;
+    const float THRESHOLD_GREEN = 0.4f;
 
     cv::Mat blurred;
     cv::GaussianBlur(probability_map, blurred, cv::Size(3, 3), 0);
 
     cv::Mat thresh;
-    cv::inRange(blurred, cv::Scalar(THRESHOLD), cv::Scalar(1.0f), thresh);
+    cv::Scalar threshold = cv::Scalar(THRESHOLD_RED, 0.0f);
 
+    if(!red) {
+        threshold = cv::Scalar(0.0f, THRESHOLD_GREEN);
+    }
+
+    cv::inRange(blurred, threshold, cv::Scalar(1.0f, 1.0f), thresh_red);
+    
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
@@ -67,8 +76,8 @@ bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y) {
     float largest_contour_area = 10000.0f;
     int largest_contour_idx = 0;
 
-    for(int i = 0; i < contours.size(); ++i) {
-        float area = cv::contourArea(contours[i]);
+    for(int i = 0; i < contours_red.size(); ++i) {
+        float area = cv::contourArea(contours_red[i]);
         if(area > largest_contour_area) {
             largest_contour_area = area;
             largest_contour_idx = i;
