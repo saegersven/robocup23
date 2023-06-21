@@ -57,5 +57,6 @@ int dist_addresses[NUM_VL53L0X] = {0x8A, 0x8B};
 #define CMD_TURN                  0x07
 #define CMD_M_BTN_OBSTACLE        0x08
 #define CMD_TOGGLE_LED            0x09
+#define CMD_TURN_DONE             0x0A
 
-int message_lengths[9] = {5, 1, 2, 3, 2, 2, 3, 3, 1};   
+int message_lengths[10] = {5, 1, 2, 3, 2, 2, 3, 3, 1, 1};   

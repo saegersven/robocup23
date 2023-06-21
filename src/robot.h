@@ -18,6 +18,7 @@
 #define CMD_TURN                  0x07
 #define CMD_M_BTN_OBSTACLE        0x08
 #define CMD_TOGGLE_LED			  0x09
+#define CMD_TURN_DONE             0x0A
 
 #define SERVO_ARM 0
 #define SERVO_GATE 1

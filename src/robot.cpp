@@ -202,8 +202,17 @@ void Robot::turn(float angle) {
 	memcpy(&msg[1], &angle_mrad, 2);
 
 	write(serial_fd, msg, 3);
-	delay((uint16_t) (315 * (uint16_t) std::abs(angle))); // turning one rad takes 315ms
-	delay(250);
+
+
+	// wait until turn is finished. Currently not working...
+	while (1) {
+		std::cout << "Awaiting done turning" << std::endl;
+		char msg[1] = {0};
+		read(serial_fd, &msg, 1);
+		std::cout << msg[0] << std::endl;
+		if (10 == msg[0]) break;
+	}
+	std::cout << "Received done turning" << std::endl;
 }
 
 void Robot::attach_detach_servo(uint8_t servo_id) {

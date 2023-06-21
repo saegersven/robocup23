@@ -88,6 +88,8 @@ void turn(int16_t mrad) {
     }
   }
   m(0, 0, 50);
+
+  Serial.write(CMD_TURN_DONE); // send that turn is done
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
@@ -165,7 +167,6 @@ void parse_message() {
     gripper(gripper_direction);
   } else if (message[0] == CMD_TURN) {
     int16_t angle = *((int16_t*)&message[1]);
-
     turn(angle);
   } else if (message[0] == CMD_SENSOR) {
     uint8_t sensor_id = message[1];
