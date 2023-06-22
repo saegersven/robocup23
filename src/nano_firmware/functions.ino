@@ -100,7 +100,10 @@ void gripper(int8_t dir) {
 
 uint16_t distance(int sensor_id) {
   if (sensor_id > NUM_VL53L0X) return -1;
-  return dist_sensors[sensor_id].readRangeContinuousMillimeters();
+  uint16_t dist = dist_sensors[sensor_id].readRangeSingleMillimeters();
+  if (dist < 0) dist = 0;
+  if (dist > 2000) dist = 2000;
+  return dist;
 }
 
 // returns heading of BNO055 (z rotation). Used for accurate turning

@@ -35,10 +35,25 @@ void Rescue::stop() {
 // main routine for rescue area
 void Rescue::rescue() {
 
+	robot->m(127, 127, 600);
+
 	while (true) {
-		std::cout << robot->distance(0) << std::endl;
-		delay(500);
+		std::cout << robot->distance(1) << std::endl;
 	}
+
+	bool wall_right = false; // is there a wall on the right side of robot?
+
+	uint16_t dist = robot->distance(1);
+	std::cout << dist << std::endl;
+	if (dist < 30) {
+		wall_right = true;
+		std::cout << "Wall right" << std::endl;
+	}
+
+
+	robot->turn(wall_right ? DTOR(135): -DTOR(135));
+
+	exit(0);
 
 
 

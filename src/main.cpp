@@ -15,20 +15,20 @@ enum class State {
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
-	while (true) {
-		std::cout << robot->distance(0) << std::endl;
-		delay(30);
-	}
 
-	/*
+	while (true) {
+		std::cout << robot->distance(1) << std::endl;
+		delay(100);
+	}
 	State state = State::rescue;
 	Rescue rescue(robot);
 	rescue.start();
 
+	
+
 	while (1) {
 		
 	}
-	*/
 
 
 

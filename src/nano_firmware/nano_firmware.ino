@@ -54,7 +54,7 @@ void setup() {
 
     dist_sensors[i].setAddress(dist_addresses[i]);
     dist_sensors[i].setMeasurementTimingBudget(20000);
-    dist_sensors[i].startContinuous();
+    //dist_sensors[i].startContinuous();
     dist_sensors[i].setTimeout(100);
     delay(10);
   }
@@ -64,6 +64,9 @@ void setup() {
   if (get_battery_voltage() < 6.5) error(1);
 
   m(0, 0, 0);
+  while (true) {
+    Serial.println(distance(1));
+  }
 }
 
 void loop() {
