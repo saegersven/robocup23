@@ -9,13 +9,14 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] robot->turn() CMD_TURN_DONE not properly received
+- [ ] robot->turn() CMD_TURN_DONE not properly received (maybe endian problem? Convert to litte endian to try out)
 - [ ] review changes from kraemerlukas314 in corner_ml.cpp (marked with @saegersven)
-- [ ] robot->button() not working (somehow always true)
-- [ ] robot->distance() not working (receiving random values), reading out dist on Nano works
+- [ ] robot->button() not working (somehow always true) (maybe endian problem? Convert to litte endian to try out)
 #### CAD
+- [ ] modify gripper for usage of threaded inserts (Gewindeeinsätze)
 ...
 #### 3D Printing
+- [ ] print ALL replacement parts
 ...
 ### Problems based on runs in St Augustin (descending order of importance, will probably never be implemented)
 - [ ] increase motor speed when frame is the same of long time (indicating the robot got stuck)

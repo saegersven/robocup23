@@ -261,18 +261,19 @@ float Robot::read_pitch() {
 	return DTOR((float)data / 16.0f);
 }
 
-// returns front distance in cm
+// Returns front distance in cm
 int Robot::distance(uint8_t sensor_id) {
-	uint8_t msg[2] = {CMD_SENSOR, sensor_id};
-	write(serial_fd, msg, 2);
+    uint8_t msg[2] = {CMD_SENSOR, sensor_id};
+    write(serial_fd, msg, 2);
 
-	if(read(serial_fd, msg, 2) != 2) return 0xFFFF;
+    if (read(serial_fd, msg, 2) != 2) return 0xFFFF;
 
-	uint16_t dist;
-	memcpy(&dist, msg, 2);
+    uint16_t dist;
+    dist = (msg[0] << 8) | msg[1];  // Convert bytes to little-endian
 
-	return dist;
+    return dist;
 }
+
 
 int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
 	float arr[num_measurements];
@@ -281,7 +282,7 @@ int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 		float dist = distance();
 		arr[i] = dist;
-		delay(50);
+		delay(42);
 	}
 
 	// calculate avg after removing n percent of exteme measurements
