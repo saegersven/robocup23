@@ -34,9 +34,20 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
-	std::cout << "Rescue start!" << std::endl;
-	robot->m(127, 127, 500);
-	exit(0);
+
+	while (true) {
+		std::cout << robot->distance(0) << std::endl;
+		delay(500);
+	}
+
+
+
+
+
+	open_camera(160, 120);
+	frame = grab_frame(160, 120);
+	cv::imshow("F", frame);
+	cv::waitKey(0);
 }
 
 void Rescue::open_camera(int width, int height) {

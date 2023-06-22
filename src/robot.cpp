@@ -281,7 +281,7 @@ int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
 		float dist = distance();
 		arr[i] = dist;
-		delay(15);
+		delay(50);
 	}
 
 	// calculate avg after removing n percent of exteme measurements

@@ -19,7 +19,7 @@ int main() {
 	rescue.start();
 
 	while (1) {
-		rescue.rescue();
+		
 	}
 
 

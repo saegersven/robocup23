@@ -50,7 +50,7 @@ void setup() {
     digitalWrite(dist_xshut_pins[i], HIGH);
     delay(10);
 
-    if (!dist_sensors[i].init()) error(3); // freezes here
+    if (!dist_sensors[i].init()) error(3);
 
     dist_sensors[i].setAddress(dist_addresses[i]);
     dist_sensors[i].setMeasurementTimingBudget(20000);

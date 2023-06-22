@@ -9,16 +9,15 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-
-- [ ] use camera to check when unloading victim
-- [ ] disable BNO055 feature in case its broken during competition
-- [ ] exit of evac zone
-
+- [ ] robot->turn() CMD_TURN_DONE not properly received
+- [ ] review changes from kraemerlukas314 in corner_ml.cpp (marked with @saegersven)
+- [ ] robot->button() not working (somehow always true)
+- [ ] robot->distance() not working (receiving random values), reading out dist on Nano works
 #### CAD
 ...
 #### 3D Printing
 ...
-### Current Problems based on runs in St Augustin (descending order of importance)
+### Problems based on runs in St Augustin (descending order of importance, will probably never be implemented)
 - [ ] increase motor speed when frame is the same of long time (indicating the robot got stuck)
 - [ ] turn lineangle before gap? Maybe drive backwards a few times to allow for slight corrections
 - [ ] missed black line during obstacle
