@@ -37,10 +37,6 @@ void Rescue::rescue() {
 
 	robot->m(127, 127, 600);
 
-	while (true) {
-		std::cout << robot->distance(1) << std::endl;
-	}
-
 	bool wall_right = false; // is there a wall on the right side of robot?
 
 	uint16_t dist = robot->distance(1);
@@ -108,7 +104,7 @@ cv::Mat Rescue::grab_frame(int width, int height) {
 // drives roughly to centre of rescue area
 void Rescue::find_center() {
 	for (int8_t i = 0; i < 25; ++i) {
-		uint16_t dist = robot->distance_avg(5, 0.2f);
+		uint16_t dist = robot->distance_avg(0, 5, 0.2f);
 		if (dist < 120) { // no entry or exit ahead
 			if (dist < 60) robot->m(-80, -80, 200);
 			else robot->m(80, 80, 200);
@@ -138,7 +134,7 @@ void Rescue::find_center_new() {
 	for(int i = 0; i < NUM_DATA_POINTS; ++i) {
 		robot->m(60, -60, 70); // Tune this so its exactly 12°
 		delay(100);
-		float dist = (float)robot->distance_avg(5, 0.2f);
+		float dist = (float)robot->distance_avg(0, 5, 0.2f);
 		if(dist > 110.0f) {
 			std::cout << "Likely entrance or exit, using last distance" << std::endl;
 			dist = last_dist;
@@ -185,7 +181,7 @@ void Rescue::find_center_new_new() {
 	uint64_t start_time = millis_();
 
 	while(millis_() - start_time < MAX_TIME) {
-		float dist = robot->distance_avg(5, 0.2f);
+		float dist = robot->distance_avg(0, 5, 0.2f);
 		if(dist > 80.0f && dist < 110.0f) {
 			robot->m(127, 35);
 		} else if (dist < 50.0f) {
@@ -334,7 +330,7 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 				robot->stop();
 				std::cout << "Found possible exit" << std::endl;
 
-				dist = robot->distance_avg(20, 0.2f);
+				dist = robot->distance_avg(0, 20, 0.2f);
 				if(dist > EXIT_MIN_DISTANCE) {
 					turn_time_on_potential_exit = millis() - start_time;
 
@@ -462,7 +458,7 @@ void Rescue::find_exit() {
 
 	while(1) {
 		// Robot is facing the wall
-		int dist = robot->distance_avg(10, 0.2f);
+		int dist = robot->distance_avg(0, 10, 0.2f);
 		std::cout << "Dist: " << dist << std::endl;
 
 		if(dist > 30) {
@@ -485,13 +481,13 @@ void Rescue::find_exit() {
 
 		if(tiles_traveled >= 3) {
 			// If this is 90cm wall, check for wall
-			dist = robot->distance_avg(10, 0.2f);
+			dist = robot->distance_avg(0, 10, 0.2f);
 			if(dist < 30) {
 				turn_wall();
 				tiles_traveled = 0;
 			} else if(dist > 110) {
 				turn_wall();
-				dist = robot->distance_avg(10, 0.2f);
+				dist = robot->distance_avg(0, 10, 0.2f);
 				robot->turn(R90);
 				robot->m(70, 70, 700);
 				robot->m(40, 40, 300);
@@ -531,7 +527,7 @@ void Rescue::turn_until_wall(int* wall_dist, int* duration, int max_dist, bool d
 		if(dist < max_dist) {
 			uint64_t start_time_stop = millis_();
 			robot->stop();
-			dist = robot->distance_avg(4, 0.2f);
+			dist = robot->distance_avg(0, 4, 0.2f);
 			if(dist < max_dist) break;
 			robot->m(turn_speed_left, turn_speed_right);
 			offset += millis_() - start_time_stop;
@@ -540,7 +536,7 @@ void Rescue::turn_until_wall(int* wall_dist, int* duration, int max_dist, bool d
 	robot->m(turn_speed_left, turn_speed_right, 50);
 	delay(20);
 	robot->stop();
-	*wall_dist = robot->distance_avg(20, 0.2f);
+	*wall_dist = robot->distance_avg(0, 20, 0.2f);
 	*duration = millis_() - *duration - offset;
 }
 

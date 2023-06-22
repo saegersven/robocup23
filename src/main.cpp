@@ -17,14 +17,14 @@ int main() {
 
 
 	while (true) {
-		std::cout << robot->distance(1) << std::endl;
-		delay(100);
+		std::cout << robot->distance_avg(1, 10, 0.2f) << std::endl;
+		delay(1000);
 	}
 	State state = State::rescue;
 	Rescue rescue(robot);
 	rescue.start();
 
-	
+
 
 	while (1) {
 		

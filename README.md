@@ -12,6 +12,7 @@
 - [ ] robot->turn() CMD_TURN_DONE not properly received (maybe endian problem? Convert to litte endian to try out)
 - [ ] review changes from kraemerlukas314 in corner_ml.cpp (marked with @saegersven)
 - [ ] robot->button() not working (somehow always true) (maybe endian problem? Convert to litte endian to try out)
+- [ ] first few distance measurements are always > 12000mm. Why???
 #### CAD
 - [ ] modify gripper for usage of threaded inserts (Gewindeeinsätze)
 ...

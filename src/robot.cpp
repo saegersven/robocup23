@@ -261,7 +261,7 @@ float Robot::read_pitch() {
 	return DTOR((float)data / 16.0f);
 }
 
-// Returns front distance in cm
+// Returns distance in mm. id 0 is front sensor, id 1 is side sensor
 int Robot::distance(uint8_t sensor_id) {
     uint8_t msg[2] = {CMD_SENSOR, sensor_id};
     write(serial_fd, msg, 2);
@@ -274,15 +274,15 @@ int Robot::distance(uint8_t sensor_id) {
     return dist;
 }
 
-
-int Robot::distance_avg(uint8_t num_measurements, float remove_percentage) {
+// avg distance in mm. Highest and lowest remove_percentage is removed
+int Robot::distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remove_percentage) {
 	float arr[num_measurements];
 
 	// take measurements
 	for(int i = 0; i < sizeof(arr) / sizeof(arr[0]); i++) {
-		float dist = distance();
+		float dist = distance(sensor_id);
 		arr[i] = dist;
-		delay(42);
+		delay(35);
 	}
 
 	// calculate avg after removing n percent of exteme measurements
