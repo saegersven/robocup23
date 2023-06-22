@@ -188,8 +188,8 @@ void Robot::stop() {
 	write(serial_fd, &msg, 1);
 }
 
-void Robot::toggle_led() {
-	char msg = CMD_TOGGLE_LED;
+void Robot::send_ready() {
+	char msg = CMD_READY;
 	write(serial_fd, &msg, 1);
 }
 
@@ -204,15 +204,20 @@ void Robot::turn(float angle) {
 	write(serial_fd, msg, 3);
 
 
-	// wait until turn is finished. Currently not working...
+	// wait until turn is finished. Currently not working @saegersven
 	while (1) {
 		std::cout << "Awaiting done turning" << std::endl;
 		char msg[1] = {0};
 		read(serial_fd, &msg, 1);
 		std::cout << msg[0] << std::endl;
-		if (10 == msg[0]) break;
+		if (10 == msg[0]) {
+			std::cout << "Received done, msg is: " << msg[0] << std::endl;
+			break;
+		}
 	}
 	std::cout << "Received done turning" << std::endl;
+
+	delay(2000);
 }
 
 void Robot::attach_detach_servo(uint8_t servo_id) {

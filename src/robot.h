@@ -17,7 +17,7 @@
 #define CMD_GRIPPER               0x06
 #define CMD_TURN                  0x07
 #define CMD_M_BTN_OBSTACLE        0x08
-#define CMD_TOGGLE_LED			  0x09
+#define CMD_READY				  0x09
 #define CMD_TURN_DONE             0x0A
 
 #define SERVO_ARM 0
@@ -94,9 +94,9 @@ public:
 	void stop();
 
 	/**
-	 * toggles LED of Nano
+	 * Nano turns on green led for 50ms, indicating that robot can be started via button
 	 */
-	void toggle_led();
+	void send_ready();
 
 	/**
 	 * Turn by a specified angle (in radians). Positive angles result in clockwise

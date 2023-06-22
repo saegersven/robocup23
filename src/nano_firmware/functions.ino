@@ -200,8 +200,10 @@ void parse_message() {
     flags |= (analogRead(PIN_BTN) > 400) << 7;
 
     Serial.write(&flags, 1);
-  } else if (message[0] == CMD_TOGGLE_LED) {
-    toggle_led();
+  } else if (message[0] == CMD_READY) {
+    digitalWrite(13, HIGH);
+    delay(50);
+    digitalWrite(13, LOW);
   }
 }
 

@@ -14,14 +14,12 @@ enum class State {
 
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-	robot->servo(2, CAM_LOWER_POS, 500);
-	robot->turn(-1.55);
-	State state = State::line;
-	Line line(robot);
-	line.start();
+	State state = State::rescue;
+	Rescue rescue(robot);
+	rescue.start();
 
 	while (1) {
-		line.line();
+		rescue.rescue();
 	}
 
 
