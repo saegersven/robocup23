@@ -39,9 +39,14 @@ void Rescue::rescue() {
 
 	bool wall_right = false; // is there a wall on the right side of robot?
 
-	uint16_t dist = robot->distance(1);
+	while (true) {
+		std::cout << robot->distance(1) << std::endl;
+		delay(35);
+	}
+	uint16_t dist = robot->distance_avg(1, 10, 0.4f);
+	std::cout << "test test" << std::endl;
 	std::cout << dist << std::endl;
-	if (dist < 30) {
+	if (dist < 300) {
 		wall_right = true;
 		std::cout << "Wall right" << std::endl;
 	}
