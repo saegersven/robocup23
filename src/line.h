@@ -91,6 +91,7 @@ private:
 	cv::Mat black;
 	cv::Mat green_mat;
 	uint32_t green_num_pixels;
+	uint8_t obstacle_counter = 0;
 
 	// used for silver testing
 	bool test = false;

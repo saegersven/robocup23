@@ -181,7 +181,8 @@ void parse_message() {
         value = distance(sensor_id);
         break;
       case SENSOR_ID_BTN:
-        value = analogRead(PIN_BTN) > 350;
+        bool btn_pressed = analogRead(PIN_BTN) > 350;
+        value = btn_pressed ? 0xFFFF : 0x0000;
         break;
     }
 

@@ -514,6 +514,15 @@ void Line::line() {
 	rescue_kit();
 	red();
 	silver();
+	/*
+	if (obstacle_counter > 10) {
+		uint16_t dist = robot->distance(0);
+		std::cout << "Distance: " << dist << std::endl;
+		obstacle_counter = 0;
+	}
+	obstacle_counter = 5;
+	std::cout << "Cnt: " << obstacle_counter << std::endl;
+	*/
 
 	// DEBUG, show fps and current frame
 	auto now_t = std::chrono::high_resolution_clock::now();

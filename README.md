@@ -9,12 +9,10 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] robot->button() not working (somehow always true) (maybe endian problem? Convert to litte endian to try out)
-- [ ] first few distance measurements are always > 12000 despite Nano not sending values > 2000
 - [ ] robot->turn() CMD_TURN_DONE not properly received (maybe endian problem? Convert to litte endian to try out)
+- [ ] NN failed to invoke after restart (https://pasteboard.co/5ex492N8kNwy.png)
 - [ ] review changes from kraemerlukas314 in corner_ml.cpp (marked with @saegersven)
 - [ ] obstacle
-- [ ] stop button during linefollowing
 - [ ] ramp
 
 

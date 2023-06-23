@@ -269,7 +269,7 @@ int Robot::distance(uint8_t sensor_id) {
     if (read(serial_fd, msg, 2) != 2) return 0xFFFF;
 
     uint16_t dist;
-    //dist = (msg[0] << 8) | msg[1];  // Convert bytes to little-endian
+    //dist = (msg[0] << 8) | msg[1];  // Convert bytes to little-endian. Sometimes necessary
     dist = (msg[0]) | msg[1];
 
     return dist;
