@@ -1,7 +1,4 @@
 void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
-  Serial.print(left_speed);
-  Serial.print(right_speed);
-  Serial.println(duration);
   // Left motors
   // Motors will be shorted to ground when speed is zero
   digitalWrite(M_LEFT_A, left_speed < 0);
@@ -100,7 +97,7 @@ void gripper(int8_t dir) {
 
 uint16_t distance(int sensor_id) {
   if (sensor_id > NUM_VL53L0X) return -1;
-  uint16_t dist = dist_sensors[sensor_id].readRangeSingleMillimeters();
+  uint16_t dist = dist_sensors[sensor_id].readRangeContinuousMillimeters();
   if (dist < 0) dist = 0;
   if (dist > 2000) dist = 2000;
   return dist;

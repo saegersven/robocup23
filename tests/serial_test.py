@@ -17,4 +17,4 @@ while True:
 	#ser.write(bytearray([0x01, 60, 60, 200, 0]))
 	ser.write(bytearray([0x05, 0]))
 	val = ser.read(2)
-	print(struct.unpack('>h', val)[0])
+	print(struct.unpack('<h', val)[0])
