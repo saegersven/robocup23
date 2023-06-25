@@ -9,10 +9,6 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] robot->turn() CMD_TURN_DONE not properly received (maybe endian problem? Convert to litte endian to try out)
-- [ ] NN failed to invoke after restart (https://pasteboard.co/5ex492N8kNwy.png)
-- [ ] review changes from kraemerlukas314 in corner_ml.cpp (marked with @saegersven)
-- [ ] obstacle
 - [ ] ramp
 
 

@@ -14,7 +14,7 @@ enum class State {
 
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-
+	
 	State state = State::line;
 	Line line(robot);
 
@@ -48,6 +48,7 @@ int main() {
 			switch(state) {
 				case State::line:
 					line.stop();
+					line.obstacle_direction = !line.obstacle_direction;
 					break;
 				case State::rescue:
 					rescue.stop();

@@ -81,6 +81,7 @@ void Line::stop() {
 	robot->stop();
 	robot->set_blocked(false);
 	robot->stop_camera();
+	silver_ml.stop();
 	running = false;
 
 	cv::destroyAllWindows();
@@ -143,7 +144,6 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
-	float base_speed = LINE_FOLLOW_BASE_SPEED;
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
 
 	// If frame does not change much, try to get unstuck by increasing motor speed
@@ -394,8 +394,15 @@ void Line::green() {
 		float angle = std::atan2(dy, dx) + PI05;
 		float distance = std::sqrt(dx*dx + dy*dy);
 
-		robot->m(50 + (last_line_angle + angle) * 40, 50 - (last_line_angle + angle) * 40);
-		delay((int)(distance * 2.5f));
+		//robot->m(50 + (last_line_angle + angle) * 40, 50 - (last_line_angle + angle) * 40);
+		//delay((int)(distance * 2.5f));
+
+		robot->m(LINE_FOLLOW_BASE_SPEED, LINE_FOLLOW_BASE_SPEED, 200);
+		if(green_result == GREEN_RESULT_LEFT) {
+			robot->m(-LINE_FOLLOW_BASE_SPEED, LINE_FOLLOW_BASE_SPEED, 200);
+		} else {
+			robot->m(LINE_FOLLOW_BASE_SPEED, -LINE_FOLLOW_BASE_SPEED, 200);
+		}
 
 		green_start_t = now;
 
@@ -486,7 +493,7 @@ void Line::red() {
 		std::cout << "Red: " << red_percentage << std::endl;
 		std::cout << "Detected red" << std::endl;
 		robot->m(100, 100, 300);
-		delay(8000);
+		delay(8000); // in case of misdetection, robot will continue driving after 8s
 	}
 }
 
@@ -506,6 +513,90 @@ void Line::silver() {
 	}
 }
 
+void Line::obstacle() {
+	if (frame_counter % 10 != 0) return;
+
+	uint16_t dist = robot->distance(0);
+	if(dist > 100) return;
+
+	robot->stop();
+	dist = robot->distance_avg(0, 10, 0.2f);
+	std::cout << "Distance: " << (int)dist << std::endl;
+	if(dist > 100) return;
+
+	std::cout << "OBSTACLE" << std::endl;
+
+	float sign = obstacle_direction == BOOL_DIR_LEFT ? 1.0f : -1.0f;
+
+	robot->m(-100, -100, 120);
+	delay(20);
+	robot->turn(sign * (-R90));
+	robot->m(100, 100, 500);
+	delay(20);
+
+	const uint32_t durations[] = {1650, 1650, 1650, 675};
+
+	for(int i = 0; i < 4; ++i) {
+		bool found_line = false;
+
+		robot->turn(sign * R90);
+		auto start_t = std::chrono::high_resolution_clock::now();
+
+		robot->m(50, 50);
+
+		while(1) {
+			grab_frame();
+			cv::imshow("Obstacle", frame);
+			cv::waitKey(1);
+
+			cv::Range x_range = cv::Range(45, 70);
+			if(obstacle_direction == BOOL_DIR_RIGHT) {
+				x_range = cv::Range(10, 35);
+			}
+
+			cv::Mat roi = frame(cv::Range(0, 48), x_range);
+			uint32_t roi_size = roi.cols * roi.rows;
+
+			uint32_t num_black = 0;
+			in_range(roi, &is_black, &num_black);
+
+			float p = (float)num_black / roi_size;
+			std::cout << p << std::endl;
+
+			if(p > 0.08f) {
+				robot->stop();
+				found_line = true;
+				break;
+			}
+
+			auto now = std::chrono::high_resolution_clock::now();
+			uint32_t elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - start_t).count();
+			if(elapsed > durations[i]) break;
+		}
+		if(found_line) break;
+	}
+
+	robot->m(-40, -40, 180);
+	robot->m(-40 * sign, 40 * sign, 200);
+	robot->m(80, 80, 330);
+	robot->m(-80 * sign, 80 * sign, 180);
+	robot->m(-40, -40, 260);
+}
+
+// increases or decreases speed if robot drives up or down a ramp
+void Line::ramp() {
+	// checking for a ramp every 42th frame should suffice
+	if (frame_counter % 42 != 0) return;
+	uint8_t ramp_state = robot->ramp();
+	if (ramp_state == 1) { // ramp up, increase speed
+		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+	} else if (ramp_state == 2) { // ramp down, decrease speed
+		base_speed = LINE_FOLLOW_BASE_SPEED * 1.0f; // 1.0f should potentially be decreased, maybe also adjust sensitivity
+	} else {
+		base_speed = LINE_FOLLOW_BASE_SPEED;
+	}
+}
+
 void Line::line() {
 	grab_frame();
 
@@ -514,15 +605,12 @@ void Line::line() {
 	rescue_kit();
 	red();
 	silver();
-	/*
-	if (obstacle_counter > 10) {
-		uint16_t dist = robot->distance(0);
-		std::cout << "Distance: " << dist << std::endl;
-		obstacle_counter = 0;
-	}
-	obstacle_counter = 5;
-	std::cout << "Cnt: " << obstacle_counter << std::endl;
-	*/
+	obstacle();
+	ramp();
+
+	++frame_counter;
+	std::cout << "Base speed: " << base_speed << std::endl;
+	
 
 	// DEBUG, show fps and current frame
 	auto now_t = std::chrono::high_resolution_clock::now();

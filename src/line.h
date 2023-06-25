@@ -42,7 +42,7 @@
 #define LINE_CORNER_WIDTH 7
 #define LINE_CORNER_HEIGHT 8
 
-#define LINE_FOLLOW_BASE_SPEED 48
+#define LINE_FOLLOW_BASE_SPEED 50
 #define LINE_FOLLOW_STRAIGHT_LINE_SPEED 60
 #define LINE_FOLLOW_SENSITIVITY 57.0f
 #define LINE_FOLLOW_D 0.05f
@@ -51,8 +51,8 @@
 
 #define ENABLE_NO_DIFFERENCE true // should robot increase motor speed when frame = last_frame?
 
-#define GREEN_WEIGHT_SLOPE 0.6f
-#define GREEN_DURATION 500
+#define GREEN_WEIGHT_SLOPE 0.7f
+#define GREEN_DURATION 300
 
 /**
  * Single-pixel thresholding operations
@@ -91,7 +91,9 @@ private:
 	cv::Mat black;
 	cv::Mat green_mat;
 	uint32_t green_num_pixels;
-	uint8_t obstacle_counter = 0;
+
+	uint32_t frame_counter;
+	float base_speed = LINE_FOLLOW_BASE_SPEED; // base linefollowing speed
 
 	// used for silver testing
 	bool test = false;
@@ -117,16 +119,6 @@ private:
 	SilverML silver_ml;
 
 	void grab_frame();
-
-	/**
-	 * Async method, checks distance
-	 */
-	void obstacle();
-
-	/**
-	 * Goes in a straight line for a maximum duration and stops if the robot hits a black line.
-	 */
-	bool obstacle_straight_line(int duration);
 
 	/*########################
 	METHODS FOR LINE-FOLLOWING
@@ -204,8 +196,14 @@ private:
 
 	void silver();
 
+	void obstacle();
+
+	void ramp();
+
 public:
 	bool found_silver = false;
+
+	bool obstacle_direction = BOOL_DIR_LEFT;
 
 	Line(std::shared_ptr<Robot> robot);
 

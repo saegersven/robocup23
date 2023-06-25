@@ -57,16 +57,14 @@ bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y, bool 
     cv::Mat blurred;
     cv::GaussianBlur(probability_map, blurred, cv::Size(3, 3), 0);
 
-    cv::Mat thresh;
     cv::Scalar threshold = cv::Scalar(THRESHOLD_RED, 0.0f);
 
     if(!red) {
         threshold = cv::Scalar(0.0f, THRESHOLD_GREEN);
     }
-
-    // @saegersven thresh_red or just thresh
-    cv::Mat thresh_red;
-    cv::inRange(blurred, threshold, cv::Scalar(1.0f, 1.0f), thresh_red);
+    
+    cv::Mat thresh;
+    cv::inRange(blurred, threshold, cv::Scalar(1.0f, 1.0f), thresh);
     
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -78,7 +76,6 @@ bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y, bool 
     float largest_contour_area = 10000.0f;
     int largest_contour_idx = 0;
 
-    // @saegersven contours_red is not defined, just use contours???
     for(int i = 0; i < contours.size(); ++i) {
         //float area = cv::contourArea(contours_red[i]);
         float area = cv::contourArea(contours[i]);

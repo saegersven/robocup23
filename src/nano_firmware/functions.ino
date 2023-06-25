@@ -58,9 +58,15 @@ int sgn(float x) {
 // angle in mrad
 void turn(int16_t mrad) {
   int16_t angle = (int)((float)mrad / 1000.0f * 180.0f / 3.141592f);
-  // TODO: fix
-  // if (abs(angle) > 30) angle -= 3;
-  angle -= 0.14 * angle; // robot overturns slightly, probably because motors don't stop immediately. This is the quick fix
+
+  if(abs(angle) <= 30) {
+    m(sgn(angle) * 50, -sgn(angle) * 50, (int)(angle * MIN_TIME_PER_DEG * 1.8));
+    m(0, 0, 21);
+    return;
+  }
+  
+  if (angle > 30) angle -= 3; // robot slightly overturns, this is the quick fix
+  if (angle < -30) angle += 3;
   if (angle == 0) return;
 
   int min_duration = MIN_TIME_PER_DEG * abs(angle);
@@ -87,6 +93,7 @@ void turn(int16_t mrad) {
   m(0, 0, 50);
 
   Serial.write(CMD_TURN_DONE); // send that turn is done
+  Serial.write(CMD_TURN_DONE);
 }
 
 // Dir: -1 for open, 0 for short (both LOW), 1 for close
@@ -172,6 +179,8 @@ void parse_message() {
     uint8_t sensor_id = message[1];
 
     uint16_t value = 0;
+    bool btn_pressed = false;
+    float current_pitch = 0.0f;
 
     switch (sensor_id) {
       case SENSOR_ID_DIST_1:
@@ -181,9 +190,13 @@ void parse_message() {
         value = distance(sensor_id);
         break;
       case SENSOR_ID_BTN:
-        bool btn_pressed = analogRead(PIN_BTN) > 350;
+        btn_pressed = analogRead(PIN_BTN) > 350;
         value = btn_pressed ? 0xFFFF : 0x0000;
-        break;
+        break;     
+      case SENSOR_RAMP:
+        current_pitch = get_pitch();
+        if (current_pitch > 15.0f) value = 1; // ramp up
+        else if (current_pitch < -15.0f) value = 2; // ramp down
     }
 
     char msg[2];

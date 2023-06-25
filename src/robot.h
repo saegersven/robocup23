@@ -130,5 +130,7 @@ public:
 	int distance(uint8_t sensor_id = 0);
 	int distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remove_percentage);
 
+	int ramp();
+
 	void servo_cam(int16_t angle, uint16_t d);
 };

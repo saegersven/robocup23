@@ -158,6 +158,8 @@ int Robot::serial_available() {
 bool Robot::button() {
 	char msg[2] = {CMD_SENSOR, 2};
 
+	tcflush(serial_fd, TCIFLUSH);
+	
 	write(serial_fd, msg, 2);
 
 	if(read(serial_fd, &msg, 2) != 2) return false;
@@ -203,21 +205,23 @@ void Robot::turn(float angle) {
 
 	write(serial_fd, msg, 3);
 
+	tcflush(serial_fd, TCIFLUSH);
+
+	uint64_t start_t = millis();
 
 	// wait until turn is finished. Currently not working @saegersven
 	while (1) {
-		std::cout << "Awaiting done turning" << std::endl;
 		char msg[1] = {0};
 		read(serial_fd, &msg, 1);
 		std::cout << msg[0] << std::endl;
-		if (10 == msg[0]) {
-			std::cout << "Received done, msg is: " << msg[0] << std::endl;
+		if (CMD_TURN_DONE == msg[0]) {
+			std::cout << "Received done, msg is: " << (int)msg[0] << std::endl;
 			break;
 		}
+		if(start_t - millis() > 6000) break;
 	}
-	std::cout << "Received done turning" << std::endl;
 
-	delay(2000);
+	tcflush(serial_fd, TCIFLUSH);
 }
 
 void Robot::attach_detach_servo(uint8_t servo_id) {
@@ -266,11 +270,13 @@ int Robot::distance(uint8_t sensor_id) {
     uint8_t msg[2] = {CMD_SENSOR, sensor_id};
     write(serial_fd, msg, 2);
 
+	tcflush(serial_fd, TCIFLUSH);
+
     if (read(serial_fd, msg, 2) != 2) return 0xFFFF;
 
     uint16_t dist;
     //dist = (msg[0] << 8) | msg[1];  // Convert bytes to little-endian. Sometimes necessary
-    dist = (msg[0]) | msg[1];
+    dist = (msg[0]) | (msg[1] << 8);
 
     return dist;
 }
@@ -291,13 +297,40 @@ int Robot::distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remov
 
 	std::sort(arr, arr + arr_len);
 	int kthPercent = (arr_len * remove_percentage);
+
+	int num_considered_measurements = (arr_len - 2 * kthPercent);
+
 	float sum = 0;
 
-	for(int i = 0; i < arr_len; i++)
-		if (i >= kthPercent && i < (arr_len - kthPercent))
-			sum += arr[i];
+	for(int i = 0; i < arr_len; i++) {
+		if (i >= kthPercent && i < (arr_len - kthPercent)) {
+			if(arr[i] == 0xFFFF) {
+				// False measurement, dont include
+				--num_considered_measurements;
+			} else {
+				sum += arr[i];
+			}
+		}
+	}
 
-	float avg = sum / (arr_len - 2 * kthPercent);
+	float avg = sum / num_considered_measurements;
 
 	return (int)avg;
+}
+
+// returns 1 for ramp up, 2 for ramp down, 0 for no ramp
+int Robot::ramp() {
+	uint8_t msg[2] = {CMD_SENSOR, 3}; // 3 means gyro
+    write(serial_fd, msg, 2);
+
+	tcflush(serial_fd, TCIFLUSH);
+
+
+    int ramp_state;
+
+    if (read(serial_fd, msg, 2) != 2) ramp_state = -1;
+
+    //dist = (msg[0] << 8) | msg[1];  // Convert bytes to little-endian. Sometimes necessary
+    ramp_state = (msg[0]) | (msg[1] << 8);
+    return ramp_state;
 }
