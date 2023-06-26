@@ -144,8 +144,6 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
-	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
-
 	// If frame does not change much, try to get unstuck by increasing motor speed
 	if(!last_frame.empty()) {
 		float diff = average_difference(frame, last_frame);
@@ -154,7 +152,11 @@ void Line::follow() {
 			++no_difference_counter;
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
-					std::cout << "No difference\n";
+					std::cout << "No difference, ruckling\n";
+					robot->m(127, -127, 100);
+					robot->m(127, 127, 50);
+					robot->m(127, -127, 100);
+					robot->m(127, 127, 50);
 					no_difference_time_stamp = millis_();
 				}
 			}
@@ -504,12 +506,11 @@ void Line::silver() {
 		obstacle_enabled = false;
 		robot->set_blocked(false);
 		delay(50);
-		std::cout << "NN detected silver. But it has been ignored. Pls check code" << std::endl;
+		std::cout << "NN detected silver" << std::endl;
 		robot->turn(last_line_angle / 3.0f); // align with silver stripe
 		robot->stop();
 
-		//found_silver = true;
-		found_silver = false;
+		found_silver = true;
 	}
 }
 
@@ -590,8 +591,10 @@ void Line::ramp() {
 	uint8_t ramp_state = robot->ramp();
 	if (ramp_state == 1) { // ramp up, increase speed
 		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
+		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY * 0.5f;
 	} else if (ramp_state == 2) { // ramp down, decrease speed
-		base_speed = LINE_FOLLOW_BASE_SPEED * 1.0f; // 1.0f should potentially be decreased, maybe also adjust sensitivity
+		base_speed = LINE_FOLLOW_BASE_SPEED * 0.6f; // 1.0f should potentially be decreased, maybe also adjust sensitivity
+		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY * 0.5f;
 	} else {
 		base_speed = LINE_FOLLOW_BASE_SPEED;
 	}

@@ -325,7 +325,6 @@ int Robot::ramp() {
 
 	tcflush(serial_fd, TCIFLUSH);
 
-
     int ramp_state;
 
     if (read(serial_fd, msg, 2) != 2) ramp_state = -1;

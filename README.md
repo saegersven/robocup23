@@ -2,24 +2,26 @@
 ### Team BitFlip
 
 
-* [Youtube Channel](https://www.youtube.com/channel/UCC9BH-tkFcYVH9Up8JBV4LQ)
+* [Youtube Channel](https://www.youtube.com/@evbrobocup)
 * [Website](http://kraemer123.de/)
 * [2022 Repository](https://github.com/saegersven/robocup)
 
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] ramp
+- [ ] randomly stops after silver has been detected (https://pasteboard.co/VqY2UIQh3ovj.png)
+- [ ] sometimes robot wont start after buwtton press (https://pasteboard.co/P5Lg1cDAcL2i.png)
+- [ ] reduce sensitivity when few black pixels (gaps)
+- [ ] rescue
+- [ ] exit
 
 
 
 
 #### CAD
-- [ ] modify gripper for usage of threaded inserts (Gewindeeinsätze)
-...
+
 #### 3D Printing
-- [ ] print ALL replacement parts
-...
+
 ### Problems based on runs in St Augustin (descending order of importance, will probably never be implemented)
 - [ ] increase motor speed when frame is the same of long time (indicating the robot got stuck)
 - [ ] turn lineangle before gap? Maybe drive backwards a few times to allow for slight corrections
