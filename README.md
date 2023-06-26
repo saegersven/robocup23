@@ -9,11 +9,9 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] randomly stops after silver has been detected (https://pasteboard.co/VqY2UIQh3ovj.png)
-- [ ] sometimes robot wont start after buwtton press (https://pasteboard.co/P5Lg1cDAcL2i.png)
-- [ ] reduce sensitivity when few black pixels (gaps)
 - [ ] rescue
 - [ ] exit
+- [ ] reduce sensitivity when few black pixels (gaps)
 
 
 

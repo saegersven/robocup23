@@ -15,7 +15,7 @@ enum class State {
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	
-	while (true) std::cout << robot->button() << std::endl;
+	//while (true) std::cout << robot->button() << std::endl;
 	State state = State::line;
 	Line line(robot);
 
@@ -59,7 +59,6 @@ int main() {
 			
 			std::cout << "Stop." << std::endl;
 			// SET SERVOS TO DEFAULT POS
-			robot->attach_detach_servo(SERVO_CAM); // attach cam servo
 			robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
 			robot->servo(1, GATE_CLOSED, 300);
 			robot->servo(0, ARM_HIGHER_POS, 300);
@@ -71,8 +70,8 @@ int main() {
 			} 
 			while(robot->button());
 			std::cout << "Start." << std::endl;
-			//line.check_silver();
 			line.start();
+			line.check_silver();
 		}
 
 		switch(state) {

@@ -17,7 +17,7 @@ find_package(WiringPi REQUIRED)
 include_directories(${WIRINGPI_INCLUDE_DIRS})
 
 find_package(Threads REQUIRED)
-
+find_package(pigpio REQUIRED)
 
 #include_directories("libs/tensorflow_src")
 #include_directories("libs/tflite_build/flatbuffers/include")
@@ -45,5 +45,6 @@ target_link_libraries(robocup ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(robocup ${WIRINGPI_LIBRARIES})
 target_link_libraries(robocup i2c)
 target_link_libraries(robocup tensorflow-lite)
+target_link_libraries(robocup pigpio)
 
 #target_link_libraries(robocup Eigen3::Eigen)

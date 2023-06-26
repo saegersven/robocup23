@@ -16,14 +16,20 @@ extern "C" {
 #include <sstream>
 #include <string>
 
-#include <wiringPi.h>
-#include <softPwm.h>
+#include <pigpio.h>
 
 #include "defines.h"
 #include "utils.h"
 
 Robot::Robot() : blocked(false), has_frame(false) {
 	init_serial();
+
+	if(gpioInitialise() < 0) {
+		std::cout << "GPIO initialization failed" << std::endl;
+	}
+
+	gpioSetMode(PIN_BTN, PI_INPUT);
+	gpioSetPullUpDown(PIN_BTN, PI_PUD_DOWN);
 
 	delay(2000); // Wait for Nano to boot up (can probably be shorter)
 }
@@ -156,15 +162,10 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-    if (wiringPiSetup() == -1) {
-        std::cerr << "Failed to initialize wiringPi." << std::endl;
-    }
-
-    pinMode(4, INPUT);
-    pullUpDnControl(4, PUD_DOWN);
-    while (1) {
-		std::cout << "State: " << digitalRead(4) << std::endl;
-    }
+	if(gpioRead(PIN_BTN)) {
+		delay(5);
+		return gpioRead(PIN_BTN);
+	}
 	return false;
 }
 
@@ -201,6 +202,14 @@ void Robot::send_ready() {
 void Robot::turn(float angle) {
 	if(blocked) return;
 
+	/*
+	if(std::abs(RTOD(angle)) < 30.0f) {
+		float sign = angle / std::abs(angle);
+    	m(sign * 50, -sign * 50, (int)(RTOD(std::abs(angle)) * MS_PER_DEG));
+		return;
+	}
+	*/
+
 	int16_t angle_mrad = angle * 1000;
 	char msg[3] = {CMD_TURN, 0, 0};
 	memcpy(&msg[1], &angle_mrad, 2);
@@ -209,7 +218,7 @@ void Robot::turn(float angle) {
 
 	tcflush(serial_fd, TCIFLUSH);
 
-	uint64_t start_t = millis();
+	uint64_t start_t = millis_();
 
 	// wait until turn is finished. Currently not working @saegersven
 	while (1) {
@@ -220,7 +229,7 @@ void Robot::turn(float angle) {
 			std::cout << "Received done, msg is: " << (int)msg[0] << std::endl;
 			break;
 		}
-		if(start_t - millis() > 6000) break;
+		if(start_t - millis_() > 6000) break;
 	}
 
 	tcflush(serial_fd, TCIFLUSH);

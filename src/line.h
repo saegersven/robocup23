@@ -51,7 +51,7 @@
 
 #define ENABLE_NO_DIFFERENCE true // should robot increase motor speed when frame = last_frame?
 
-#define GREEN_WEIGHT_SLOPE 0.7f
+#define GREEN_WEIGHT_SLOPE 0.1f
 #define GREEN_DURATION 300
 
 /**

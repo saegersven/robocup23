@@ -153,11 +153,11 @@ void Line::follow() {
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
 					std::cout << "No difference, ruckling\n";
-					robot->m(127, -127, 100);
-					robot->m(127, 127, 50);
-					robot->m(127, -127, 100);
-					robot->m(127, 127, 50);
+					robot->m(127, 127, 42*2);
+					robot->turn(last_line_angle);
+					robot->m(-50, -50, 42*3);
 					no_difference_time_stamp = millis_();
+					no_difference_counter = 100;
 				}
 			}
 		} else {
@@ -371,7 +371,7 @@ void Line::green() {
 	auto now = std::chrono::high_resolution_clock::now();
 	uint32_t time_since_last_green = std::chrono::duration_cast<std::chrono::milliseconds>(now - green_start_t).count();
 
-	green_active = time_since_last_green < GREEN_DURATION;
+	green_active = false;
 	if(green_active) std::cout << "GREEN ACTIVE\n";
 	if(!green_active) green_weight_slope = 0.0f;
 
@@ -381,34 +381,63 @@ void Line::green() {
 		obstacle_enabled = false;
 		obstacle_active = false;
 
-		if(green_result == GREEN_RESULT_DEAD_END) {
-			// Dead-End regardless of green_active
-			robot->m(127, 127, 200);
-			robot->turn(DTOR(180.0f));
-			robot->m(127, 127, 160);
-			return;
-		}
+		robot->stop();
+		delay(50);
 
-		if(green_active) return;
-
+		// Approach
 		float dx = global_average_x - frame.cols / 2.0f;
 		float dy = global_average_y - (frame.rows + 20.0f);
 		float angle = std::atan2(dy, dx) + PI05;
 		float distance = std::sqrt(dx*dx + dy*dy);
 
-		//robot->m(50 + (last_line_angle + angle) * 40, 50 - (last_line_angle + angle) * 40);
-		//delay((int)(distance * 2.5f));
+		robot->turn(angle);
+		delay(50);
+		robot->m(100, 100, DISTANCE_FACTOR * (distance - 50));
 
-		robot->m(LINE_FOLLOW_BASE_SPEED, LINE_FOLLOW_BASE_SPEED, 200);
-		if(green_result == GREEN_RESULT_LEFT) {
-			robot->m(-LINE_FOLLOW_BASE_SPEED, LINE_FOLLOW_BASE_SPEED, 200);
-		} else {
-			robot->m(LINE_FOLLOW_BASE_SPEED, -LINE_FOLLOW_BASE_SPEED, 200);
+		robot->m(60, 60, 250);
+
+		if(green_result == GREEN_RESULT_DEAD_END) {
+			// Dead-End regardless of green_active
+			robot->m(127, 127, 200);
+			robot->turn(DTOR(180.0f));
+			robot->m(127, 127, 160);
+			obstacle_enabled = true;
+		} else if(green_result == GREEN_RESULT_LEFT) {
+			robot->turn(DTOR(-65.0f));
+			delay(30);
+		} else if(green_result == GREEN_RESULT_RIGHT) {
+			robot->turn(DTOR(65.0f));
+			delay(30);
+		}
+		robot->m(127, 127, 50);
+
+		grab_frame();
+		uint32_t num_black_pixels = 0;
+		black = in_range(frame, &is_black, &num_black_pixels);
+		
+		if(num_black_pixels < 200) {
+			std::cout << "Searching left and right\n";
+			// Search for line left and right
+			uint32_t num_black_pixels_right = 0;
+			uint32_t num_black_pixels_left = 0;
+
+			robot->turn(DTOR(40.0f));
+			grab_frame();
+
+			black = in_range(frame, &is_black, &num_black_pixels_right);
+
+			robot->turn(DTOR(-80.0f));
+			grab_frame();
+
+			black = in_range(frame, &is_black, &num_black_pixels_left);
+
+			std::cout << num_black_pixels_left << " | " << num_black_pixels_right << "\n";
+			if(num_black_pixels_right > num_black_pixels_left) {
+				robot->turn(DTOR(85.0f));
+			}
 		}
 
-		green_start_t = now;
-
-		green_weight_slope = GREEN_WEIGHT_SLOPE * (green_result == GREEN_RESULT_LEFT ? -1.0f : 1.0f);
+		obstacle_enabled = true;
 	}
 }
 
@@ -600,6 +629,38 @@ void Line::ramp() {
 	}
 }
 
+void Line::check_silver() {
+	obstacle_enabled = false;
+	delay(20);
+	std::cout << "Checking silver before line..." << std::endl;
+	grab_frame();
+	std::cout << "Grabbed frame" << std::endl;
+	int dist = 100; //robot->distance_avg(10, 0.2f);
+	std::cout << "Distance: " << dist << std::endl;
+	if (dist < 135 && dist > 90) { // dist must be between 120 and 90cm for rescue area
+		std::cout << "Distance within range, counting black pixels..." << std::endl;
+
+		delay(200);
+
+		robot->servo(SERVO_CAM, 20, 300);
+
+		grab_frame();
+
+		uint32_t num_black_pixels = 0;
+		black = in_range(frame, &is_black, &num_black_pixels);
+		std::cout << "Black pixels: " << num_black_pixels << std::endl;
+		if(num_black_pixels < 200) {
+			std::cout << "Few black pixels, should be rescue" << std::endl;
+			robot->stop_camera();
+			found_silver = true;
+			return;
+		}
+	}
+	obstacle_enabled = true;
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
+	delay(20);
+}
+
 void Line::line() {
 	grab_frame();
 
@@ -608,11 +669,10 @@ void Line::line() {
 	rescue_kit();
 	red();
 	silver();
-	obstacle();
+	if(obstacle_enabled) obstacle();
 	ramp();
 
 	++frame_counter;
-	std::cout << "Base speed: " << base_speed << std::endl;
 	
 
 	// DEBUG, show fps and current frame

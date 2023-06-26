@@ -48,7 +48,7 @@
 
 #define CM_TO_MS_FULL_SPEED 18.0f
 
-#define MS_PER_DEGREE 5.5f // milliseconds a one degree turn takes
+#define MS_PER_DEGREE 9.0f // milliseconds a one degree turn takes
 
 #define T180_ERR (-DTOR(6.0f))
 

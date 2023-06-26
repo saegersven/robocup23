@@ -60,8 +60,11 @@ void turn(int16_t mrad) {
   int16_t angle = (int)((float)mrad / 1000.0f * 180.0f / 3.141592f);
 
   if(abs(angle) <= 30) {
-    m(sgn(angle) * 50, -sgn(angle) * 50, (int)(angle * MIN_TIME_PER_DEG * 1.8));
+    m(sgn(angle) * 50, -sgn(angle) * 50, (int)(abs(angle) * MIN_TIME_PER_DEG * 1.8));
     m(0, 0, 21);
+
+    Serial.write(CMD_TURN_DONE); // send that turn is done
+    Serial.write(CMD_TURN_DONE);
     return;
   }
   
