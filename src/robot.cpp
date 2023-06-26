@@ -156,14 +156,16 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-	char msg[2] = {CMD_SENSOR, 2};
+    if (wiringPiSetup() == -1) {
+        std::cerr << "Failed to initialize wiringPi." << std::endl;
+    }
 
-	tcflush(serial_fd, TCIFLUSH);
-	
-	write(serial_fd, msg, 2);
-
-	if(read(serial_fd, &msg, 2) != 2) return false;
-	return msg[0] || msg[1];
+    pinMode(4, INPUT);
+    pullUpDnControl(4, PUD_DOWN);
+    while (1) {
+		std::cout << "State: " << digitalRead(4) << std::endl;
+    }
+	return false;
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {

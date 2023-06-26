@@ -42,6 +42,8 @@
 #define SERVO_MIN_ANGLE -45
 #define SERVO_MAX_ANGLE 45
 
+#define PIN_BTN 4 // reset button in case of Lack of Progress
+
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 
 #define CM_TO_MS_FULL_SPEED 18.0f

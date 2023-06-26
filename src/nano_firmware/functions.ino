@@ -189,9 +189,7 @@ void parse_message() {
         // This is the only type of sensor where we need to index an array, so that is fine.
         value = distance(sensor_id);
         break;
-      case SENSOR_ID_BTN:
-        btn_pressed = analogRead(PIN_BTN) > 350;
-        value = btn_pressed ? 0xFFFF : 0x0000;
+      case SENSOR_ID_BTN: // button is not connected to nano anymore
         break;     
       case SENSOR_RAMP:
         current_pitch = get_pitch();

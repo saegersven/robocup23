@@ -23,7 +23,6 @@ void setup() {
 
   // Configure pins
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(PIN_BTN, INPUT);
 
   pinMode(M_LEFT_A, OUTPUT);
   pinMode(M_LEFT_B, OUTPUT);
