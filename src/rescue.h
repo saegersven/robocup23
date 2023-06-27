@@ -59,17 +59,6 @@ private:
 	cv::Mat debug_frame;
 
 	/**
-	 * Open and close camera. Parameters are the resolution send to the camera.
-	 */
-	void open_camera(int width, int height);
-	void close_camera();
-
-	/**
-	 * Grab a frame from the camera and resize it to the specified resolution.
-	 */
-	cv::Mat grab_frame(int width, int height);
-
-	/**
 	 * Drive to the center of the evacuation zone.
 	 * Three different methods:
 	 * 1. Turn and check distance in discrete steps
@@ -88,7 +77,7 @@ private:
 	/**
 	 * Use the victim neural network to find the closest victim.
 	 */
-	void find_victims(float& x, float& y, bool ignore_dead, bool ignore_top = false);
+	void find_victims(float& x, float& y, bool ignore_dead, bool& dead, bool ignore_top = false);
 
 	/**
 	 * Find exit using distance sensor and camera, starting from the center.

@@ -66,7 +66,12 @@ void Line::create_maps() {
 
 void Line::start() {
 	last_line_angle = 0.0f;
+	last_frame = cv::Mat();
 
+	robot->capture_height = 192;
+	robot->capture_width = 320;
+	robot->frame_height = 48;
+	robot->frame_width = 80;
 	robot->start_camera();
 	robot->set_blocked(false);
 
@@ -642,7 +647,7 @@ void Line::check_silver() {
 
 		delay(200);
 
-		robot->servo(SERVO_CAM, 20, 300);
+		robot->servo(SERVO_CAM, 80, 300);
 
 		grab_frame();
 

@@ -94,8 +94,9 @@ void Robot::init_serial() {
 
 void Robot::start_camera() {
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, 320);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, 192);
+	cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 3);
+	cap.set(cv::CAP_PROP_FRAME_WIDTH, capture_width);
+	cap.set(cv::CAP_PROP_FRAME_HEIGHT, capture_height);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
 	cap.set(cv::CAP_PROP_FPS, 120);
 
@@ -115,7 +116,7 @@ void Robot::camera_thread() {
 		cap.grab();
 		frame_lock.lock();
 		cap.retrieve(curr_frame);
-		cv::resize(curr_frame, curr_frame, cv::Size(80, 48));
+		cv::resize(curr_frame, curr_frame, cv::Size(frame_width, frame_height));
 		frame_lock.unlock();
 		has_frame = true;
 	}
@@ -162,11 +163,14 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-	if(gpioRead(PIN_BTN)) {
-		delay(5);
-		return gpioRead(PIN_BTN);
+	for(int i = 0; i < 10; ++i) {
+		if(!gpioRead(PIN_BTN)) {
+			return false;
+		}
+		delay(3);
 	}
-	return false;
+	std::cout << "Button is really being pressed" << std::endl;
+	return true;
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {

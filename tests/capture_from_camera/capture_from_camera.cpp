@@ -22,8 +22,8 @@
 // Rescue victims: 160x120
 // Rescue corner: 160x120
 // Rescue exit: 640x480
-#define WIDTH 80
-#define HEIGHT 48
+#define WIDTH 160
+#define HEIGHT 120
 
 //#define TIME
 

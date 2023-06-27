@@ -110,3 +110,5 @@
 - rote/grüne Ecke
 - schwarzer Streifen
 - Arduino Nanos
+- Taschenlampe
+- Baustellenstrahler

@@ -66,6 +66,9 @@ private:
 	cv::Mat curr_frame;
 
 public:
+	int capture_height, capture_width;
+	int frame_height, frame_width;
+
 	Robot();
 
 	void init_serial();

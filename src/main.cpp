@@ -14,7 +14,6 @@ enum class State {
 
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-	
 	//while (true) std::cout << robot->button() << std::endl;
 	State state = State::line;
 	Line line(robot);
