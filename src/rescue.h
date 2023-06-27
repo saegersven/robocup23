@@ -83,7 +83,7 @@ private:
 	/**
 	 * Use the corner neural network to find the corner.
 	 */
-	void find_black_corner();
+	void find_corner(bool ignore_green);
 
 	/**
 	 * Use the victim neural network to find the closest victim.

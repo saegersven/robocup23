@@ -34,29 +34,19 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
+	std::cout << "Rescue start!" << std::endl;
+	robot->m(127, 127, 700);
 
-	robot->m(127, 127, 600);
-
-	bool wall_right = false; // is there a wall on the right side of robot?
-
-	while (true) {
-		std::cout << robot->distance(1) << std::endl;
-		delay(35);
+	if (robot->distance_avg(1, 10, 0.3f) < 400) {
+		robot->turn(DTOR(130.0f));
+		robot->m(-127, -127, 1200);
+	} else {
+		robot->turn(DTOR(-130.0f));
+		robot->m(-127, -127, 1200);
 	}
-	uint16_t dist = robot->distance_avg(1, 10, 0.4f);
-	std::cout << "test test" << std::endl;
-	std::cout << dist << std::endl;
-	if (dist < 300) {
-		wall_right = true;
-		std::cout << "Wall right" << std::endl;
-	}
-
-
-	robot->turn(wall_right ? DTOR(135): -DTOR(135));
-
-	exit(0);
-
-
+	
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS, 300);
+	find_corner(false); // finds green corner
 
 
 
@@ -123,6 +113,7 @@ void Rescue::find_center() {
 	robot->stop();
 }
 
+// TODO: adjust because robot->distance() now returns mm instead of cm
 void Rescue::find_center_new() {
 	const int NUM_DATA_POINTS = 30;
 	const float step = PI2 / NUM_DATA_POINTS;
@@ -187,9 +178,9 @@ void Rescue::find_center_new_new() {
 
 	while(millis_() - start_time < MAX_TIME) {
 		float dist = robot->distance_avg(0, 5, 0.2f);
-		if(dist > 80.0f && dist < 110.0f) {
+		if(dist > 800.0f && dist < 1100.0f) {
 			robot->m(127, 35);
-		} else if (dist < 50.0f) {
+		} else if (dist < 500.0f) {
 			robot->m(-35, -127);
 		} else {
 			robot->m(50, -50);
@@ -200,12 +191,15 @@ void Rescue::find_center_new_new() {
 
 #define BLACK_CORNER_RES 480, 270
 
-// finds black corner and unloads victims
-void Rescue::find_black_corner() {
+// if ignore_green = false it only finds green corners.
+// if ignore_green = true it only finds red corners
+void Rescue::find_corner(bool ignore_green) {
+	robot->servo(SERVO_CAM, CAM_HIGHER_POS, 300);
+	std::cout << "Searching for corner" << std::endl;
 	open_camera(VICTIM_CAP_RES);
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
-	const int SLOW_TURN_SPEED = 35;
-	const int FAST_TURN_SPEED = 40;
+	int SLOW_TURN_SPEED = 35;
+	int FAST_TURN_SPEED = 50;
 
 	int8_t turn_speed = FAST_TURN_SPEED;
 
@@ -228,14 +222,14 @@ void Rescue::find_black_corner() {
 			cv::Mat res = corner_ml.invoke(frame);
 			cv::Mat res_resized;
 			cv::resize(res, res_resized, cv::Size(160, 120));
-			cv::imshow("Black corner", res_resized);
+			//cv::imshow("Corner", res_resized); //@saegersven: throws error, invalid number of channels (https://pasteboard.co/fyISv8IDnErT.png)
 			cv::imshow("frame", frame);
 			cv::waitKey(1);
 
-			if(corner_ml.extract_corner(res, x_corner, y_corner, false)) { // !!! false ignores red corners, please adjust
+			if(corner_ml.extract_corner(res, x_corner, y_corner, ignore_green)) {
 				uint64_t new_start_time = millis_() - 2000;
 				start_time = start_time > new_start_time ? start_time : new_start_time;
-				robot->m(22, -22);
+				robot->m(SLOW_TURN_SPEED, -SLOW_TURN_SPEED);
 				deg_per_iteration = 5;
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
 				std::cout << x_corner << std::endl;
@@ -243,14 +237,13 @@ void Rescue::find_black_corner() {
 					robot->turn(-DTOR(5.0f));
 					frame = grab_frame(160, 120);
 					res = corner_ml.invoke(frame);
-					corner_ml.extract_corner(res, x_corner, y_corner, false); // !!! false ignores red corners, please adjust
+					corner_ml.extract_corner(res, x_corner, y_corner, ignore_green);
 					robot->turn((x_corner / CORNER_IN_WIDTH - 0.5f) * DTOR(65.0f));
 					found_corner = true;
-					save_img(frame, "possible_corner");
 					break;
 				}
 			} else {
-				robot->m(28, -28);
+				robot->m(FAST_TURN_SPEED, -FAST_TURN_SPEED);
 			}
 			last_x_corner = x_corner;
 			//robot->turn(DTOR(deg_per_iteration));
@@ -258,34 +251,31 @@ void Rescue::find_black_corner() {
 		}
 		// robot turned full 360 deg and did not find corner
 		// recentre and increase cam angle a bit
+		// also drive a bit slower
 		if(!found_corner) {
+			robot->servo(SERVO_CAM, CAM_HIGHER_POS + 3, 300);
+			SLOW_TURN_SPEED -= 10;
+			FAST_TURN_SPEED -= 15;
 			find_center_new_new();
 		}
 	}
 	close_camera();
+	// TODO: drive to corner using camera!!!
+	robot->m(127, 127, 1200);
+	robot->m(-127, -127, 600);
+	robot->turn(R180);
+	robot->m(-127, -127, 1000);
 
-	open_camera(BLACK_CORNER_RES);
-
-	while(1) {
-		robot->m(42, 42);
-		frame = grab_frame(BLACK_CORNER_RES);
-		uint32_t num_black_pixels = 0;
-		in_range(frame, &is_black, &num_black_pixels);
-
-		if(num_black_pixels > 20000) break;
-	}
-	robot->m(37, 37, 200);
-	robot->stop();
-	delay(42);
-	robot->m(-127, -127, 550);
-	robot->turn(DTOR(180.0f));
-	delay(80);
-	robot->m(-50, -50, 1500);
-	for (int i = 0; i < 370; ++i) {
-		std::cout << i << std::endl;
+	robot->servo(SERVO_GATE, GATE_OPEN, 1500);
+	for (int i = 0; i < 3; ++i) {
+		robot->m(42, 42, 200);
 		delay(10);
+		robot->m(-127, -127, 150);	
+		delay(50);
 	}
-	robot->m(127, 127, 1000);
+	delay(700);
+	robot->servo(SERVO_GATE, GATE_CLOSED, 600);
+	robot->m(127, 127, 1200);
 }
 
 void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bool ignore_top) {
@@ -445,7 +435,7 @@ void Rescue::turn_wall() {
 }
 
 void Rescue::find_exit() {
-	find_black_corner();
+	find_corner(true);
 	close_camera();
 
 	robot->m(-127, -127, 950);

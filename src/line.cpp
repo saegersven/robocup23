@@ -153,9 +153,9 @@ void Line::follow() {
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
 					std::cout << "No difference, ruckling\n";
-					robot->m(127, 127, 42*2);
+					robot->m(127, 127, 42*4);
 					robot->turn(last_line_angle);
-					robot->m(-50, -50, 42*3);
+					robot->m(-35, -35, 42*4);
 					no_difference_time_stamp = millis_();
 					no_difference_counter = 100;
 				}
