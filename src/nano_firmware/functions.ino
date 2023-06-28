@@ -1,4 +1,8 @@
 void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
+  // debugging:
+  //EEPROM.write(0, left_speed);
+  //EEPROM.write(1, right_speed);
+  //exit(0);
   // Left motors
   // Motors will be shorted to ground when speed is zero
   digitalWrite(M_LEFT_A, left_speed < 0);

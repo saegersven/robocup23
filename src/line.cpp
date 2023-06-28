@@ -541,6 +541,7 @@ void Line::silver() {
 		robot->set_blocked(false);
 		delay(50);
 		std::cout << "NN detected silver" << std::endl;
+		save_img(frame, "potential_silver");
 		robot->turn(last_line_angle / 3.0f); // align with silver stripe
 		robot->stop();
 
@@ -678,7 +679,7 @@ void Line::line() {
 	ramp();
 
 	++frame_counter;
-	std::cout << "Base speed: " << base_speed << std::endl;
+	//std::cout << "Base speed: " << base_speed << std::endl;
 
 	// DEBUG, show fps and current frame
 	auto now_t = std::chrono::high_resolution_clock::now();
