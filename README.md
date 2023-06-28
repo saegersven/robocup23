@@ -9,7 +9,11 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] rescue
+- [ ] investigate crooked driving after turn
+- [ ] investigate why cam servo sometimes turns when stop.py is being called from run.sh
+- [ ] debounce button properly
+- [ ] check_silver after restart not working, cam servo does not tilt upwards
+- [ ] investigate: why is cam servo not ALWAYS attached. Sometimes its detached
 - [ ] exit
 - [ ] reduce sensitivity when few black pixels (gaps)
 

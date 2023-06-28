@@ -65,6 +65,11 @@ private:
 	std::mutex frame_lock;
 	cv::Mat curr_frame;
 
+	// variables used for button debouncing:
+	bool lastButtonState = false;
+	long long lastDebounceTime = 0;
+	bool buttonState = false;
+
 public:
 	int capture_height, capture_width;
 	int frame_height, frame_width;

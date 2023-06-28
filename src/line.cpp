@@ -678,7 +678,7 @@ void Line::line() {
 	ramp();
 
 	++frame_counter;
-	
+	std::cout << "Base speed: " << base_speed << std::endl;
 
 	// DEBUG, show fps and current frame
 	auto now_t = std::chrono::high_resolution_clock::now();

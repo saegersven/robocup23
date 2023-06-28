@@ -163,14 +163,21 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-	for(int i = 0; i < 10; ++i) {
-		if(!gpioRead(PIN_BTN)) {
-			return false;
-		}
-		delay(3);
-	}
-	std::cout << "Button is really being pressed" << std::endl;
-	return true;
+    bool reading = gpioRead(PIN_BTN); // Read the state of the button
+
+    if (reading != lastButtonState) {
+        lastDebounceTime = millis_(); // Reset the debounce timer
+    }
+
+    if ((millis_() - lastDebounceTime) > 50) { // change 50ms if needed
+        if (reading != buttonState) {
+            buttonState = reading;
+        }
+    }
+
+    lastButtonState = reading;
+
+    return buttonState;
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {

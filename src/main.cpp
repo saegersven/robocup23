@@ -70,7 +70,7 @@ int main() {
 			while(robot->button());
 			std::cout << "Start." << std::endl;
 			line.start();
-			line.check_silver();
+			//line.check_silver();
 		}
 
 		switch(state) {
