@@ -223,9 +223,8 @@ void Line::follow() {
 
 	robot->m(
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
-		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127), 42
+		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);
-	delay(100);
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
 }
@@ -695,8 +694,6 @@ void Line::line() {
 	if(obstacle_enabled) obstacle();
 
 	ramp();
-
-	delay(15);
 
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);
