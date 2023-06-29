@@ -24,6 +24,7 @@ bool is_red(uint8_t b, uint8_t g, uint8_t r) {
 
 Line::Line(std::shared_ptr<Robot> robot) {
 	this->robot = robot;
+	last_line_angle = 0.0f;
 
 	create_maps();
 }
@@ -67,6 +68,7 @@ void Line::create_maps() {
 void Line::start() {
 	last_line_angle = 0.0f;
 	last_frame = cv::Mat();
+	found_silver = false;
 
 	robot->capture_height = 192;
 	robot->capture_width = 320;
@@ -78,6 +80,7 @@ void Line::start() {
 	silver_ml.start();
 
 	running = true;
+	obstacle_enabled = true;
 	found_silver = false;
 	std::cout << "Line started.\n";
 }
@@ -88,6 +91,8 @@ void Line::stop() {
 	robot->stop_camera();
 	silver_ml.stop();
 	running = false;
+	obstacle_enabled = true;
+	obstacle_active = false;
 
 	cv::destroyAllWindows();
 	std::cout << "Line stopped.\n";
@@ -149,6 +154,9 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
+	uint32_t num_black_pixels = 0;
+	black = in_range(frame, &is_black, &num_black_pixels);
+
 	// If frame does not change much, try to get unstuck by increasing motor speed
 	if(!last_frame.empty()) {
 		float diff = average_difference(frame, last_frame);
@@ -157,12 +165,17 @@ void Line::follow() {
 			++no_difference_counter;
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
-					std::cout << "No difference, ruckling\n";
-					robot->m(127, 127, 42*4);
-					robot->turn(last_line_angle);
-					robot->m(-35, -35, 42*4);
-					no_difference_time_stamp = millis_();
-					no_difference_counter = 100;
+					if(num_black_pixels > 100) {
+						std::cout << "No difference, ruckling\n";
+						robot->m(127, 127, 42*4);
+						robot->turn(last_line_angle);
+						robot->m(-35, -35, 42*4);
+						no_difference_time_stamp = millis_();
+						no_difference_counter = 100;
+					} else {
+						std::cout << "Few pixels, no ruckling\n";
+						no_difference_counter = 100;
+					}
 				}
 			}
 		} else {
@@ -180,9 +193,6 @@ void Line::follow() {
 			robot->turn(last_line_angle);
 		}
 	}*/
-
-	uint32_t num_black_pixels = 0;
-	black = in_range(frame, &is_black, &num_black_pixels);
 
 	cv::imshow("Black", black);
 
@@ -213,10 +223,9 @@ void Line::follow() {
 
 	robot->m(
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
-		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
+		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127), 42
 		);
-
-
+	delay(100);
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
 }
@@ -253,8 +262,7 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 
 	uint32_t num_pixels = 0;
 	ir = in_range(frame, f, &num_pixels);
-
-	if(num_pixels < 50) return groups;
+	if(num_pixels < 130) return groups;
 
 	for(int y = 0; y < ir.rows; ++y) {
 		uint8_t* p = ir.ptr<uint8_t>(y);
@@ -447,6 +455,8 @@ void Line::green() {
 }
 
 void Line::rescue_kit() {
+	if((frame_counter + 2) % 4 != 0) return;
+
 	cv::Mat blue;
 	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
 
@@ -520,6 +530,8 @@ void Line::rescue_kit() {
 }
 
 void Line::red() {
+	if(frame_counter % 4 != 0) return; // PERFORMANCE WHOOOO
+
 	uint32_t num_red_pixels = 0;
 	in_range(frame, &is_red, &num_red_pixels);
 
@@ -671,12 +683,43 @@ void Line::line() {
 	grab_frame();
 
 	green(); // follow() needs green
+
 	follow();
+
 	rescue_kit();
+
 	red();
+
 	silver();
+
 	if(obstacle_enabled) obstacle();
+
 	ramp();
+
+	delay(15);
+
+	cv::imshow("Debug", debug_frame);
+	cv::waitKey(1);
+	return;
+	//auto a = std::chrono::high_resolution_clock::now();
+
+	//long b = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	//long c = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	//long d = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	rescue_kit();
+	//long e = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	red();
+	//long f = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	silver();
+	//long g = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	if(obstacle_enabled) obstacle();
+	//long h = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	ramp();
+	//long i = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
+	
+	//std::cout << "grab_frame (" << b << ")\t green (" << (c - b) << ")\t follow (" << (d - c);
+	//std::cout << ")\t rescue_kit (" << (e - d) << ")\t red (" << (f - e) << ")\t silver (" << (g - f);
+	//std::cout << ")\t obstacle (" << (h - g) << ")\t ramp (" << (i - h) << ")\n";
 
 	++frame_counter;
 	//std::cout << "Base speed: " << base_speed << std::endl;
@@ -690,6 +733,8 @@ void Line::line() {
 		cv::Point(2, 8), cv::FONT_HERSHEY_DUPLEX,
 		0.4, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
+
+	std::cout << "Line fps: " << fps << std::endl;
 
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);

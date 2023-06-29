@@ -14,7 +14,19 @@ enum class State {
 
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
-	
+
+	/*robot->capture_height = 192;
+	robot->capture_width = 320;
+	robot->frame_height = 48;
+	robot->frame_width = 80;
+	robot->start_camera();
+	cv::Mat frame;
+	while(1) {
+		frame = robot->grab_frame();
+		cv::imshow("Frame", frame);
+		cv::waitKey(1);
+	}*/
+
 	State state = State::line;
 	Line line(robot);
 
@@ -39,10 +51,7 @@ int main() {
 	
 	// MAIN LOOP
 	while(1) {
-		uint64_t duration = millis_();
-		while(robot->button()) delay(10);
-		duration = millis_() - duration;
-		if(duration > 20 && millis_() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
+		if(robot->button() && millis_() - last_started > 300) { // if Restart_btn is pressed and main program has been running for at least 300ms:
 			while(robot->button());
 			robot->stop();
 			switch(state) {

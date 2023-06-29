@@ -40,6 +40,7 @@ int main(int, char**) {
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, WIDTH * 4);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, HEIGHT * 4);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+    cap.set(cv::CAP_PROP_FPS, 120);
     if (!cap.isOpened()) {
         std::cerr << "ERROR! Unable to open camera\n";
         return -1;
@@ -55,7 +56,7 @@ int main(int, char**) {
         cv::flip(frame, debug_frame, 1);
 
         if (frame.empty()) {
-            std::cerr << "ERROR! blank frame grabbed\n";
+            std::cerr << "ERROR! blank frame grabbed\n";ls
             break;
         }
         cv::imshow("Live", frame);

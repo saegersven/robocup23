@@ -94,7 +94,6 @@ void Robot::init_serial() {
 
 void Robot::start_camera() {
 	cap.open(0, cv::CAP_V4L2);
-	cap.set(cv::CAP_PROP_AUTO_EXPOSURE, 3);
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, capture_width);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, capture_height);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
@@ -112,7 +111,12 @@ void Robot::start_camera() {
 }
 // constantly grabs frame from camera
 void Robot::camera_thread() {
+	//auto time = std::chrono::high_resolution_clock::now();
 	while(camera_running) {
+		//auto now_t = std::chrono::high_resolution_clock::now();
+		//long long dt = std::chrono::duration_cast<std::chrono::microseconds>(now_t - time).count();
+		//std::cout << 1000000.0f / (float)dt << std::endl;
+		//time = now_t;
 		cap.grab();
 		frame_lock.lock();
 		cap.retrieve(curr_frame);
@@ -163,7 +167,7 @@ int Robot::serial_available() {
 }
 
 bool Robot::button() {
-    bool reading = gpioRead(PIN_BTN); // Read the state of the button
+    /*bool reading = gpioRead(PIN_BTN); // Read the state of the button
 
     if (reading != lastButtonState) {
         lastDebounceTime = millis_(); // Reset the debounce timer
@@ -175,9 +179,15 @@ bool Robot::button() {
         }
     }
 
-    lastButtonState = reading;
+    lastButtonState = reading;*/
+    for(int i = 0; i < 8; i++) {
+    	if(!gpioRead(PIN_BTN)) {
+    		std::cout << i << std::endl;
+    		return false;
+    	}
+    }
 
-    return buttonState;
+    return true;
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {
