@@ -29,7 +29,7 @@ Robot::Robot() : blocked(false), has_frame(false) {
 	}
 
 	gpioSetMode(PIN_BTN, PI_INPUT);
-	gpioSetPullUpDown(PIN_BTN, PI_PUD_DOWN);
+	//gpioSetPullUpDown(PIN_BTN, PI_PUD_DOWN);
 
 	delay(2000); // Wait for Nano to boot up (can probably be shorter)
 }
@@ -180,9 +180,8 @@ bool Robot::button() {
     }
 
     lastButtonState = reading;*/
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < 4; i++) {
     	if(!gpioRead(PIN_BTN)) {
-    		std::cout << i << std::endl;
     		return false;
     	}
     }
@@ -191,7 +190,7 @@ bool Robot::button() {
 }
 
 void Robot::m(int8_t left, int8_t right, int32_t duration) {
-	std::cout << "left: " << static_cast<int>(left) << "  right: " << static_cast<int>(right) << "  dur: " << duration << std::endl;
+	//std::cout << "left: " << static_cast<int>(left) << "  right: " << static_cast<int>(right) << "  dur: " << duration << std::endl;
 	if(blocked) return;
 	if(duration < 0) {
 		duration = -duration;
@@ -247,7 +246,7 @@ void Robot::turn(float angle) {
 		read(serial_fd, &msg, 1);
 		std::cout << msg[0] << std::endl;
 		if (CMD_TURN_DONE == msg[0]) {
-			std::cout << "Received done, msg is: " << (int)msg[0] << std::endl;
+			//std::cout << "Received done, msg is: " << (int)msg[0] << std::endl;
 			break;
 		}
 		if(start_t - millis_() > 6000) break;

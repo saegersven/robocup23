@@ -174,7 +174,7 @@ void Line::follow() {
 						no_difference_counter = 100;
 					} else {
 						std::cout << "Few pixels, no ruckling\n";
-						no_difference_counter = 100;
+						no_difference_counter = 0;
 					}
 				}
 			}
@@ -223,9 +223,9 @@ void Line::follow() {
 
 	robot->m(
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
-		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127), 42
+		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);
-	delay(100);
+
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
 }
@@ -262,7 +262,7 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 
 	uint32_t num_pixels = 0;
 	ir = in_range(frame, f, &num_pixels);
-	if(num_pixels < 130) return groups;
+	if(num_pixels < 50) return groups;
 
 	for(int y = 0; y < ir.rows; ++y) {
 		uint8_t* p = ir.ptr<uint8_t>(y);
@@ -277,7 +277,7 @@ std::vector<Group> Line::find_groups(cv::Mat frame, cv::Mat& ir, std::function<b
 				float group_center_y = 0.0f;
 				add_to_group_center(x, y, ir, num_group_pixels, group_center_x, group_center_y);
 
-				if(num_group_pixels > 130) {
+				if(num_group_pixels > 70) {
 					group_center_x /= num_group_pixels;
 					group_center_y /= num_group_pixels;
 					groups.push_back({group_center_x, group_center_y, num_group_pixels});
@@ -407,22 +407,25 @@ void Line::green() {
 		delay(50);
 		robot->m(100, 100, DISTANCE_FACTOR * (distance - 50));
 
-		robot->m(60, 60, 250);
+		robot->m(60, 60, 200);
 
 		if(green_result == GREEN_RESULT_DEAD_END) {
+			std::cout << "DEAD-END\n";
 			// Dead-End regardless of green_active
 			robot->m(127, 127, 200);
 			robot->turn(DTOR(180.0f));
 			robot->m(127, 127, 160);
 			obstacle_enabled = true;
 		} else if(green_result == GREEN_RESULT_LEFT) {
+			std::cout << "LEFT\n";
 			robot->turn(DTOR(-65.0f));
 			delay(30);
 		} else if(green_result == GREEN_RESULT_RIGHT) {
+			std::cout << "RIGHT\n";
 			robot->turn(DTOR(65.0f));
 			delay(30);
 		}
-		robot->m(127, 127, 50);
+		robot->m(127, 127, 20);
 
 		grab_frame();
 		uint32_t num_black_pixels = 0;
@@ -473,7 +476,9 @@ void Line::rescue_kit() {
 			}
 		}
 
-		if(group.num_pixels < 100) return;
+		if(group.num_pixels < 70) return;
+
+		std::cout << "RESCUE KIT\n";
 
 		robot->stop();
 
@@ -696,31 +701,6 @@ void Line::line() {
 
 	ramp();
 
-	delay(15);
-
-	cv::imshow("Debug", debug_frame);
-	cv::waitKey(1);
-	return;
-	//auto a = std::chrono::high_resolution_clock::now();
-
-	//long b = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	//long c = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	//long d = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	rescue_kit();
-	//long e = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	red();
-	//long f = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	silver();
-	//long g = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	if(obstacle_enabled) obstacle();
-	//long h = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	ramp();
-	//long i = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - a).count();
-	
-	//std::cout << "grab_frame (" << b << ")\t green (" << (c - b) << ")\t follow (" << (d - c);
-	//std::cout << ")\t rescue_kit (" << (e - d) << ")\t red (" << (f - e) << ")\t silver (" << (g - f);
-	//std::cout << ")\t obstacle (" << (h - g) << ")\t ramp (" << (i - h) << ")\n";
-
 	++frame_counter;
 	//std::cout << "Base speed: " << base_speed << std::endl;
 
@@ -734,7 +714,7 @@ void Line::line() {
 		0.4, cv::Scalar(0, 255, 0));
 	last_frame_t = now_t;
 
-	std::cout << "Line fps: " << fps << std::endl;
+	//std::cout << "Line fps: " << fps << std::endl;
 
 	cv::imshow("Debug", debug_frame);
 	cv::waitKey(1);

@@ -24,7 +24,7 @@
 #define SERVO_GATE 1
 #define SERVO_CAM 2
 
-#define CAM_LOWER_POS 33
+#define CAM_LOWER_POS 36
 #define CAM_HIGHER_POS 100
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
@@ -42,7 +42,7 @@
 #define SERVO_MIN_ANGLE -45
 #define SERVO_MAX_ANGLE 45
 
-#define PIN_BTN 4 // reset button in case of Lack of Progress
+#define PIN_BTN 27 // reset button in case of Lack of Progress
 
 #define DISTANCE_FACTOR (4.2f + 2 * 0.42f)
 
