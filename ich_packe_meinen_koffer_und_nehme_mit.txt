@@ -6,6 +6,7 @@
 - Dremel mit Werkzeug
 - Labornetzteil
 - Akkuschrauber
+- Akkuschrauber Netzteil
 - Powerbank
 - Mehrfachsteckdose
 - Verlängerungskabel
@@ -114,3 +115,7 @@
 - Baustellenstrahler
 - Gewindeeinsätze
 - Kabel zum Löten
+- Spezialkleber
+- Raspi Kamera Kabel
+- Mini USB Kabel
+- Feinmechanikerschraubendreher
