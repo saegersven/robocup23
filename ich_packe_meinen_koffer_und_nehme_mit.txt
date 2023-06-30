@@ -112,3 +112,5 @@
 - Arduino Nanos
 - Taschenlampe
 - Baustellenstrahler
+- Gewindeeinsätze
+- Kabel zum Löten
