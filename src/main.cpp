@@ -15,7 +15,8 @@ enum class State {
 int main() {
 	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 
-	/*robot->capture_height = 192;
+	/*
+	robot->capture_height = 192;
 	robot->capture_width = 320;
 	robot->frame_height = 48;
 	robot->frame_width = 80;
@@ -25,19 +26,21 @@ int main() {
 		frame = robot->grab_frame();
 		cv::imshow("Frame", frame);
 		cv::waitKey(1);
-	}*/
+	}
+	*/
 
 	State state = State::line;
 	Line line(robot);
 
+
 	Rescue rescue(robot);
 
 	// SET SERVOS TO DEFAULT POS
-	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
-	robot->gripper(GRIPPER_CLOSE, 200);
-	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
-	robot->servo(1, GATE_CLOSED, 300);
-	robot->servo(0, ARM_HIGHER_POS, 300);
+	// robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
+	// robot->gripper(GRIPPER_CLOSE, 200);
+	// robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+	// robot->servo(1, GATE_CLOSED, 300);
+	// robot->servo(0, ARM_HIGHER_POS, 300);
 
 	while (!robot->button()) {
 		robot->send_ready();
@@ -67,9 +70,9 @@ int main() {
 			
 			std::cout << "Stop." << std::endl;
 			// SET SERVOS TO DEFAULT POS
-			robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
-			robot->servo(1, GATE_CLOSED, 300);
-			robot->servo(0, ARM_HIGHER_POS, 300);
+			// robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+			// robot->servo(1, GATE_CLOSED, 300);
+			// robot->servo(0, ARM_HIGHER_POS, 300);
 			delay(300);
 
 			while(!robot->button()) {
@@ -90,7 +93,7 @@ int main() {
 					rescue.start();
 					state = State::rescue;
 				} else {
-					line.line();					
+					line.line();
 				}
 				break;
 			}

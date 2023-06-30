@@ -74,10 +74,15 @@ void loop() {
     }
   }
 
-  while (Serial.available() > 0)  {
+  while (Serial.available() > 0)  {    
     message[message_pos] = Serial.read();
+    //i2cDebug(42, message[message_pos]);
     message_pos++;
 
+    if(message[message_pos - 1] == -1) {
+      message_pos = 0;
+    }
+    
     if (message_pos == message_lengths[message[0] - 1]) {
       parse_message();
       message_pos = 0;

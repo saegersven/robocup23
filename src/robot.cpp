@@ -16,7 +16,7 @@ extern "C" {
 #include <sstream>
 #include <string>
 
-#include <pigpio.h>
+#include <wiringPi.h>
 
 #include "defines.h"
 #include "utils.h"
@@ -24,14 +24,20 @@ extern "C" {
 Robot::Robot() : blocked(false), has_frame(false) {
 	init_serial();
 
-	if(gpioInitialise() < 0) {
+	/*if(gpioInitialise() < 0) {
 		std::cout << "GPIO initialization failed" << std::endl;
 	}
 
 	gpioSetMode(PIN_BTN, PI_INPUT);
-	//gpioSetPullUpDown(PIN_BTN, PI_PUD_DOWN);
+	gpioSetPullUpDown(PIN_BTN, PI_PUD_OFF);
 
-	delay(2000); // Wait for Nano to boot up (can probably be shorter)
+	//gpioSetMode(4, PI_INPUT);
+	//gpioSetPullUpDown(4, PI_PUD_DOWN);*/
+
+	wiringPiSetupGpio();
+	pinMode(PIN_BTN, OUTPUT);
+
+	delay(500); // Wait for Nano to boot up
 }
 
 void Robot::init_serial() {
@@ -97,7 +103,7 @@ void Robot::start_camera() {
 	cap.set(cv::CAP_PROP_FRAME_WIDTH, capture_width);
 	cap.set(cv::CAP_PROP_FRAME_HEIGHT, capture_height);
 	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
-	cap.set(cv::CAP_PROP_FPS, 120);
+	cap.set(cv::CAP_PROP_FPS, 60);
 
 	if(!cap.isOpened()) {
 		std::cout << "Could not open camera." << std::endl;
@@ -111,12 +117,12 @@ void Robot::start_camera() {
 }
 // constantly grabs frame from camera
 void Robot::camera_thread() {
-	//auto time = std::chrono::high_resolution_clock::now();
+	auto time = std::chrono::high_resolution_clock::now();
 	while(camera_running) {
-		//auto now_t = std::chrono::high_resolution_clock::now();
-		//long long dt = std::chrono::duration_cast<std::chrono::microseconds>(now_t - time).count();
-		//std::cout << 1000000.0f / (float)dt << std::endl;
-		//time = now_t;
+		auto now_t = std::chrono::high_resolution_clock::now();
+		long long dt = std::chrono::duration_cast<std::chrono::microseconds>(now_t - time).count();
+		std::cout << 1000000.0f / (float)dt << std::endl;
+		time = now_t;
 		cap.grab();
 		frame_lock.lock();
 		cap.retrieve(curr_frame);
@@ -180,8 +186,9 @@ bool Robot::button() {
     }
 
     lastButtonState = reading;*/
+    //return false;
     for(int i = 0; i < 4; i++) {
-    	if(!gpioRead(PIN_BTN)) {
+    	if(!digitalRead(PIN_BTN)) {
     		return false;
     	}
     }
@@ -199,18 +206,23 @@ void Robot::m(int8_t left, int8_t right, int32_t duration) {
 	}
 	if(duration > 65535) duration = 65535;
 	uint16_t dur = duration;
-	char msg[5] = {CMD_MOTOR, *((char*)&left), *((char*)&right), 0, 0};
-	memcpy(&msg[3], &dur, 2);
 
-	write(serial_fd, msg, 5);
+	// -1 is sync byte
+	if(left == -1) left = 0;
+	if(right == -1) right = 0;
+
+	char msg[6] = {0xFF, CMD_MOTOR, *((char*)&left), *((char*)&right), 0, 0};
+	memcpy(&msg[4], &dur, 2);
+
+	write(serial_fd, msg, 6);
 	delay(duration);
 }
 
 void Robot::stop() {
 	if(blocked) return;
 
-	char msg = CMD_STOP;
-	write(serial_fd, &msg, 1);
+	char msg[2] = {0xFF, CMD_STOP};
+	write(serial_fd, msg, 2);
 }
 
 void Robot::send_ready() {
@@ -231,10 +243,10 @@ void Robot::turn(float angle) {
 	*/
 
 	int16_t angle_mrad = angle * 1000;
-	char msg[3] = {CMD_TURN, 0, 0};
-	memcpy(&msg[1], &angle_mrad, 2);
+	char msg[4] = {0xFF, CMD_TURN, 0, 0};
+	memcpy(&msg[2], &angle_mrad, 2);
 
-	write(serial_fd, msg, 3);
+	write(serial_fd, msg, 4);
 
 	tcflush(serial_fd, TCIFLUSH);
 
@@ -274,13 +286,13 @@ void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 void Robot::gripper(int8_t gripper_direction, uint16_t delay_ms) {
 	if(blocked) return;
 
-	uint8_t msg[2] = {CMD_GRIPPER, *((uint8_t*)&gripper_direction)};
+	uint8_t msg[3] = {0xFF, CMD_GRIPPER, *((uint8_t*)&gripper_direction)};
 
-	write(serial_fd, msg, 2);
+	write(serial_fd, msg, 3);
 	if(delay_ms != 0) {
 		delay(delay_ms);
-		msg[1] = GRIPPER_OFF;
-		write(serial_fd, msg, 2);
+		msg[2] = GRIPPER_OFF;
+		write(serial_fd, msg, 3);
 	}
 }
 
@@ -298,8 +310,8 @@ float Robot::read_pitch() {
 
 // Returns distance in mm. id 0 is front sensor, id 1 is side sensor
 int Robot::distance(uint8_t sensor_id) {
-    uint8_t msg[2] = {CMD_SENSOR, sensor_id};
-    write(serial_fd, msg, 2);
+    uint8_t msg[3] = {0xFF, CMD_SENSOR, sensor_id};
+    write(serial_fd, msg, 3);
 
 	tcflush(serial_fd, TCIFLUSH);
 
@@ -351,8 +363,8 @@ int Robot::distance_avg(uint8_t sensor_id, uint8_t num_measurements, float remov
 
 // returns 1 for ramp up, 2 for ramp down, 0 for no ramp
 int Robot::ramp() {
-	uint8_t msg[2] = {CMD_SENSOR, 3}; // 3 means gyro
-    write(serial_fd, msg, 2);
+	uint8_t msg[3] = {0xFF, CMD_SENSOR, 3}; // 3 means gyro
+    write(serial_fd, msg, 3);
 
 	tcflush(serial_fd, TCIFLUSH);
 

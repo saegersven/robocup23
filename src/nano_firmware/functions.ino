@@ -1,4 +1,6 @@
 void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
+  i2cDebug(duration, (byte)(duration >> 8));
+  i2cDebug(left_speed, right_speed);
   // debugging:
   //EEPROM.write(0, left_speed);
   //EEPROM.write(1, right_speed);
@@ -184,6 +186,8 @@ void parse_message() {
     turn(angle);
   } else if (message[0] == CMD_SENSOR) {
     uint8_t sensor_id = message[1];
+    
+    //i2cDebug(CMD_SENSOR, sensor_id);
 
     uint16_t value = 0;
     bool btn_pressed = false;
@@ -208,6 +212,7 @@ void parse_message() {
     memcpy(msg, &value, 2);
 
     Serial.write(msg, 2);
+    //i2cDebug(msg[0], msg[1]);
   } else if (message[0] == CMD_M_BTN_OBSTACLE) {
     int8_t left_speed = message[1];
     int8_t right_speed = message[2];
@@ -238,7 +243,7 @@ void error(int error_code) {
     Serial.println(" ---");
     digitalWrite(13, HIGH);
     delay(42);
-    digitalWrite(13, LOW);
+    digitalWrite(13,LOW );
     delay(42);
   }
 }

@@ -336,7 +336,9 @@ void Rescue::find_corner(bool ignore_green) {
 				x_corner -= (CORNER_IN_WIDTH / 2.0f);
 				std::cout << x_corner << std::endl;
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
-					robot->turn(-DTOR(5.0f));
+					robot->stop();
+					delay(1000);
+					robot->turn(-DTOR(25.0f));
 					for(int i = 0; i < 2; ++i) {
 						frame = robot->grab_frame();
 						res = corner_ml.invoke(frame);
@@ -355,6 +357,7 @@ void Rescue::find_corner(bool ignore_green) {
 		// recentre and increase cam angle a bit
 		// also drive a bit slower
 		if(!found_corner) {
+			std::cout << "TURNING SLOWER NOW!!!" << std::endl;
 			robot->servo(SERVO_CAM, CAM_HIGHER_POS + 3, 300);
 			SLOW_TURN_SPEED -= 10;
 			FAST_TURN_SPEED -= 15;

@@ -51,8 +51,8 @@ cv::Mat CornerML::invoke(cv::Mat image) {
 }
 
 bool CornerML::extract_corner(cv::Mat probability_map, float& x, float& y, bool red) {
-    const float THRESHOLD_RED = 0.4f;
-    const float THRESHOLD_GREEN = 0.4f;
+    const float THRESHOLD_RED = 0.3f;
+    const float THRESHOLD_GREEN = 0.3f;
 
     cv::Mat blurred;
     cv::GaussianBlur(probability_map, blurred, cv::Size(3, 3), 0);

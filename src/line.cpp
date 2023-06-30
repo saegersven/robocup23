@@ -66,6 +66,13 @@ void Line::create_maps() {
 }
 
 void Line::start() {
+
+	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
+	robot->gripper(GRIPPER_CLOSE, 200);
+	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
+	robot->servo(1, GATE_CLOSED, 300);
+	robot->servo(0, ARM_HIGHER_POS, 300);
+
 	last_line_angle = 0.0f;
 	last_frame = cv::Mat();
 	found_silver = false;
@@ -160,12 +167,13 @@ void Line::follow() {
 	// If frame does not change much, try to get unstuck by increasing motor speed
 	if(!last_frame.empty()) {
 		float diff = average_difference(frame, last_frame);
+		std::cout << "No diff counter: " << no_difference_counter << " | " << diff << std::endl;
 
 		if(diff < 4.2f) {
 			++no_difference_counter;
 			if(no_difference_counter == 200) {
 				if(ENABLE_NO_DIFFERENCE) {
-					if(num_black_pixels > 100) {
+					if(num_black_pixels > 200) {
 						std::cout << "No difference, ruckling\n";
 						robot->m(127, 127, 42*4);
 						robot->turn(last_line_angle);
@@ -225,7 +233,7 @@ void Line::follow() {
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
 		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);
-	
+
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
 }
@@ -556,7 +564,6 @@ void Line::silver() {
 	if(silver_ml.get_current_prediction()) {
 		obstacle_enabled = false;
 		robot->set_blocked(false);
-		delay(50);
 		std::cout << "NN detected silver" << std::endl;
 		save_img(frame, "potential_silver");
 		robot->turn(last_line_angle / 3.0f); // align with silver stripe
@@ -567,7 +574,7 @@ void Line::silver() {
 }
 
 void Line::obstacle() {
-	if (frame_counter % 10 != 0) return;
+	if (frame_counter % 14 != 0) return;
 
 	uint16_t dist = robot->distance(0);
 	if(dist > 100) return;
@@ -633,7 +640,7 @@ void Line::obstacle() {
 	robot->m(-40 * sign, 40 * sign, 200);
 	robot->m(80, 80, 330);
 	robot->m(-80 * sign, 80 * sign, 180);
-	robot->m(-40, -40, 260);
+	robot->m(-40, -40, 150);
 }
 
 // increases or decreases speed if robot drives up or down a ramp
@@ -685,6 +692,17 @@ void Line::check_silver() {
 }
 
 void Line::line() {
+	/*robot->capture_height = 192;
+	robot->capture_width = 320;
+	robot->frame_height = 48;
+	robot->frame_width = 80;
+	robot->start_camera();
+
+	while(1) {
+		frame = robot->grab_frame();
+		cv::imshow("Frame", frame);
+		cv::waitKey(1);
+	}*/
 	grab_frame();
 
 	green(); // follow() needs green
@@ -699,7 +717,7 @@ void Line::line() {
 
 	if(obstacle_enabled) obstacle();
 
-	ramp();
+	//ramp();
 
 	++frame_counter;
 	//std::cout << "Base speed: " << base_speed << std::endl;

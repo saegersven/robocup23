@@ -32,7 +32,7 @@
 #define GATE_CLOSED 0
 
 #define GRIPPER_OPEN 1
-#define GRIPPER_CLOSE -1
+#define GRIPPER_CLOSE -2
 #define GRIPPER_OFF 0
 
 

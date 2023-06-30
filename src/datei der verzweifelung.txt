@@ -1,0 +1,4 @@
+tl;dr: BNO auslesen
+
+Was wir getestet haben und die frame drops nicht beheben konnte:
+- alles
