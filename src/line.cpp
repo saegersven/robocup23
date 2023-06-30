@@ -225,10 +225,7 @@ void Line::follow() {
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),
 		clamp(base_speed - line_angle * line_follow_sensitivity * ees_r * extra_sensitivity, -128, 127)
 		);
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/main
+	
 	last_frame = frame.clone();
 	last_line_angle = line_angle;
 }
