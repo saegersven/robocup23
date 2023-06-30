@@ -24,7 +24,11 @@
 #define SERVO_GATE 1
 #define SERVO_CAM 2
 
+<<<<<<< HEAD
 #define CAM_LOWER_POS 36
+=======
+#define CAM_LOWER_POS 35
+>>>>>>> origin/main
 #define CAM_HIGHER_POS 100
 #define ARM_LOWER_POS 3
 #define ARM_HIGHER_POS 180
