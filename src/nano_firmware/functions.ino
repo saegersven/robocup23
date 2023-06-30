@@ -242,3 +242,10 @@ void error(int error_code) {
     delay(42);
   }
 }
+
+void i2cDebug(int8_t integer1, int8_t integer2) {
+  Wire.beginTransmission(8);  // Address of the Slavenano (Arduino 2)
+  Wire.write((byte)integer1);  // Send the first integer
+  Wire.write((byte)integer2);  // Send the second integer
+  Wire.endTransmission();  // End the transmission
+}
