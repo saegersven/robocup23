@@ -27,9 +27,11 @@ void Rescue::start() {
 }
 
 void Rescue::stop() {
+	std::cout << "Rescue::stop" << std::endl;
 	pthread_cancel(this->native_handle);
 	robot->stop_camera();
 	cv::destroyAllWindows();
+	std::cout << "Windows closed!!!" << std::endl;
 }
 
 #define X_RES 160
@@ -324,9 +326,9 @@ void Rescue::find_corner(bool ignore_green) {
 			cv::Mat res = corner_ml.invoke(frame);
 			cv::Mat res_resized;
 			cv::resize(res, res_resized, cv::Size(160, 120));
-			cv::imshow("Corner", two_channel_to_three_channel(res_resized));
-			cv::imshow("frame", frame);
-			cv::waitKey(1);
+			//cv::imshow("Corner", two_channel_to_three_channel(res_resized));
+			//cv::imshow("frame", frame);
+			//cv::waitKey(1);
 
 			if(corner_ml.extract_corner(res, x_corner, y_corner, ignore_green)) {
 				uint64_t new_start_time = millis_() - 2000;
@@ -393,13 +395,13 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 	cv::Mat res = victim_ml.invoke(frame);
 	save_img(frame, "rescue");
 	//cv::resize(res, res, cv::Size(160, 120));
-	cv::imshow("Victim result", two_channel_to_three_channel(res));
+	//cv::imshow("Victim result", two_channel_to_three_channel(res));
 	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
-	cv::imshow("Victims", frame);
-	cv::waitKey(1);
+	//cv::imshow("Victims", frame);
+	//cv::waitKey(1);
 
 	for(int i = 0; i < victims.size(); ++i) {
 		if(ignore_dead && victims[i].dead) continue;

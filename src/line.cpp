@@ -66,7 +66,6 @@ void Line::create_maps() {
 }
 
 void Line::start() {
-
 	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
 	robot->gripper(GRIPPER_CLOSE, 200);
 	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
@@ -89,6 +88,7 @@ void Line::start() {
 	running = true;
 	obstacle_enabled = true;
 	found_silver = false;
+	first_frame = true;
 	std::cout << "Line started.\n";
 }
 
@@ -202,7 +202,7 @@ void Line::follow() {
 		}
 	}*/
 
-	cv::imshow("Black", black);
+	//cv::imshow("Black", black);
 
 	float line_angle = get_line_angle(black);
 
@@ -302,8 +302,7 @@ uint8_t Line::green_direction(float& global_average_x, float& global_average_y) 
 
 	std::vector<Group> groups = find_groups(frame, green_mat, &is_green);
 
-	cv::imshow("Green", green_mat);
-	cv::waitKey(1);
+	//cv::imshow("Green", green_mat);
 
 	if(groups.size() == 0) return 0;
 	
@@ -397,6 +396,8 @@ void Line::green() {
 	if(!green_active) green_weight_slope = 0.0f;
 
 	uint8_t green_result = green_direction(global_average_x, global_average_y);
+
+	std::cout << "Green result: " << green_result << std::endl;
 
 	if(green_result != 0) {
 		obstacle_enabled = false;
@@ -606,8 +607,8 @@ void Line::obstacle() {
 
 		while(1) {
 			grab_frame();
-			cv::imshow("Obstacle", frame);
-			cv::waitKey(1);
+			//cv::imshow("Obstacle", frame);
+			//cv::waitKey(1);
 
 			cv::Range x_range = cv::Range(45, 70);
 			if(obstacle_direction == BOOL_DIR_RIGHT) {
@@ -692,6 +693,7 @@ void Line::check_silver() {
 }
 
 void Line::line() {
+	std::cout << "Line" << std::endl;
 	/*robot->capture_height = 192;
 	robot->capture_width = 320;
 	robot->frame_height = 48;
@@ -705,9 +707,13 @@ void Line::line() {
 	}*/
 	grab_frame();
 
+	std::cout << "Got Frame" << std::endl;
+
 	green(); // follow() needs green
+	std::cout << "Green" << std::endl;
 
 	follow();
+	std::cout << "Follow" << std::endl;
 
 	rescue_kit();
 
@@ -716,6 +722,7 @@ void Line::line() {
 	silver();
 
 	if(obstacle_enabled) obstacle();
+	std::cout << "Kit, red, silver" << std::endl;
 
 	//ramp();
 
@@ -734,6 +741,6 @@ void Line::line() {
 
 	//std::cout << "Line fps: " << fps << std::endl;
 
-	cv::imshow("Debug", debug_frame);
-	cv::waitKey(1);
+	//cv::imshow("Debug", debug_frame);
+	//cv::waitKey(1);
 }

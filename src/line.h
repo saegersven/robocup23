@@ -98,6 +98,8 @@ private:
 
 	// used for silver testing
 	bool test = false;
+
+	bool first_frame = true;
 	
 	// used to align before gaps. Currently not working
 	bool correct_gap_line_angle = true;

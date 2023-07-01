@@ -111,18 +111,19 @@ void Robot::start_camera() {
 	}
 
 	camera_running = true;
+	has_frame = false;
 
 	std::thread t([this] {this->camera_thread();});
 	t.detach();
 }
 // constantly grabs frame from camera
 void Robot::camera_thread() {
-	auto time = std::chrono::high_resolution_clock::now();
+	//auto time = std::chrono::high_resolution_clock::now();
 	while(camera_running) {
-		auto now_t = std::chrono::high_resolution_clock::now();
-		long long dt = std::chrono::duration_cast<std::chrono::microseconds>(now_t - time).count();
-		std::cout << 1000000.0f / (float)dt << std::endl;
-		time = now_t;
+		//auto now_t = std::chrono::high_resolution_clock::now();
+		//long long dt = std::chrono::duration_cast<std::chrono::microseconds>(now_t - time).count();
+		//std::cout << 1000000.0f / (float)dt << std::endl;
+		//time = now_t;
 		cap.grab();
 		frame_lock.lock();
 		cap.retrieve(curr_frame);
@@ -142,11 +143,11 @@ cv::Mat Robot::grab_frame() {
 	if(!camera_running) std::cout << "Grabbing frame with closed camera" << std::endl;
 
 	while(!has_frame);
+	
+	frame_lock.lock();
 	has_frame = false;
 
 	cv::Mat frame;
-	
-	frame_lock.lock();
 	cv::flip(curr_frame, frame, -1);
 	frame_lock.unlock();
 
@@ -214,6 +215,8 @@ void Robot::m(int8_t left, int8_t right, int32_t duration) {
 	char msg[6] = {0xFF, CMD_MOTOR, *((char*)&left), *((char*)&right), 0, 0};
 	memcpy(&msg[4], &dur, 2);
 
+	tcflush(serial_fd, TCIFLUSH);
+
 	write(serial_fd, msg, 6);
 	delay(duration);
 }
@@ -228,6 +231,8 @@ void Robot::stop() {
 void Robot::send_ready() {
 	char msg = CMD_READY;
 	write(serial_fd, &msg, 1);
+
+	tcflush(serial_fd, TCIFLUSH);
 }
 
 // turns given angle in radians
