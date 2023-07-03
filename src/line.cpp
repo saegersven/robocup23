@@ -421,9 +421,8 @@ void Line::green() {
 		if(green_result == GREEN_RESULT_DEAD_END) {
 			std::cout << "DEAD-END\n";
 			// Dead-End regardless of green_active
-			robot->m(127, 127, 200);
 			robot->turn(DTOR(180.0f));
-			robot->m(127, 127, 160);
+			robot->m(127, 127, 100);
 			obstacle_enabled = true;
 		} else if(green_result == GREEN_RESULT_LEFT) {
 			std::cout << "LEFT\n";
@@ -741,6 +740,6 @@ void Line::line() {
 
 	//std::cout << "Line fps: " << fps << std::endl;
 
-	//cv::imshow("Debug", debug_frame);
-	//cv::waitKey(1);
+	cv::imshow("Debug", debug_frame);
+	cv::waitKey(1);
 }

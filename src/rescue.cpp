@@ -340,7 +340,7 @@ void Rescue::find_corner(bool ignore_green) {
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
 					robot->stop();
 					delay(1000);
-					robot->turn(-DTOR(25.0f));
+					robot->turn(-DTOR(20.0f));
 					for(int i = 0; i < 2; ++i) {
 						frame = robot->grab_frame();
 						res = corner_ml.invoke(frame);
@@ -367,18 +367,27 @@ void Rescue::find_corner(bool ignore_green) {
 		}
 	}
 	// TODO: drive to corner using camera!!!
-	robot->m(127, 127, 1200);
+	robot->m(127, 127, 1100);
 	robot->m(-127, -127, 600);
 	robot->turn(R180);
-	robot->m(-60, -60, 2500);
+	robot->m(-60, -60, 2600);
 
-	robot->servo(SERVO_GATE, GATE_OPEN, 1500);
-	for (int i = 0; i < 3; ++i) {
+	for (int i = 0; i < 2; ++i) {
 		robot->m(42, 42, 200);
 		delay(10);
 		robot->m(-127, -127, 150);	
 		delay(50);
 	}
+	robot->m(-60, -60, 300);
+	robot->servo(SERVO_GATE, GATE_OPEN, 1500);
+
+	for (int i = 0; i < 1; ++i) {
+		robot->m(42, 42, 200);
+		delay(10);
+		robot->m(-127, -127, 150);	
+		delay(50);
+	}
+
 	delay(700);
 	robot->servo(SERVO_GATE, GATE_CLOSED, 600);
 	robot->m(127, 127, 1200);
