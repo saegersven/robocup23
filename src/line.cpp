@@ -701,18 +701,18 @@ void Line::line() {
 
 	while(1) {
 		frame = robot->grab_frame();
-		cv::imshow("Frame", frame);
+		cv::imshow("Frame", frame);pa
 		cv::waitKey(1);
 	}*/
 	grab_frame();
 
-	std::cout << "Got Frame" << std::endl;
+	//std::cout << "Got Frame" << std::endl;
 
 	green(); // follow() needs green
-	std::cout << "Green" << std::endl;
+	//std::cout << "Green" << std::endl;
 
 	follow();
-	std::cout << "Follow" << std::endl;
+	//std::cout << "Follow" << std::endl;
 
 	rescue_kit();
 
@@ -721,7 +721,7 @@ void Line::line() {
 	silver();
 
 	if(obstacle_enabled) obstacle();
-	std::cout << "Kit, red, silver" << std::endl;
+	//std::cout << "Kit, red, silver" << std::endl;
 
 	//ramp();
 

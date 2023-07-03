@@ -239,14 +239,13 @@ void Robot::send_ready() {
 void Robot::turn(float angle) {
 	if(blocked) return;
 
-	/*
+	
 	if(std::abs(RTOD(angle)) < 30.0f) {
 		float sign = angle / std::abs(angle);
-    	m(sign * 50, -sign * 50, (int)(RTOD(std::abs(angle)) * MS_PER_DEG));
+    	m(sign * 50, -sign * 50, (int)(RTOD(std::abs(angle)) * MS_PER_DEGREE));
 		return;
 	}
-	*/
-
+	
 	int16_t angle_mrad = angle * 1000;
 	char msg[4] = {0xFF, CMD_TURN, 0, 0};
 	memcpy(&msg[2], &angle_mrad, 2);

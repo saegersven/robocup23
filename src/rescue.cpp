@@ -59,7 +59,9 @@ void Rescue::rescue() {
 	// Restart camera for exposure adjustment here
 	robot->start_camera();
 
-	find_corner(false);
+	find_corner(true);
+	find_exit();
+	delay(100000);
 
 	const int MAX_TURNS = 20;
 	int turn_counter = 0;
@@ -160,10 +162,17 @@ void Rescue::rescue() {
 					robot->servo(SERVO_CAM, CAM_HIGHER_POS);
 					turn_counter = 0;
 					++victim_counter;
+
+					if(dead) {
+						find_exit();
+						finished = true;
+						return;
+					}
 					break;
 				}
 
 				float x_error = X_TO_ANGLE(X_RES, (x_victim - 80.0f));
+				std::cout << "X_error: " << x_error << std::endl;
 				robot->turn(x_error);
 				robot->m(42, 42, 300);
 				delay(50);
@@ -176,7 +185,8 @@ void Rescue::rescue() {
 		if(turn_counter == MAX_TURNS) {
 			if(find_center_called) {
 				std::cout << "Found no victims, searching for exit" << std::endl;
-				//find_exit();
+				find_corner(true);
+				find_exit();
 				finished = true;
 				return;
 			}
@@ -196,8 +206,8 @@ void Rescue::rescue() {
 
 		delay(50);
 	}
-
-	//find_exit();
+	find_corner(true);
+	find_exit();
 	finished = true;
 }
 
@@ -339,7 +349,7 @@ void Rescue::find_corner(bool ignore_green) {
 				std::cout << x_corner << std::endl;
 				if(std::abs(x_corner) < 25.0f || x_corner <= 0.0f && last_x_corner > 0.0f) {
 					robot->stop();
-					delay(1000);
+					delay(50);
 					robot->turn(-DTOR(20.0f));
 					for(int i = 0; i < 2; ++i) {
 						frame = robot->grab_frame();
@@ -424,4 +434,84 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 
 bool is_black2(uint8_t b, uint8_t g, uint8_t r) {
 	return (uint16_t)b + (uint16_t)g + (uint16_t)r < BLACK_MAX_SUM;
+}
+
+#define distance_less_than(dist_variable, sensor, mm) (dist_variable < mm && robot->distance_avg(sensor, 10, 0.2f) < mm)
+#define distance_greater_than(dist_variable, sensor, mm) (dist_variable > mm && robot->distance_avg(sensor, 10, 0.2f) > mm)
+
+bool Rescue::check_exit() {
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
+	uint32_t num_black_pixels = 0;
+	frame = robot->grab_frame();
+	cv::Mat thresh = in_range(frame, &is_black, &num_black_pixels);
+
+	float percentage = (float)frame.rows * (float)frame.cols / (float)num_black_pixels;
+	std::cout << "Percentage: " << percentage << std::endl;
+	if(percentage > 0.2f) {
+	    std::vector<std::vector<cv::Point>> contours;
+	    std::vector<cv::Vec4i> hierarchy;
+	    cv::findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+	    if(contours.size() == 0) return false;
+
+	    cv::Rect bound_rect = cv::boundingRect(contours[0]);
+
+	    std::cout << "Width: " << bound_rect.width << std::endl;
+	    if(bound_rect.width > 0.8f * frame.cols) return true;
+	}
+	return false;
+}
+
+// finds exit
+void Rescue::find_exit() {
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
+	robot->m(-2*42, -2*42, 3000);
+	robot->m(60, 60, 420);
+	robot->turn(R45);
+	robot->m(127, 127, 200);
+	robot->turn(-R90);
+	robot->m(-70, -70, 900);
+	robot->m(127, 127, 50);
+	robot->turn(R90);
+
+	int counter = 0;
+
+	while(true) {
+		int dist = robot->distance_avg(1, 10, 0.3f);
+
+		std::cout << dist << std::endl;
+
+		if(dist > 250) {
+			robot->stop();
+			std::cout << "POTENTIAL EXIT" << std::endl;
+			robot->m(-80, -80, 210);
+			robot->turn(R90);
+			robot->m(80, 80, 300);
+			if(check_exit()) {
+
+			}
+		}
+
+		if(dist < 110) {
+			std::cout << "REALIGN WALL, TOO CLOSE\n";
+			// Realign with wall
+			robot->turn(-R45);
+			robot->m(127, 127, 200);
+			robot->turn(R45);
+			robot->m(-70, -70, 700);
+			robot->m(127, 127, 50);
+			robot->turn(R90);
+			robot->m(60, 60);
+		} else if(dist > 140) {
+			std::cout << "REALIGN WALL, TOO FAR AWAY\n";
+			robot->turn(-R90);
+			robot->m(-70, -70, 900);
+			robot->m(127, 127, 50);
+			robot->turn(R90);
+			robot->m(60, 60);
+		}
+
+		if(counter % 10 == 0) robot->m(60, 60);
+		counter++;
+	}
 }
