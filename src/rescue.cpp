@@ -445,7 +445,7 @@ bool Rescue::check_exit() {
 	frame = robot->grab_frame();
 	cv::Mat thresh = in_range(frame, &is_black, &num_black_pixels);
 
-	float percentage = (float)frame.rows * (float)frame.cols / (float)num_black_pixels;
+	float percentage = (float)num_black_pixels / (float)frame.rows / (float)frame.cols;
 	std::cout << "Percentage: " << percentage << std::endl;
 	if(percentage > 0.2f) {
 	    std::vector<std::vector<cv::Point>> contours;
@@ -482,13 +482,20 @@ void Rescue::find_exit() {
 		std::cout << dist << std::endl;
 
 		if(dist > 250) {
+			robot->m(60, 60, 150);
 			robot->stop();
-			std::cout << "POTENTIAL EXIT" << std::endl;
-			robot->m(-80, -80, 210);
-			robot->turn(R90);
-			robot->m(80, 80, 300);
-			if(check_exit()) {
-
+			if(robot->distance_avg(1, 10, 0.3f) > 400) {
+				std::cout << "POTENTIAL EXIT" << std::endl;
+				robot->m(-80, -80, 80);
+				robot->turn(R90);
+				robot->m(80, 80, 300);
+				if(check_exit()) {
+					std::cout << "FOUND EXIT" << std::endl;
+					robot->m(80, 80, 300);
+					return;
+				}
+			} else {
+				robot->m(-60, -60, 100);
 			}
 		}
 

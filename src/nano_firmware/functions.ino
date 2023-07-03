@@ -8,11 +8,14 @@ void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
   // Left motors
   // Motors will be shorted to ground when speed is zero
 
-  if (left_speed > 80 && right_speed > 80) m(42, 42, 10);
-  else if (left_speed < -80 && right_speed > 80) m(-42, 42, 10);
-  else if (left_speed > 80 && right_speed < -80) m(42, -42, 10);
-  else if (left_speed < -80 && right_speed < -80) m(-42, -42, 10);
-  duration -= 4;
+  if (duration > 50) {
+    if (left_speed > 80 && right_speed > 80) m(42, 42, 10);
+    else if (left_speed < -80 && right_speed > 80) m(-42, 42, 10);
+    else if (left_speed > 80 && right_speed < -80) m(42, -42, 10);
+    else if (left_speed < -80 && right_speed < -80) m(-42, -42, 10);
+    duration -= 4;
+  }
+  
   
   digitalWrite(M_LEFT_A, left_speed < 0);
   digitalWrite(M_LEFT_B, left_speed > 0);
