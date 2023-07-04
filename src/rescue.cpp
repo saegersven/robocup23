@@ -59,9 +59,12 @@ void Rescue::rescue() {
 	// Restart camera for exposure adjustment here
 	robot->start_camera();
 
-	find_corner(true);
 	find_exit();
+	finished = true;
+	return;
 	delay(100000);
+
+	find_corner(true);
 
 	const int MAX_TURNS = 20;
 	int turn_counter = 0;
@@ -440,7 +443,6 @@ bool is_black2(uint8_t b, uint8_t g, uint8_t r) {
 #define distance_greater_than(dist_variable, sensor, mm) (dist_variable > mm && robot->distance_avg(sensor, 10, 0.2f) > mm)
 
 bool Rescue::check_exit() {
-	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
 	uint32_t num_black_pixels = 0;
 	frame = robot->grab_frame();
 	cv::Mat thresh = in_range(frame, &is_black, &num_black_pixels);
@@ -464,15 +466,118 @@ bool Rescue::check_exit() {
 
 // finds exit
 void Rescue::find_exit() {
+	int distances[95];
+	int second_derivative[93];
+
+	for(int i = 0; i < 95; i++) {
+		robot->m(42, -42, 70);
+
+		int dist = robot->distance_avg(0, 10, 0.3f);
+		distances[i] = dist;
+
+		if(i >= 2) {
+			second_derivative[i - 2] = distances[i - 2] + distances[i - 1] - 2*distances[i];
+			std::cout << second_derivative[i - 2] << std::endl;
+		}
+	}
+
+	int largest_i[2] = {0, 0};
+
+	for(int i = 0; i < 93; i++) {
+		if(second_derivative[i] > 120) {
+			if(second_derivative[i - 1] < second_derivative[i]
+				&& second_derivative[i + 1] < second_derivative[i]) {
+				// This is peak
+				if(second_derivative[largest_i[0]] < second_derivative[i]) {
+					if(second_derivative[largest_i[1]] < second_derivative[largest_i[0]]) {
+						largest_i[1] = largest_i[0];
+					}
+					largest_i[0] = i;
+				} else if(second_derivative[largest_i[1]] < second_derivative[i]) {
+					largest_i[1] = i;
+				}
+			}
+		}
+	}
+
+	float pot_exit_angle_1 = (float)largest_i[0] / (float)93 * 360.0f;
+	float pot_exit_angle_2 = (float)largest_i[1] / (float)93 * 360.0f;
+
+	std::cout << "Potential exits at " << pot_exit_angle_1 << "° and " << pot_exit_angle_2 << "°" << std::endl;
+
+	robot->turn(DTOR(pot_exit_angle_1));
+	robot->m(127, 127, distances[largest_i[0] + 2] * 2 - 500);
+
+	float largest_dist_angle = 0.0f;
+	int largest_dist = 0;
+	int average_dist = 0;
+	// Look for exit
+	robot->turn(-DTOR(31.0f));
+	for(int i = 0; i < 15; i++) {
+		robot->m(42, -42, 70);
+		int dist = robot->distance_avg(0, 10, 0.3f);
+
+		average_dist += dist;
+		std::cout << dist << std::endl;
+		if(dist > largest_dist) {
+			largest_dist = dist;
+			largest_dist_angle = i / 15.0f * 60.0f;
+		}
+	}
+	average_dist /= 15;
+	std::cout << "Largest dist angle: " << largest_dist_angle - 60.0f << std::endl;
+	std::cout << "Angle: " << DTOR(largest_dist_angle - 60.0f) << std::endl;
+	robot->turn(DTOR(largest_dist_angle - 60.0f));
+
+	robot->m(126, 126, average_dist * CM_TO_MS_FULL_SPEED / 10 - 500);
+
+	long long start_time = millis_();
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
+
+	robot->m(50, 50);
+
+	int counter_ = 0;
+	while(millis_() - start_time < 2000) {
+		frame = robot->grab_frame();
+		if(check_exit()) {
+			robot->stop();
+			delay(1000);
+			robot->m(60, 60, 300);
+			return;
+		}
+		if(counter_ % 10 == 0) robot->m(50, 50);
+		++counter_;
+	}
+
 	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
 	robot->m(-2*42, -2*42, 3000);
 	robot->m(60, 60, 420);
 	robot->turn(R45);
-	robot->m(127, 127, 200);
-	robot->turn(-R90);
-	robot->m(-70, -70, 900);
-	robot->m(127, 127, 50);
-	robot->turn(R90);
+
+	while(1) {
+		robot->m(50, 50, 300);
+		int dist = robot->distance_avg(1, 10, 0.3f);
+
+		std::cout << dist << std::endl;
+		if(dist > 1000) {
+			// Wand absuchen
+			robot->stop();
+			delay(5000);
+		}
+
+		dist = robot->distance_avg(0, 10, 0.3f);
+
+		if(dist < 100) {
+			robot->m(-60, -60, 200);
+			robot->turn(R180);
+			robot->m(-60, -60, 500);
+			robot->m(60, 60, 200);
+			robot->turn(R90);
+			// Ecke absuchen
+		}
+	}
+
+	return;
 
 	int counter = 0;
 
@@ -516,6 +621,14 @@ void Rescue::find_exit() {
 			robot->m(127, 127, 50);
 			robot->turn(R90);
 			robot->m(60, 60);
+		}
+
+		// Check front distance
+		dist = robot->distance_avg(0, 10, 0.3f);
+		if(dist < 250) {
+			// Wall in front, turn
+			robot->turn(-R90);
+
 		}
 
 		if(counter % 10 == 0) robot->m(60, 60);
