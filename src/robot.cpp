@@ -239,6 +239,8 @@ void Robot::send_ready() {
 void Robot::turn(float angle) {
 	if(blocked) return;
 
+	std::cout << "Turning Angle: " << RTOD(angle) << std::endl;
+
 	if(std::abs(RTOD(angle)) < 30.0f) {
 		float sign = angle / std::abs(angle);
 		int dur = (int)(RTOD(std::abs(angle)) * MS_PER_DEGREE);
