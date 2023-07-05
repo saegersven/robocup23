@@ -175,11 +175,23 @@ void Line::follow() {
 				if(ENABLE_NO_DIFFERENCE) {
 					if(num_black_pixels > 200) {
 						std::cout << "No difference, ruckling\n";
-						robot->m(127, 127, 42*4);
-						robot->turn(last_line_angle);
-						robot->m(-35, -35, 42*4);
-						no_difference_time_stamp = millis_();
-						no_difference_counter = 100;
+						if (robot->ramp() == 1) {
+							std::cout << "No difference, on ramp. Increasing base_speed\n";
+							for (int i = 0; i < 25; ++i) {
+								robot->m(126, 0, 350);
+								robot->m(126, 126, 21);
+								robot->m(0, 126, 250);
+								robot->m(126, 126, 42);
+							}
+							no_diff_on_ramp_timestamp = millis_();
+							no_difference_counter = 100;
+						} else {
+							robot->m(127, 127, 42*4);
+							robot->turn(last_line_angle);
+							robot->m(-35, -35, 42*4);
+							no_difference_time_stamp = millis_();
+							no_difference_counter = 100;							
+						}
 					} else {
 						std::cout << "Few pixels, no ruckling\n";
 						no_difference_counter = 0;
@@ -191,16 +203,6 @@ void Line::follow() {
 			no_difference_counter = no_difference_counter >= 30 ? no_difference_counter - 30 : 0;
 		}
 	}
-
-	/*if(millis() - no_difference_time_stamp < 300) {
-		std::cout << "Increasing base motor speed\n";
-		base_speed = LINE_FOLLOW_BASE_SPEED * 1.5f;
-		if(std::abs(RTOD(last_line_angle)) > 10.0f) {
-			std::cout << "Large line angle, trying to get unstuck\n";
-			robot->m(127, 127, 42*2);
-			robot->turn(last_line_angle);
-		}
-	}*/
 
 	//cv::imshow("Black", black);
 
@@ -228,6 +230,16 @@ void Line::follow() {
 
 	float us = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::high_resolution_clock::now() - last_frame_t).count();
 	float line_angle_d = last_line_angle / us * 1000000.0f;
+
+	if (millis_() - no_diff_on_ramp_timestamp < 600 && millis_() > 600) {
+		std::cout << "!!! Actually increasing base speed !!!" << std::endl;
+		base_speed = LINE_FOLLOW_BASE_SPEED * 2.5f;
+		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY * 10.0f;
+	}
+	else {
+		base_speed = LINE_FOLLOW_BASE_SPEED;
+		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
+	}
 
 	robot->m(
 		clamp(base_speed + line_angle * line_follow_sensitivity * ees_l * extra_sensitivity, -128, 127),

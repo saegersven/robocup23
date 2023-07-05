@@ -59,18 +59,18 @@ void Rescue::rescue() {
 	// Restart camera for exposure adjustment here
 	robot->start_camera();
 
-	find_exit();
-	finished = true;
-	return;
-	delay(100000);
+	// find_exit();
+	// finished = true;
+	// return;
+	// delay(100000);
 
-	find_corner(true);
+	find_corner(false);
 
 	const int MAX_TURNS = 20;
 	int turn_counter = 0;
 	int victim_counter = 0;
 
-	float last_x_victim = -1.0f;
+	float last_x_victim = -1.0f;	
 	float x_victim = 0.0f;
 	float y_victim = 0.0f;
 
@@ -448,7 +448,7 @@ bool Rescue::check_exit() {
 	cv::Mat thresh = in_range(frame, &is_black, &num_black_pixels);
 
 	float percentage = (float)num_black_pixels / (float)frame.rows / (float)frame.cols;
-	std::cout << "Percentage: " << percentage << std::endl;
+	std::cout << "Black Percentage: " << percentage << std::endl;
 	if(percentage > 0.2f) {
 	    std::vector<std::vector<cv::Point>> contours;
 	    std::vector<cv::Vec4i> hierarchy;
@@ -459,7 +459,7 @@ bool Rescue::check_exit() {
 	    cv::Rect bound_rect = cv::boundingRect(contours[0]);
 
 	    std::cout << "Width: " << bound_rect.width << std::endl;
-	    if(bound_rect.width > 0.8f * frame.cols) return true;
+	    if(bound_rect.width > 0.8f * frame.cols || percentage > 0.3f) return true; // in case of many false positives, remove second condition
 	}
 	return false;
 }
@@ -470,9 +470,9 @@ void Rescue::find_exit() {
 	int second_derivative[93];
 
 	for(int i = 0; i < 95; i++) {
-		robot->m(42, -42, 70);
+		robot->m(42, -42, 68);
 
-		int dist = robot->distance_avg(0, 10, 0.3f);
+		int dist = robot->distance_avg(0, 5, 0.2f);
 		distances[i] = dist;
 
 		if(i >= 2) {
@@ -515,7 +515,7 @@ void Rescue::find_exit() {
 	robot->turn(-DTOR(31.0f));
 	for(int i = 0; i < 15; i++) {
 		robot->m(42, -42, 70);
-		int dist = robot->distance_avg(0, 10, 0.3f);
+		int dist = robot->distance_avg(0, 10, 0.2f);
 
 		average_dist += dist;
 		std::cout << dist << std::endl;
@@ -529,24 +529,44 @@ void Rescue::find_exit() {
 	std::cout << "Angle: " << DTOR(largest_dist_angle - 60.0f) << std::endl;
 	robot->turn(DTOR(largest_dist_angle - 60.0f));
 
-	robot->m(126, 126, average_dist * CM_TO_MS_FULL_SPEED / 10 - 500);
+	robot->servo(SERVO_CAM, CAM_LOWER_POS, 500);
 
-	long long start_time = millis_();
-	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);
+	long long start_t = millis_();
 
 	robot->m(50, 50);
 
-	int counter_ = 0;
-	while(millis_() - start_time < 2000) {
+	bool left_area = false; // did robot reach potential exit and left area a few cm?
+	while(!left_area) {
 		frame = robot->grab_frame();
-		if(check_exit()) {
+
+		uint32_t num_black_pixels_ = 0;
+		in_range(frame, &is_black, &num_black_pixels_);
+		std::cout << "Black pixels: " << num_black_pixels_ << std::endl;
+
+		// theres a black line, so robot reached potential exit. Check for exit now
+		if (num_black_pixels_ > 0.05 * frame.cols * frame.rows) {
+			std::cout << "Possible exit, checking..." << std::endl;
 			robot->stop();
-			delay(1000);
-			robot->m(60, 60, 300);
-			return;
+			delay(5000);
+			robot->m(-60, -60, 100);
+			robot->grab_frame();
+			delay(10);
+			robot->grab_frame();
+			delay(10);
+			if(check_exit()) {
+				std::cout << "Yeah, found exit!" << std::endl;
+				robot->stop();
+				delay(1000);
+				robot->m(60, 60, 300);
+				return;
+			} else { // robot found entrance instead of exit
+				// TODO: drive back to center. Especially use TURN
+				std::cout << "Nope, no exit here" << std::endl;
+				robot->m(-50, 50, millis_() - start_t); // drive back to center
+				std::cout << "Back in center. Checking other exit" << std::endl;
+
+			}
 		}
-		if(counter_ % 10 == 0) robot->m(50, 50);
-		++counter_;
 	}
 
 	robot->servo(SERVO_CAM, CAM_LOWER_POS, 300);

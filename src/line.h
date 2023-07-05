@@ -95,6 +95,7 @@ private:
 	uint32_t frame_counter;
 	float base_speed = LINE_FOLLOW_BASE_SPEED; // base linefollowing speed
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;
+	long long no_diff_on_ramp_timestamp = 0;
 
 	// used for silver testing
 	bool test = false;
