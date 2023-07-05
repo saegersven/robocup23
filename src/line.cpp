@@ -161,6 +161,7 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
+	if (frame_counter % 42 == 0) save_img(frame, "captured");
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
 
@@ -177,18 +178,16 @@ void Line::follow() {
 						std::cout << "No difference, ruckling\n";
 						if (robot->ramp() == 1) {
 							std::cout << "No difference, on ramp. Increasing base_speed\n";
-							for (int i = 0; i < 25; ++i) {
-								robot->m(126, 0, 350);
-								robot->m(126, 126, 21);
-								robot->m(0, 126, 250);
-								robot->m(126, 126, 42);
-							}
+							robot->m(-126, -126, 200);
+							delay(20);
+							robot->m(126, 126, 350);
 							no_diff_on_ramp_timestamp = millis_();
 							no_difference_counter = 100;
 						} else {
 							robot->m(127, 127, 42*4);
 							robot->turn(last_line_angle);
-							robot->m(-35, -35, 42*4);
+							robot->m(-42, -42, 42*4);
+							robot->m(-33, -33, 42*2);
 							no_difference_time_stamp = millis_();
 							no_difference_counter = 100;							
 						}
@@ -482,6 +481,8 @@ void Line::rescue_kit() {
 
 	cv::Mat blue;
 	std::vector<Group> groups = find_groups(frame, blue, &is_blue);
+	//cv::imshow("Blue", blue);
+	//cv::waitKey(1);
 
 	if(groups.size() > 0) {
 		std::cout << "Rescue kit groups: " << groups.size() << std::endl;
@@ -562,11 +563,15 @@ void Line::red() {
 
 	uint32_t num_pixels = LINE_FRAME_HEIGHT * LINE_FRAME_WIDTH;
 	float red_percentage = (float)num_red_pixels / (float)num_pixels;
+	// TODO: check contours of red to avoid false positives
 	if(red_percentage > 0.23f) {
-		std::cout << "Red: " << red_percentage << std::endl;
-		std::cout << "Detected red" << std::endl;
-		robot->m(100, 100, 300);
-		delay(8000); // in case of misdetection, robot will continue driving after 8s
+		// dist check is to ignore red obstacles
+		if (robot->distance_avg(0, 10, 0.2f) > 15.0f) {
+			std::cout << "Red: " << red_percentage << std::endl;
+			std::cout << "Detected red" << std::endl;
+			robot->m(100, 100, 300);
+			delay(8000); // in case of misdetection, robot will continue driving after 8s		
+		}
 	}
 }
 

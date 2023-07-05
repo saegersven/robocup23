@@ -22,8 +22,8 @@
 // Rescue victims: 160x120
 // Rescue corner: 160x120
 // Rescue exit: 640x480
-#define WIDTH 80
-#define HEIGHT 48
+#define WIDTH 160
+#define HEIGHT 120
 
 //#define TIME
 
@@ -36,11 +36,11 @@ void save_img(cv::Mat& img, const std::string& subfolder) {
 int main(int, char**) {
     std::cout << WIDTH << " " << HEIGHT << std::endl;
     cv::VideoCapture cap;
-    cap.open(0, cv::CAP_ANY);
-	cap.set(cv::CAP_PROP_FRAME_WIDTH, WIDTH * 4);
-	cap.set(cv::CAP_PROP_FRAME_HEIGHT, HEIGHT * 4);
-	cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
-    cap.set(cv::CAP_PROP_FPS, 120);
+    cap.open(0, cv::CAP_V4L2);
+    cap.set(cv::CAP_PROP_FRAME_WIDTH, 160);
+    cap.set(cv::CAP_PROP_FRAME_HEIGHT, 120);
+    cap.set(cv::CAP_PROP_FORMAT, CV_8UC3);
+    cap.set(cv::CAP_PROP_FPS, 60);
     if (!cap.isOpened()) {
         std::cerr << "ERROR! Unable to open camera\n";
         return -1;
@@ -56,7 +56,7 @@ int main(int, char**) {
         cv::flip(frame, debug_frame, 1);
 
         if (frame.empty()) {
-            std::cerr << "ERROR! blank frame grabbed\n";ls
+            std::cerr << "ERROR! blank frame grabbed\n";
             break;
         }
         cv::imshow("Live", frame);

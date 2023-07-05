@@ -449,7 +449,10 @@ bool Rescue::check_exit() {
 
 	float percentage = (float)num_black_pixels / (float)frame.rows / (float)frame.cols;
 	std::cout << "Black Percentage: " << percentage << std::endl;
-	if(percentage > 0.2f) {
+	if(percentage > 0.1f) {
+		return true;
+		// not working code:
+		/*
 	    std::vector<std::vector<cv::Point>> contours;
 	    std::vector<cv::Vec4i> hierarchy;
 	    cv::findContours(thresh, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
@@ -459,7 +462,8 @@ bool Rescue::check_exit() {
 	    cv::Rect bound_rect = cv::boundingRect(contours[0]);
 
 	    std::cout << "Width: " << bound_rect.width << std::endl;
-	    if(bound_rect.width > 0.8f * frame.cols || percentage > 0.3f) return true; // in case of many false positives, remove second condition
+	    if(bound_rect.width > 0.6f * frame.cols || percentage > 0.3f) return true; // in case of many false positives, remove second condition
+	    */
 	}
 	return false;
 }

@@ -9,7 +9,7 @@
 ### <u>Our ToDo List:</u>
 
 #### Software
-- [ ] ignore no_difference when few black pixels (=gap)
+- [ ] ignore silver for 1s after ramp to get rid of false positives when driving down seesaw/ramp
 - [ ] LoPs in rescue area not working
 - [ ] check_silver after restart not working, cam servo does not tilt upwards
 - [ ] after green dot: check left/right like in Kassel
