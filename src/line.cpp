@@ -46,7 +46,7 @@ float Line::green_weight(float x) {
 }
 
 void Line::create_maps() {
-	float center_x = LINE_FRAME_WIDTH / 2 - 7.0f;
+	float center_x = LINE_FRAME_WIDTH / 2 + 5.0f;
 	float center_y = LINE_FRAME_HEIGHT;
 
 	this->distance_weight_map = cv::Mat(LINE_FRAME_HEIGHT, LINE_FRAME_WIDTH, CV_32FC1);
@@ -116,7 +116,7 @@ float Line::get_line_angle(cv::Mat in) {
 
 	uint32_t num_angles = 0;
 	// Bottom center coordinates (point close to center of rotation of the robot)
-	float center_x = in.cols / 2.0f - 7.0f;
+	float center_x = in.cols / 2.0f- 7.0f;
 	float center_y = in.rows;
 
 	for(int y = 0; y < in.rows; ++y) {
@@ -585,6 +585,10 @@ void Line::silver() {
 		save_img(frame, "potential_silver");
 		robot->turn(last_line_angle / 3.0f); // align with silver stripe
 		robot->stop();
+		delay(50);
+		robot->m(70, 70, 200);
+		robot->grab_frame();
+		red();
 
 		found_silver = true;
 	}

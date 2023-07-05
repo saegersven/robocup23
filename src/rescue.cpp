@@ -88,8 +88,10 @@ void Rescue::rescue() {
 
 		if(x_victim != -1.0f) {
 			int cam_angle = CAM_HIGHER_POS;
-			robot->turn(X_TO_ANGLE(X_RES, x_victim) - DTOR(30.0f));
-			std::cout << "Found victim, approaching..." << std::endl;
+			std::cout << "Starting approach..." << std::endl;
+			std::cout << "x_victim: " << x_victim << std::endl;
+			std::cout << "angle:    " << X_TO_ANGLE(X_RES, (x_victim - 80.0f)) - DTOR(30.0f) << std::endl;
+			robot->turn(X_TO_ANGLE(X_RES, (x_victim - 80.0f)));
 			delay(100);
 			robot->m(40, 40, 200);
 
@@ -416,9 +418,11 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 	delay(50);
 	cv::Mat res = victim_ml.invoke(frame);
 	save_img(frame, "rescue");
+	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
+
 	cv::resize(res, res, cv::Size(160, 120));
 	cv::imshow("Victim result", two_channel_to_three_channel(res));
-	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
+
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
