@@ -284,16 +284,16 @@ void Robot::turn(float angle) {
 void Robot::attach_detach_servo(uint8_t servo_id) {
 	if(blocked) return;
 
-	uint8_t msg[2] = {CMD_SERVO_ATTACH_DETACH, servo_id};
+	uint8_t msg[3] = {0xFF, CMD_SERVO_ATTACH_DETACH, servo_id};
 
-	write(serial_fd, msg, 2);
+	write(serial_fd, msg, 3);
 }
 
 void Robot::servo(uint8_t servo_id, uint8_t angle, uint16_t delay_ms) {
 	if(blocked) return;
 
-	uint8_t msg[3] = {CMD_SERVO_WRITE, servo_id, angle};
-	write(serial_fd, msg, 3);
+	uint8_t msg[4] = {0xFF, CMD_SERVO_WRITE, servo_id, angle};
+	write(serial_fd, msg, 4);
 	if(delay_ms != 0) delay(delay_ms);
 }
 
