@@ -40,6 +40,14 @@ Robot::Robot() : blocked(false), has_frame(false) {
 	delay(500); // Wait for Nano to boot up
 }
 
+Robot::~Robot() {
+	// Cleanup GPIO
+
+
+	// Close serial
+	close(serial_fd);
+}
+
 void Robot::init_serial() {
 	termios options;
 	speed_t baud_rate = B115200;

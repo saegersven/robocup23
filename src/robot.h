@@ -75,6 +75,7 @@ public:
 	int frame_height, frame_width;
 
 	Robot();
+	~Robot();
 
 	void init_serial();
 
