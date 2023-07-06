@@ -38,6 +38,8 @@ void Rescue::stop() {
 
 // main routine for rescue area
 void Rescue::rescue() {
+	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
+
 	robot->capture_width = 1280;
 	robot->capture_height = 960;
 	robot->frame_width = 160;
@@ -314,6 +316,8 @@ void Rescue::find_center_new_new() {
 // if ignore_green = false it only finds green corners.
 // if ignore_green = true it only finds red corners
 void Rescue::find_corner(bool ignore_green) {
+	robot->stop();
+	std::shared_ptr<Robot> robot = std::make_shared<Robot>(); // quick fix for Nano freezing sometimes
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS, 300);
 	std::cout << "Searching for corner" << std::endl;
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
@@ -387,7 +391,7 @@ void Rescue::find_corner(bool ignore_green) {
 	robot->turn(R180);
 	robot->m(-60, -60, 2600);
 
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < 3; ++i) {
 		robot->m(42, 42, 200);
 		delay(10);
 		robot->m(-127, -127, 150);	
@@ -396,7 +400,7 @@ void Rescue::find_corner(bool ignore_green) {
 	robot->m(-60, -60, 300);
 	robot->servo(SERVO_GATE, GATE_OPEN, 1500);
 
-	for (int i = 0; i < 1; ++i) {
+	for (int i = 0; i < 2; ++i) {
 		robot->m(42, 42, 200);
 		delay(10);
 		robot->m(-127, -127, 150);	

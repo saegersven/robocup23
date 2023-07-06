@@ -66,6 +66,7 @@ void Line::create_maps() {
 }
 
 void Line::start() {
+	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
 	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
 	robot->gripper(GRIPPER_CLOSE, 200);
 	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
