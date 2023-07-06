@@ -92,6 +92,8 @@ private:
 	cv::Mat green_mat;
 	uint32_t green_num_pixels;
 
+	int num_black_pixels_counter = 0;
+
 	uint32_t frame_counter;
 	float base_speed = LINE_FOLLOW_BASE_SPEED; // base linefollowing speed
 	float line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY;

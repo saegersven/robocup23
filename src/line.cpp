@@ -66,7 +66,7 @@ void Line::create_maps() {
 }
 
 void Line::start() {
-	std::shared_ptr<Robot> robot = std::make_shared<Robot>();
+	robot = std::make_shared<Robot>();
 	robot->attach_detach_servo(SERVO_CAM); // attach cam servo, necessary???
 	robot->gripper(GRIPPER_CLOSE, 200);
 	robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
@@ -210,6 +210,74 @@ void Line::follow() {
 	}
 
 	//cv::imshow("Black", black);
+
+	/*std::cout << num_black_pixels_counter << std::endl;
+
+	if(num_black_pixels < 150) {
+		num_black_pixels_counter++;
+	} else {
+		if(num_black_pixels_counter > 1) num_black_pixels_counter -= 2;
+	}
+
+	if(num_black_pixels > 250) {
+		num_black_pixels_counter = 0;
+	}
+
+	if(num_black_pixels_counter >= 10) {
+		// Gap, align
+		std::cout << "GAP, align" << std::endl;
+
+		long long start_t = millis_();
+		robot->m(-80, -80);
+		num_black_pixels = 0;
+		while(num_black_pixels < 230) {
+			frame = robot->grab_frame();
+			black = in_range(frame, &is_black, &num_black_pixels);
+			robot->m(-80, -80);
+
+			if(millis_() - start_t >= 1000) {
+				num_black_pixels_counter = -100;
+				return; // Just return, idc
+			}
+		}
+		robot->m(-80, -80, 80);
+		frame = robot->grab_frame();
+		black = in_range(frame, &is_black, &num_black_pixels);
+		robot->stop();
+
+	    std::vector<std::vector<cv::Point>> contours;
+	    std::vector<cv::Vec4i> hierarchy;
+	    cv::findContours(black, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+
+	    // Merge all contours
+	    std::vector<cv::Point> contour;
+	    for(std::vector<cv::Point> c : contours) {
+	    	for(cv::Point p : c) {
+	    		if(p.x >= 20 && p.x <= 60) contour.push_back(p);
+	    	}
+	    }
+
+	    cv::RotatedRect rect = cv::minAreaRect(contour);
+	    float angle = rect.angle;
+	    while(angle >= 90.0f) angle -= 90.0f;
+	    while(angle <= -90.0f) angle += 90.0f;
+
+	    std::cout << "Angle: " << angle << std::endl;
+
+	    // Draw
+		cv::Point2f vertices[4];
+		rect.points(vertices);
+		for (int i = 0; i < 4; i++)
+    		cv::line(frame, vertices[i], vertices[(i+1)%4], cv::Scalar(0,255,0), 2);
+
+    	cv::imshow("Frame", frame);
+    	cv::imshow("Black", black);
+    	cv::waitKey(6000);
+    	robot->turn(DTOR(angle));
+    	delay(30);
+    	robot->m(80, 80, 150);
+    	num_black_pixels_counter = -600; // Set to low number to skip this gap
+	}*/
 
 	float line_angle = get_line_angle(black);
 

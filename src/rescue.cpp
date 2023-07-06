@@ -232,11 +232,15 @@ void Rescue::find_center() {
 			--i;
 		}
 	}
+
 	robot->stop();
 }
 
 // TODO: adjust because robot->distance() now returns mm instead of cm
 void Rescue::find_center_new() {
+	robot->stop();
+	robot = std::make_shared<Robot>();
+	delay(50);
 	const int NUM_DATA_POINTS = 30;
 	const float step = PI2 / NUM_DATA_POINTS;
 	const float gamma = 1.8f;
@@ -316,8 +320,6 @@ void Rescue::find_center_new_new() {
 // if ignore_green = false it only finds green corners.
 // if ignore_green = true it only finds red corners
 void Rescue::find_corner(bool ignore_green) {
-	robot->stop();
-	robot = std::make_shared<Robot>(); // quick fix for Nano freezing sometimes
 	robot->servo(SERVO_CAM, CAM_HIGHER_POS, 300);
 	std::cout << "Searching for corner" << std::endl;
 	uint8_t deg_per_iteration = 10; // how many degrees should the robot turn after each check for black corner?
@@ -425,13 +427,13 @@ void Rescue::find_victims(float& x_victim, float& y_victim, bool ignore_dead, bo
 	std::vector<Victim> victims = victim_ml.extract_victims(res, ignore_top);
 
 	cv::resize(res, res, cv::Size(160, 120));
-	cv::imshow("Victim result", two_channel_to_three_channel(res));
+	//cv::imshow("Victim result", two_channel_to_three_channel(res));
 
 	for(int i = 0; i < victims.size(); ++i) {
 		cv::circle(frame, cv::Point(victims[i].x, victims[i].y), 10, victims[i].dead ? cv::Scalar(0, 0, 255) : cv::Scalar(0, 255, 0), 5);
 	}
-	cv::imshow("Victims", frame);
-	cv::waitKey(1);
+	//cv::imshow("Victims", frame);
+	//cv::waitKey(1);
 
 	for(int i = 0; i < victims.size(); ++i) {
 		if(ignore_dead && victims[i].dead) continue;

@@ -1,6 +1,6 @@
 void m(int8_t left_speed, int8_t right_speed, uint16_t duration) {
-  i2cDebug(duration, (byte)(duration >> 8));
-  i2cDebug(left_speed, right_speed);
+  //i2cDebug(duration, (byte)(duration >> 8));
+  //i2cDebug(left_speed, right_speed);
   // debugging:
   //EEPROM.write(0, left_speed);
   //EEPROM.write(1, right_speed);
@@ -123,7 +123,7 @@ void gripper(int8_t dir) {
 
 uint16_t distance(int sensor_id) {
   if (sensor_id > NUM_VL53L0X) return -1;
-  uint16_t dist = dist_sensors[sensor_id].readRangeContinuousMillimeters();
+  uint16_t dist = dist_sensors[sensor_id].readRangeSingleMillimeters();
   if (dist < 0) dist = 0;
   if (dist > 2000) dist = 2000;
   return dist;
@@ -189,6 +189,7 @@ void parse_message() {
   } else if (message[0] == CMD_STOP) {
     m(0, 0, 0);
   } else if (message[0] == CMD_GRIPPER) {
+    //i2cDebug(message[0], message[1];
     int8_t gripper_direction = message[1];
     gripper(gripper_direction);
   } else if (message[0] == CMD_TURN) {

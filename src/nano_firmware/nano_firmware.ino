@@ -53,7 +53,7 @@ void setup() {
 
     dist_sensors[i].setAddress(dist_addresses[i]);
     dist_sensors[i].setMeasurementTimingBudget(20000);
-    dist_sensors[i].startContinuous();
+    //dist_sensors[i].startContinuous();
     dist_sensors[i].setTimeout(100);
     delay(10);
   }
