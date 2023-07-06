@@ -41,12 +41,8 @@ int main() {
 	// robot->servo(2, CAM_LOWER_POS, 300); // don't detach so cam stays in position
 	// robot->servo(1, GATE_CLOSED, 300);
 	// robot->servo(0, ARM_HIGHER_POS, 300);
-
-	while (!robot->button()) {
-		robot->send_ready();
-		delay(50);
-	}
-	while (robot->button());
+	
+	//while (robot->button());
 
 	line.start();
 

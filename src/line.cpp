@@ -161,7 +161,7 @@ float Line::get_line_angle(cv::Mat in) {
 }
 
 void Line::follow() {
-	if (frame_counter % 42 == 0) save_img(frame, "captured");
+	//if (frame_counter % 42 == 0) save_img(frame, "captured");
 	uint32_t num_black_pixels = 0;
 	black = in_range(frame, &is_black, &num_black_pixels);
 
@@ -178,9 +178,14 @@ void Line::follow() {
 						std::cout << "No difference, ruckling\n";
 						if (robot->ramp() == 1) {
 							std::cout << "No difference, on ramp. Increasing base_speed\n";
-							robot->m(-126, -126, 200);
+							robot->stop();
+
+							robot->attach_detach_servo(SERVO_ARM); // attach
+							robot->servo(SERVO_ARM, (int) ((ARM_HIGHER_POS + ARM_LOWER_POS) * 0.5), 420);
 							delay(20);
-							robot->m(126, 126, 350);
+							robot->m(126, 126, 420);
+							robot->servo(SERVO_ARM, ARM_HIGHER_POS, 420);
+							robot->attach_detach_servo(SERVO_ARM); // detach
 							no_diff_on_ramp_timestamp = millis_();
 							no_difference_counter = 100;
 						} else {
@@ -232,8 +237,8 @@ void Line::follow() {
 
 	if (millis_() - no_diff_on_ramp_timestamp < 600 && millis_() > 600) {
 		std::cout << "!!! Actually increasing base speed !!!" << std::endl;
-		base_speed = LINE_FOLLOW_BASE_SPEED * 2.5f;
-		line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY * 10.0f;
+		//base_speed = LINE_FOLLOW_BASE_SPEED * 2.5f;
+		//line_follow_sensitivity = LINE_FOLLOW_SENSITIVITY * 10.0f;
 	}
 	else {
 		base_speed = LINE_FOLLOW_BASE_SPEED;
